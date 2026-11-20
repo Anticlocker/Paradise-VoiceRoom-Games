@@ -4,9 +4,9 @@ import com.sundram.weplay.voiceroom.DemoVoiceRoomEngine
 import com.sundram.weplay.voiceroom.RoomConnection
 import com.sundram.weplay.voiceroom.VOICE_ROOM_SEAT_COUNT
 import com.sundram.weplay.voiceroom.VoiceRoomState
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -16,7 +16,6 @@ import org.junit.Test
 /**
  * Functional unit tests for Aurora Lounge 2.0 Joined Voice Room.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class AuroraVoiceRoomUnitTest {
 
     @Test
@@ -25,8 +24,8 @@ class AuroraVoiceRoomUnitTest {
     }
 
     @Test
-    fun testDemoEngineStartAndInitialMembers() = runTest {
-        val testScope = TestScope()
+    fun testDemoEngineStartAndInitialMembers() = runBlocking {
+        val testScope = CoroutineScope(Dispatchers.Unconfined)
         val engine = DemoVoiceRoomEngine(testScope)
 
         engine.start("room_aurora_1", "user_test_1", "Alex")
@@ -54,8 +53,8 @@ class AuroraVoiceRoomUnitTest {
     }
 
     @Test
-    fun testTakeAndLeaveSeat() = runTest {
-        val testScope = TestScope()
+    fun testTakeAndLeaveSeat() = runBlocking {
+        val testScope = CoroutineScope(Dispatchers.Unconfined)
         val engine = DemoVoiceRoomEngine(testScope)
 
         engine.start("room_aurora_1", "user_test_1", "Alex")
@@ -80,8 +79,8 @@ class AuroraVoiceRoomUnitTest {
     }
 
     @Test
-    fun testLockedSeatRejection() = runTest {
-        val testScope = TestScope()
+    fun testLockedSeatRejection() = runBlocking {
+        val testScope = CoroutineScope(Dispatchers.Unconfined)
         val engine = DemoVoiceRoomEngine(testScope)
 
         engine.start("room_aurora_1", "user_test_1", "Alex")
@@ -102,8 +101,8 @@ class AuroraVoiceRoomUnitTest {
     }
 
     @Test
-    fun testMicrophoneToggle() = runTest {
-        val testScope = TestScope()
+    fun testMicrophoneToggle() = runBlocking {
+        val testScope = CoroutineScope(Dispatchers.Unconfined)
         val engine = DemoVoiceRoomEngine(testScope)
 
         engine.start("room_aurora_1", "user_test_1", "Alex")
@@ -119,8 +118,8 @@ class AuroraVoiceRoomUnitTest {
     }
 
     @Test
-    fun testSendGiftBroadcast() = runTest {
-        val testScope = TestScope()
+    fun testSendGiftBroadcast() = runBlocking {
+        val testScope = CoroutineScope(Dispatchers.Unconfined)
         val engine = DemoVoiceRoomEngine(testScope)
 
         engine.start("room_aurora_1", "user_test_1", "Alex")
@@ -139,8 +138,8 @@ class AuroraVoiceRoomUnitTest {
     }
 
     @Test
-    fun testFavoriteAndThemeToggle() = runTest {
-        val testScope = TestScope()
+    fun testFavoriteAndThemeToggle() = runBlocking {
+        val testScope = CoroutineScope(Dispatchers.Unconfined)
         val engine = DemoVoiceRoomEngine(testScope)
 
         engine.start("room_aurora_1", "user_test_1", "Alex")
