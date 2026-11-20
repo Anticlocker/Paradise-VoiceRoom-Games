@@ -2,6 +2,7 @@ package com.sundram.weplay.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -206,7 +208,7 @@ fun MeScreen(
 
         // Badges showcase
         Column(Modifier.padding(horizontal = 16.dp)) {
-            SectionHeader("Badges Showcase", onAction = { nav.navigate(Routes.BACKPACK) })
+            SectionHeader("Badges Showcase", trailing = "See all", onTrailingClick = { nav.navigate(Routes.BACKPACK) })
             Spacer(Modifier.height(8.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 val showcaseBadges = listOf(
@@ -237,7 +239,7 @@ fun MeScreen(
 
         // Gift showcase
         Column(Modifier.padding(horizontal = 16.dp)) {
-            SectionHeader("Gift Showcase", onAction = { nav.navigate(Routes.GIFTS) })
+            SectionHeader("Gift Showcase", trailing = "View gifts", onTrailingClick = { nav.navigate(Routes.GIFTS) })
             Spacer(Modifier.height(8.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 val showcaseGifts = listOf(

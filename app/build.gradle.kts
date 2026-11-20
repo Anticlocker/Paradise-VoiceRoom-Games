@@ -39,6 +39,15 @@ android {
         buildConfigField("String", "LIVEKIT_TOKEN_KEY", "\"${localProp("livekit.token.key")}\"")
     }
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -80,6 +89,8 @@ dependencies {
 
     // Lottie animations – for gift and celebration effects
     implementation("com.airbnb.android:lottie-compose:6.6.0")
+
+    testImplementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

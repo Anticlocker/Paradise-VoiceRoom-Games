@@ -1,0 +1,845 @@
+{
+  "product": "VYBORA Aurora Lounge Joined Voice Room",
+  "format": "Android drawable-nodpi WebP",
+  "note": "original generated artwork + programmatically designed vector UI graphics. Placeholder avatars are fictional demo art, not actual users. UI preview is not a runnable app. No backend, voice transport or purchase logic included.",
+  "asset_count": 93,
+  "assets": [
+    {
+      "name": "vb_vr_bg_aurora",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_bg_aurora.webp",
+      "category": "background",
+      "role": "primary immersive room backdrop",
+      "width": 1080,
+      "height": 1920,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_bg_celestial",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_bg_celestial.webp",
+      "category": "background",
+      "role": "alternative darker original backdrop",
+      "width": 1080,
+      "height": 1920,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_frame_host",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_frame_host.webp",
+      "category": "avatar_frame",
+      "role": "transparent overlay; center avatar inside frame; role host",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_frame_speaker",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_frame_speaker.webp",
+      "category": "avatar_frame",
+      "role": "transparent overlay; center avatar inside frame; role speaker",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_frame_moderator",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_frame_moderator.webp",
+      "category": "avatar_frame",
+      "role": "transparent overlay; center avatar inside frame; role moderator",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_frame_vip",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_frame_vip.webp",
+      "category": "avatar_frame",
+      "role": "transparent overlay; center avatar inside frame; role vip",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_frame_normal",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_frame_normal.webp",
+      "category": "avatar_frame",
+      "role": "transparent overlay; center avatar inside frame; role normal",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_frame_favorite",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_frame_favorite.webp",
+      "category": "avatar_frame",
+      "role": "transparent overlay; center avatar inside frame; role favorite",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_seat_empty",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_seat_empty.webp",
+      "category": "seat_state",
+      "role": "static seat-state fallback; empty",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_seat_locked",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_seat_locked.webp",
+      "category": "seat_state",
+      "role": "static seat-state fallback; locked",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_seat_request",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_seat_request.webp",
+      "category": "seat_state",
+      "role": "static seat-state fallback; request",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_seat_speaking",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_seat_speaking.webp",
+      "category": "seat_state",
+      "role": "static seat-state fallback; speaking",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_seat_muted",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_seat_muted.webp",
+      "category": "seat_state",
+      "role": "static seat-state fallback; muted",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_seat_invited",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_seat_invited.webp",
+      "category": "seat_state",
+      "role": "static seat-state fallback; invited",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_seat_occupied",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_seat_occupied.webp",
+      "category": "seat_state",
+      "role": "static seat-state fallback; occupied",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_avatar_demo_01",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_avatar_demo_01.webp",
+      "category": "demo_avatar",
+      "role": "fictional graphic placeholder; never identify as a real user",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_avatar_demo_02",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_avatar_demo_02.webp",
+      "category": "demo_avatar",
+      "role": "fictional graphic placeholder; never identify as a real user",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_avatar_demo_03",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_avatar_demo_03.webp",
+      "category": "demo_avatar",
+      "role": "fictional graphic placeholder; never identify as a real user",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_avatar_demo_04",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_avatar_demo_04.webp",
+      "category": "demo_avatar",
+      "role": "fictional graphic placeholder; never identify as a real user",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_avatar_demo_05",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_avatar_demo_05.webp",
+      "category": "demo_avatar",
+      "role": "fictional graphic placeholder; never identify as a real user",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_avatar_demo_06",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_avatar_demo_06.webp",
+      "category": "demo_avatar",
+      "role": "fictional graphic placeholder; never identify as a real user",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_back",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_back.webp",
+      "category": "control_icon",
+      "role": "icon for back; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_heart",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_heart.webp",
+      "category": "control_icon",
+      "role": "icon for heart; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_heart_fill",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_heart_fill.webp",
+      "category": "control_icon",
+      "role": "icon for heart-fill; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_users",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_users.webp",
+      "category": "control_icon",
+      "role": "icon for users; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_share",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_share.webp",
+      "category": "control_icon",
+      "role": "icon for share; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_more",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_more.webp",
+      "category": "control_icon",
+      "role": "icon for more; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_info",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_info.webp",
+      "category": "control_icon",
+      "role": "icon for info; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_mic",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_mic.webp",
+      "category": "control_icon",
+      "role": "icon for mic; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_mic_off",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_mic_off.webp",
+      "category": "control_icon",
+      "role": "icon for mic-off; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_volume",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_volume.webp",
+      "category": "control_icon",
+      "role": "icon for volume; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_volume_off",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_volume_off.webp",
+      "category": "control_icon",
+      "role": "icon for volume-off; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_headphones",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_headphones.webp",
+      "category": "control_icon",
+      "role": "icon for headphones; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_chat",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_chat.webp",
+      "category": "control_icon",
+      "role": "icon for chat; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_gift",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_gift.webp",
+      "category": "control_icon",
+      "role": "icon for gift; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_game",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_game.webp",
+      "category": "control_icon",
+      "role": "icon for game; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_swords",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_swords.webp",
+      "category": "control_icon",
+      "role": "icon for swords; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_dice",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_dice.webp",
+      "category": "control_icon",
+      "role": "icon for dice; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_smile",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_smile.webp",
+      "category": "control_icon",
+      "role": "icon for smile; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_settings",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_settings.webp",
+      "category": "control_icon",
+      "role": "icon for settings; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_shield",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_shield.webp",
+      "category": "control_icon",
+      "role": "icon for shield; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_flag",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_flag.webp",
+      "category": "control_icon",
+      "role": "icon for flag; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_lock",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_lock.webp",
+      "category": "control_icon",
+      "role": "icon for lock; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_unlock",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_unlock.webp",
+      "category": "control_icon",
+      "role": "icon for unlock; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_plus",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_plus.webp",
+      "category": "control_icon",
+      "role": "icon for plus; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_check",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_check.webp",
+      "category": "control_icon",
+      "role": "icon for check; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_x",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_x.webp",
+      "category": "control_icon",
+      "role": "icon for x; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_send",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_send.webp",
+      "category": "control_icon",
+      "role": "icon for send; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_camera",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_camera.webp",
+      "category": "control_icon",
+      "role": "icon for camera; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_image",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_image.webp",
+      "category": "control_icon",
+      "role": "icon for image; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_bluetooth",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_bluetooth.webp",
+      "category": "control_icon",
+      "role": "icon for bluetooth; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_link",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_link.webp",
+      "category": "control_icon",
+      "role": "icon for link; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_user_plus",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_user_plus.webp",
+      "category": "control_icon",
+      "role": "icon for user-plus; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_crown",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_crown.webp",
+      "category": "control_icon",
+      "role": "icon for crown; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_sparkles",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_sparkles.webp",
+      "category": "control_icon",
+      "role": "icon for sparkles; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_leave",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_leave.webp",
+      "category": "control_icon",
+      "role": "icon for leave; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_hand",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_hand.webp",
+      "category": "control_icon",
+      "role": "icon for hand; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_star",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_star.webp",
+      "category": "control_icon",
+      "role": "icon for star; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_search",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_search.webp",
+      "category": "control_icon",
+      "role": "icon for search; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_copy",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_copy.webp",
+      "category": "control_icon",
+      "role": "icon for copy; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_poll",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_poll.webp",
+      "category": "control_icon",
+      "role": "icon for poll; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_clock",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_clock.webp",
+      "category": "control_icon",
+      "role": "icon for clock; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_eye",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_eye.webp",
+      "category": "control_icon",
+      "role": "icon for eye; tint/compose circle background in UI",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_mic_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_mic_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_heart_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_heart_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_gift_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_gift_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_game_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_game_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_swords_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_swords_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_send_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_send_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_users_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_users_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_more_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_more_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_chat_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_chat_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_ic_hand_cyan",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_ic_hand_cyan.webp",
+      "category": "control_icon",
+      "role": "cyan-accent state",
+      "width": 160,
+      "height": 160,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_crown",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_crown.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: crown",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_audio_ring",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_audio_ring.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: audio_ring",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_shield",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_shield.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: shield",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_vip_diamond",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_vip_diamond.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: vip_diamond",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_studio_mic",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_studio_mic.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: studio_mic",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_pink_gift",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_pink_gift.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: pink_gift",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_trophy",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_trophy.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: trophy",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_dice_cards",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_dice_cards.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: dice_cards",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_emblem_heart_star",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_emblem_heart_star.webp",
+      "category": "premium_emblem",
+      "role": "original generated decorative emblem: heart_star",
+      "width": 512,
+      "height": 512,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_fx_sparkles",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_fx_sparkles.webp",
+      "category": "effect_overlay",
+      "role": "static transparent sparkle overlay; animate in Compose",
+      "width": 700,
+      "height": 500,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_chip_host",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_chip_host.webp",
+      "category": "role_chip",
+      "role": "decorative pill; add label as Compose Text",
+      "width": 440,
+      "height": 156,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_chip_moderator",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_chip_moderator.webp",
+      "category": "role_chip",
+      "role": "decorative pill; add label as Compose Text",
+      "width": 440,
+      "height": 156,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_chip_vip",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_chip_vip.webp",
+      "category": "role_chip",
+      "role": "decorative pill; add label as Compose Text",
+      "width": 440,
+      "height": 156,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_chip_speaking",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_chip_speaking.webp",
+      "category": "role_chip",
+      "role": "decorative pill; add label as Compose Text",
+      "width": 440,
+      "height": 156,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_chip_request",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_chip_request.webp",
+      "category": "role_chip",
+      "role": "decorative pill; add label as Compose Text",
+      "width": 440,
+      "height": 156,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_bar_pk",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_bar_pk.webp",
+      "category": "status_bar",
+      "role": "visual background only; draw real score text in Compose",
+      "width": 960,
+      "height": 210,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_bar_reward",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_bar_reward.webp",
+      "category": "status_bar",
+      "role": "visual background only; draw real score text in Compose",
+      "width": 960,
+      "height": 210,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_banner_music",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_banner_music.webp",
+      "category": "activity_banner",
+      "role": "original background for room activity sheet, no baked lettering",
+      "width": 1100,
+      "height": 370,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_banner_games",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_banner_games.webp",
+      "category": "activity_banner",
+      "role": "original background for room activity sheet, no baked lettering",
+      "width": 1100,
+      "height": 370,
+      "transparent": true
+    },
+    {
+      "name": "vb_vr_banner_chill",
+      "file": "android/app/src/main/res/drawable-nodpi/vb_vr_banner_chill.webp",
+      "category": "activity_banner",
+      "role": "original background for room activity sheet, no baked lettering",
+      "width": 1100,
+      "height": 370,
+      "transparent": true
+    }
+  ]
+}

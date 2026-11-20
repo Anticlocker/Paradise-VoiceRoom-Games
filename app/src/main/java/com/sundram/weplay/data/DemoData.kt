@@ -1,5 +1,8 @@
 package com.sundram.weplay.data
 
+import androidx.annotation.DrawableRes
+import com.sundram.weplay.R
+
 data class GameCard(
     val id: String,
     val title: String,
@@ -15,6 +18,9 @@ data class RoomCard(
     val members: Int,
     val tag: String,
     val live: Boolean = true,
+    @DrawableRes val coverRes: Int? = null,
+    val badges: List<Int> = emptyList(),
+    val activityText: String? = null,
 )
 
 data class ChatItem(
@@ -76,12 +82,15 @@ object Demo {
     )
 
     val rooms = listOf(
-        RoomCard("r1", "Tea Time Talks", "Priya", 7, "Casual"),
-        RoomCard("r2", "Werewolf Night", "Raj", 10, "Deduction"),
-        RoomCard("r3", "Music & Chill", "Ankit", 4, "KTV"),
-        RoomCard("r4", "Desi Gamers", "Sam", 6, "Games"),
-        RoomCard("r5", "Late Night Vibes", "Sneha", 2, "Casual"),
-        RoomCard("r6", "Sing-Along", "Kavya", 9, "KTV"),
+        RoomCard("r1", "Tea Time Talks", "Priya", 7, "Friends", coverRes = R.drawable.vb_room_cover_moonlight, badges = listOf(R.drawable.vb_room_badge_gold, R.drawable.vb_room_badge_sapphire), activityText = "Chit-chat & Tea"),
+        RoomCard("r2", "Werewolf Night", "Raj", 10, "PK", coverRes = R.drawable.vb_room_cover_werewolf_night, badges = listOf(R.drawable.vb_room_badge_ruby, R.drawable.vb_room_badge_shield), activityText = "Social Deduction"),
+        RoomCard("r3", "Music & Chill", "Ankit", 4, "Music", coverRes = R.drawable.vb_room_cover_karaoke_stage, badges = listOf(R.drawable.vb_room_badge_music, R.drawable.vb_room_badge_star), activityText = "Live Acoustic"),
+        RoomCard("r4", "Desi Gamers", "Sam", 6, "Game", coverRes = R.drawable.vb_room_cover_beast_wars, badges = listOf(R.drawable.vb_room_badge_flame, R.drawable.vb_room_badge_diamond), activityText = "Ranked Match"),
+        RoomCard("r5", "Late Night Vibes", "Sneha", 2, "Chats", coverRes = R.drawable.vb_room_cover_beach_party, badges = listOf(R.drawable.vb_room_badge_emerald, R.drawable.vb_room_badge_gold), activityText = "Chillout Lounge"),
+        RoomCard("r6", "Sing-Along Stage", "Kavya", 9, "Music", coverRes = R.drawable.vb_room_cover_pop_star, badges = listOf(R.drawable.vb_room_badge_royal, R.drawable.vb_room_badge_music), activityText = "Karaoke Contest"),
+        RoomCard("r7", "Royal High Stakes", "Vikram", 14, "Game", coverRes = R.drawable.vb_room_cover_royal_casino, badges = listOf(R.drawable.vb_room_badge_royal, R.drawable.vb_room_badge_gold), activityText = "VIP Cards"),
+        RoomCard("r8", "8-Ball Billiards Lounge", "Arjun", 8, "Game", coverRes = R.drawable.vb_room_cover_billiards_lounge, badges = listOf(R.drawable.vb_room_badge_diamond, R.drawable.vb_room_badge_ice), activityText = "Tournament"),
+        RoomCard("r9", "Crown VIP Cinema", "Natasha", 18, "Video", coverRes = R.drawable.vb_room_cover_royal_crown, badges = listOf(R.drawable.vb_room_badge_royal, R.drawable.vb_room_badge_ruby, R.drawable.vb_room_badge_sapphire), activityText = "Movie Night"),
     )
 
     val chats = listOf(

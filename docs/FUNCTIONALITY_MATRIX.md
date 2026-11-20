@@ -277,14 +277,46 @@
 
 ---
 
+## NotificationsScreen
+
+| Action | Expected Result | Current Status | Test Status | Blocker |
+|---|---|---|---|---|
+| View notifications | Displays system and social notification items | `COMPLETE_LOCAL` | Manual ✅ | Backend sync |
+| Mark all read | Updates read status of all notifications | `COMPLETE_LOCAL` | Manual ✅ | — |
+| Tap notification with route | Navigates to target destination (e.g. room) | `COMPLETE_LOCAL` | Manual ✅ | — |
+
+---
+
+## SearchScreen
+
+| Action | Expected Result | Current Status | Test Status | Blocker |
+|---|---|---|---|---|
+| Open search | Input autofocuses with keyboard prompt | `COMPLETE_LOCAL` | Manual ✅ | — |
+| Type query | Real-time filtering across games and voice rooms | `COMPLETE_LOCAL` | Manual ✅ | — |
+| Clear text | Clears query string | `COMPLETE_LOCAL` | Manual ✅ | — |
+| Tap result card | Navigates to corresponding game or room | `COMPLETE_LOCAL` | Manual ✅ | — |
+
+---
+
+## GameRoomsScreen
+
+| Action | Expected Result | Current Status | Test Status | Blocker |
+|---|---|---|---|---|
+| Browse game rooms | Renders list with host, member count, and tags | `COMPLETE_LOCAL` | Manual ✅ | Live server sync |
+| Filter by category | Filters rooms by All, Games, Deduction, Casual, KTV | `COMPLETE_LOCAL` | Manual ✅ | — |
+| Tap Join room | Navigates to target voice/game room | `COMPLETE_LOCAL` | Manual ✅ | — |
+| Tap Create room | Navigates to room creation screen | `COMPLETE_LOCAL` | Manual ✅ | — |
+
+---
+
 ## Summary Counts
 
 | Status | Count |
 |---|---|
-| `COMPLETE_LOCAL` | 52 |
+| `COMPLETE_LOCAL` | 63 |
 | `COMPLETE_LIVE` | 4 |
 | `DEMO_ONLY` | 28 |
 | `BLOCKED_INTEGRATION` | 1 |
-| `BROKEN` | 18 |
+| `BROKEN` | 12 |
 | `NOT_STARTED` | 32 |
-| **Total actions tracked** | **135** |
+| **Total actions tracked** | **140** |

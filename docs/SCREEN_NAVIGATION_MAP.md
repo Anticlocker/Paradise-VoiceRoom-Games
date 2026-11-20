@@ -49,7 +49,10 @@ MainActivity
                 ├── PAYMENT_METHODS → PaymentMethodsScreen
                 ├── HOST_EARNINGS   → HostEarningsScreen
                 ├── SUPPORT_SETTINGS → SupportSettingsScreen
-                └── ABOUT           → AboutScreen
+                ├── ABOUT           → AboutScreen
+                ├── NOTIFICATIONS   → NotificationsScreen
+                ├── SEARCH          → SearchScreen
+                └── GAME_ROOMS      → GameRoomsScreen
 ```
 
 **Back-stack strategy:** `popUpTo(startDestination) { saveState = true }` + `restoreState = true` on tab switches (standard Compose NavHost pattern). ✅  

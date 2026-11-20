@@ -84,6 +84,38 @@ class VoiceRoomViewModel(
         viewModelScope.launch { engine.leaveSeat() }
     }
 
+    fun sendGift(giftName: String, recipientName: String, count: Int, giftIconRes: Int? = null) {
+        viewModelScope.launch { engine.sendGift(giftName, recipientName, count, giftIconRes) }
+    }
+
+    fun toggleFavorite() {
+        viewModelScope.launch { engine.toggleFavorite() }
+    }
+
+    fun toggleTheme() {
+        viewModelScope.launch { engine.toggleTheme() }
+    }
+
+    fun toggleLockSeat(seat: Int) {
+        viewModelScope.launch { engine.toggleLockSeat(seat) }
+    }
+
+    fun kickSeat(seat: Int) {
+        viewModelScope.launch { engine.kickSeat(seat) }
+    }
+
+    fun toggleFollowMember(identity: String) {
+        viewModelScope.launch { engine.toggleFollowMember(identity) }
+    }
+
+    fun toggleEarpieceMode() {
+        viewModelScope.launch { engine.toggleEarpieceMode() }
+    }
+
+    fun toggleOutputMute() {
+        viewModelScope.launch { engine.toggleOutputMute() }
+    }
+
     /** Retries a failed connection without leaving the screen. */
     fun reconnect() {
         viewModelScope.launch {

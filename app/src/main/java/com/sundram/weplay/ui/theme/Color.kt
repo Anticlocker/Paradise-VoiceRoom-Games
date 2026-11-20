@@ -176,6 +176,18 @@ val CyanInk: Color
     @ReadOnlyComposable
     get() = LocalWePlayPalette.current.accentInk
 
+// ── Vybora Original Premium Identity Tokens ──────────────────────────────
+val VyboraBg            = Color(0xFFFAF9FF)
+val VyboraSurface       = Color(0xFFFFFFFF)
+val VyboraTextPrimary   = Color(0xFF201B35)
+val VyboraTextSecondary = Color(0xFF827D98)
+val VyboraPurple        = Color(0xFF8258EE)
+val VyboraLavender      = Color(0xFFEDE5FF)
+val VyboraCyan          = Color(0xFF27D2DC)
+val VyboraCyanSoft      = Color(0xFFE0FAFB)
+val VyboraGold          = Color(0xFFFFCB68)
+val VyboraBorder        = Color(0xFFEAE6F3)
+
 // ── Vybora Premium Dark Theme tokens (additive – do NOT remove existing) ────
 // Use these for the new Vybora dark-midnight screens; do not force them on
 // existing white-background screens unless explicitly redesigning them.
