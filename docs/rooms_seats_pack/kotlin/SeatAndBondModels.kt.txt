@@ -1,0 +1,54 @@
+// REFERENCE ONLY — adapt to actual existing Kotlin room models; do not add duplicates blindly.
+// Original local model showing stable identities and consent, not a substitute for trusted backend state.
+
+enum class SeatPositionType { HOST, REGULAR, PARTNER }
+enum class BondStatus { NONE, DRAFT, REQUESTED, PARTIALLY_ACCEPTED, ACTIVE, DECLINED, EXPIRED, CANCELED, DETACHING, DETACHED, FAILED }
+enum class ConsentStatus { PENDING, ACCEPTED, DECLINED, REVOKED }
+
+data class StageSeat(
+    val id: String,
+    val positionType: SeatPositionType,
+    val number: Int? = null,
+    val occupantUserId: String? = null,
+    val isLocked: Boolean = false
+)
+
+data class StageLayout(
+    val host: StageSeat,
+    val regularSeats: List<StageSeat>,
+    val partnerEnabled: Boolean = false,
+    val partnerSeat: StageSeat? = null
+) {
+    init {
+        require(host.positionType == SeatPositionType.HOST)
+        require(regularSeats.size == 8)
+        require(regularSeats.map { it.number }.toSet() == (1..8).toSet())
+        require(regularSeats.all { it.positionType == SeatPositionType.REGULAR })
+        require(partnerSeat == null || partnerSeat.positionType == SeatPositionType.PARTNER)
+    }
+    val visibleSeats: List<StageSeat>
+        get() = listOf(host) + (if (partnerEnabled && partnerSeat != null) listOf(partnerSeat) else emptyList()) + regularSeats
+}
+
+data class SeatBond(
+    val bondId: String,
+    val roomId: String,
+    val firstSeatId: String,
+    val secondSeatId: String,
+    val firstUserId: String,
+    val secondUserId: String,
+    val firstConsent: ConsentStatus,
+    val secondConsent: ConsentStatus,
+    val status: BondStatus,
+    val revision: Long
+) {
+    fun canActivate() = firstSeatId != secondSeatId &&
+        firstUserId != secondUserId &&
+        firstConsent == ConsentStatus.ACCEPTED &&
+        secondConsent == ConsentStatus.ACCEPTED &&
+        status in setOf(BondStatus.REQUESTED, BondStatus.PARTIALLY_ACCEPTED)
+}
+
+// Compose layout recommendation: center Host & optional Partner above LazyVerticalGrid(columns=GridCells.Fixed(4))
+// with 8 regular seats, stable keys by seat.id. Attached connection path must measure actual center
+// positions and render behind both seat views without consuming clicks. Persist live state via backend.

@@ -121,7 +121,7 @@ class LiveKitVoiceRoomEngine(
     }
 
     override suspend fun takeSeat(seat: Int) {
-        if (seat !in 0 until VOICE_ROOM_SEAT_COUNT) return
+        if (seat !in 0 until VOICE_ROOM_STAGE_CAPACITY) return
         if (state.value.members.any { it.seat == seat }) return
         this.seat = seat
         room?.localParticipant?.updateAttributes(seatAttributes())
@@ -201,7 +201,7 @@ class LiveKitVoiceRoomEngine(
                 identity = identityOf(participant),
                 name = displayNameOf(participant),
                 seat = participant.attributes[ATTR_SEAT]?.toIntOrNull()
-                    ?.takeIf { it in 0 until VOICE_ROOM_SEAT_COUNT },
+                    ?.takeIf { it in 0 until VOICE_ROOM_STAGE_CAPACITY },
                 micOn = micEnabled,
                 speaking = participant.isSpeaking && micEnabled,
                 isSelf = isSelf,

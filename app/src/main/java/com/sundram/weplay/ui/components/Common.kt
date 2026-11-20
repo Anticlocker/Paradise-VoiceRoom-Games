@@ -76,9 +76,13 @@ import com.sundram.weplay.ui.theme.TextMuted
  * on press (0.97f by default) with controlled bounded ripple.
  */
 fun Modifier.bounceClick(
+    enabled: Boolean = true,
     scaleDown: Float = 0.97f,
     onClick: () -> Unit,
 ): Modifier = composed {
+    if (!enabled) {
+        return@composed this
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -95,6 +99,7 @@ fun Modifier.bounceClick(
             scaleY = scale
         }
         .clickable(
+            enabled = enabled,
             interactionSource = interactionSource,
             indication = ripple(bounded = true),
             onClick = onClick,

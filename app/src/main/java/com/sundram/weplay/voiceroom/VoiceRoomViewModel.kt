@@ -116,6 +116,26 @@ class VoiceRoomViewModel(
         viewModelScope.launch { engine.toggleOutputMute() }
     }
 
+    fun togglePartnerSeat(enabled: Boolean) {
+        viewModelScope.launch { engine.togglePartnerSeat(enabled) }
+    }
+
+    fun toggleLockPartnerSeat() {
+        viewModelScope.launch { engine.toggleLockPartnerSeat() }
+    }
+
+    fun requestSeatBond(firstSeat: Int, secondSeat: Int) {
+        viewModelScope.launch { engine.requestSeatBond(firstSeat, secondSeat) }
+    }
+
+    fun respondSeatBondConsent(bondId: String, accept: Boolean) {
+        viewModelScope.launch { engine.respondSeatBondConsent(bondId, accept) }
+    }
+
+    fun detachSeatBond(bondId: String) {
+        viewModelScope.launch { engine.detachSeatBond(bondId) }
+    }
+
     /** Retries a failed connection without leaving the screen. */
     fun reconnect() {
         viewModelScope.launch {
