@@ -200,6 +200,13 @@ private fun WePlayApp(
             composable(Routes.RANKING) {
                 RankingScreen(nav = nav)
             }
+            composable(Routes.TASKS) {
+                com.sundram.weplay.ui.screens.TaskCenterScreen(
+                    nav = nav,
+                    profile = profile,
+                    onSaveProfile = onSaveProfile,
+                )
+            }
             composable(Routes.ME_SETTINGS) {
                 MeSettingsScreen(nav = nav)
             }

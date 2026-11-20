@@ -81,6 +81,7 @@ object Routes {
     const val NOTIFICATIONS = "notifications"
     const val SEARCH = "search"
     const val GAME_ROOMS = "game/rooms"
+    const val TASKS = "hub/tasks"
 
     fun chatRoute(id: String) = "chat/$id"
     fun userRoute(id: String) = "user/$id"
@@ -88,6 +89,7 @@ object Routes {
     fun roomRoute(id: String) = "room/$id"
     fun notificationsRoute() = NOTIFICATIONS
     fun searchRoute() = SEARCH
+    fun tasksRoute() = TASKS
 
     val tabs = setOf(HUB, ROOM, DISCOVER, MSG, ME)
 }
@@ -102,14 +104,14 @@ private data class TabItemDual(
 )
 
 private val tabsDual = listOf(
-    TabItemDual(Routes.HUB,      R.drawable.vb_nav_games_on,   R.drawable.vb_nav_games_off,   "WePlay"),
+    TabItemDual(Routes.HUB,      R.drawable.vb_nav_games_on,   R.drawable.vb_nav_games_off,   "Games"),
     TabItemDual(Routes.ROOM,     R.drawable.vb_nav_voice_on,   R.drawable.vb_nav_voice_off,   "Voice Room"),
     TabItemDual(Routes.MSG,      R.drawable.vb_nav_chats_on,   R.drawable.vb_nav_chats_off,   "Chats"),
     TabItemDual(Routes.DISCOVER, R.drawable.vb_nav_discover_on,R.drawable.vb_nav_discover_off,"Discover"),
     TabItemDual(Routes.ME,       R.drawable.vb_nav_me_on,      R.drawable.vb_nav_me_off,      "Me"),
 )
 
-private fun switch(controller: NavHostController, route: String) {
+internal fun switchTab(controller: NavHostController, route: String) {
     controller.navigate(route) {
         popUpTo(controller.graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
@@ -152,7 +154,11 @@ fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                            ) { switch(nav, tab.route) },
+                            ) {
+                                if (current != tab.route) {
+                                    switchTab(nav, tab.route)
+                                }
+                            },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
                     ) {

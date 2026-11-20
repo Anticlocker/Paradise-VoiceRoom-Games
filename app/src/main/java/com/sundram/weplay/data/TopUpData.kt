@@ -8,6 +8,7 @@ data class CoinPack(
     val bonus: Long = 0L,
     val price: Int,
     val tag: String? = null,
+    val title: String = "",
 ) {
     val total: Long get() = coins + bonus
 }
@@ -17,15 +18,18 @@ data class TopUpRecord(
     val coins: Long,
     val price: Int,
     val at: Long,
+    val title: String = "",
 )
 
 val DemoCoinPacks = listOf(
-    CoinPack("coins_100", 100, 0, 99),
-    CoinPack("coins_500", 500, 50, 449, "POPULAR"),
-    CoinPack("coins_1200", 1_200, 150, 899, "BEST"),
-    CoinPack("coins_3000", 3_000, 500, 1_999),
-    CoinPack("coins_6000", 6_000, 1_200, 3_799),
-    CoinPack("coins_12000", 12_000, 3_000, 7_499),
+    CoinPack("coins_starter", 100, 0, 10, "STARTER", "Starter"),
+    CoinPack("coins_mini", 300, 30, 29, null, "Mini"),
+    CoinPack("coins_popular", 550, 60, 49, "POPULAR", "Popular"),
+    CoinPack("coins_value", 1_200, 150, 99, "BEST VALUE", "Value"),
+    CoinPack("coins_premium", 2_500, 400, 199, "HOT", "Premium"),
+    CoinPack("coins_super", 5_500, 1_000, 399, "SUPER", "Super"),
+    CoinPack("coins_royal", 12_000, 2_500, 799, "ROYAL", "Royal"),
+    CoinPack("coins_mega", 30_000, 8_000, 1_999, "MEGA", "Mega"),
 )
 
 class TopUpStore(context: Context) {
