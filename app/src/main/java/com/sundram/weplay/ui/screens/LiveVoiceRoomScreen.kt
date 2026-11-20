@@ -931,7 +931,7 @@ private fun AuroraSpeakerStage(
                         moveTo(p1.x, p1.y)
                         val midY = (p1.y + p2.y) / 2f - 24.dp.toPx()
                         val midX = (p1.x + p2.x) / 2f
-                        quadraticBezierTo(midX, midY, p2.x, p2.y)
+                        quadraticTo(midX, midY, p2.x, p2.y)
                     }
                     // Outer aurora glow
                     drawPath(

@@ -142,9 +142,14 @@ class RoomsAndSeatsUnitTest {
 
         // Request bond between seat 1 (Ghost Arjun) and seat 3 (Self)
         engine.requestSeatBond(1, 3)
-        delay(1200)
+
+        // Self receives pending bond consent and accepts
+        val pending = engine.state.value.pendingBondConsent
+        assertNotNull("Self should receive pending consent request", pending)
+        engine.respondSeatBondConsent(pending!!.bondId, true)
 
         assertTrue("Seat 3 should be in bond", engine.state.value.isSeatInBond(3))
+        assertTrue("Seat 1 should be in bond", engine.state.value.isSeatInBond(1))
 
         // Self leaves seat 3
         engine.leaveSeat()
