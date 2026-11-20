@@ -40,4 +40,28 @@ interface VoiceRoomEngine {
 
     /** Give up the current seat and become a listener. */
     suspend fun leaveSeat()
+
+    /** Send an in-room gift event broadcast. */
+    suspend fun sendGift(giftName: String, recipientName: String, count: Int, giftIconRes: Int? = null) {}
+
+    /** Toggle favorited state of the room. */
+    suspend fun toggleFavorite() {}
+
+    /** Toggle room background theme (Aurora vs Celestial). */
+    suspend fun toggleTheme() {}
+
+    /** Host action: lock or unlock a specific stage seat. */
+    suspend fun toggleLockSeat(seat: Int) {}
+
+    /** Host action: remove a participant from a stage seat. */
+    suspend fun kickSeat(seat: Int) {}
+
+    /** Toggle following a room participant. */
+    suspend fun toggleFollowMember(identity: String) {}
+
+    /** Toggle speaker vs earpiece audio routing. */
+    suspend fun toggleEarpieceMode() {}
+
+    /** Toggle master audio output mute. */
+    suspend fun toggleOutputMute() {}
 }

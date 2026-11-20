@@ -20,15 +20,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
+import com.sundram.weplay.data.Demo
+import com.sundram.weplay.ui.nav.Routes
 import com.sundram.weplay.ui.theme.CyanBrand
 import com.sundram.weplay.ui.theme.Gold
 import com.sundram.weplay.ui.theme.KtvRed
@@ -53,6 +58,7 @@ import com.sundram.weplay.ui.theme.TextBody
 import com.sundram.weplay.ui.theme.TextMain
 import com.sundram.weplay.ui.theme.TextMuted
 import com.sundram.weplay.ui.theme.WarnOrange
+import kotlinx.coroutines.delay
 
 private val NewBadge = Color(0xFFFF5959)
 private val ModeUnselectedBg = Color(0xFFF5F5F9)
@@ -84,15 +90,36 @@ private val roomTags = listOf(
     RoomTag("Chats"),
 )
 
-/** Create Voice Room screen — UI only, no backend logic. */
+private val seatOptions = listOf(8, 10, 12)
+
+/** Create Voice Room screen — with form validation, loading state, and interactive controls. */
 @Composable
 fun CreateVoiceRoomScreen(
     nav: NavHostController,
 ) {
-    var roomTitle by remember { mutableStateOf("") }
-    var passwordEnabled by remember { mutableStateOf(false) }
-    var selectedMode by remember { mutableStateOf(0) }
-    var selectedTag by remember { mutableStateOf(-1) }
+    var roomTitle by rememberSaveable { mutableStateOf("") }
+    var passwordEnabled by rememberSaveable { mutableStateOf(false) }
+    var isPrivate by rememberSaveable { mutableStateOf(false) }
+    var selectedMode by rememberSaveable { mutableStateOf(0) }
+    var selectedTag by rememberSaveable { mutableStateOf(-1) }
+    var maxSeats by rememberSaveable { mutableStateOf(8) }
+    var isLoading by remember { mutableStateOf(false) }
+    var titleError by remember { mutableStateOf(false) }
+
+    // Loading → navigate effect
+    LaunchedEffect(isLoading) {
+        if (isLoading) {
+            delay(1500)
+            val demoRoom = Demo.rooms.firstOrNull()
+            if (demoRoom != null) {
+                nav.navigate(Routes.roomRoute(demoRoom.id)) {
+                    popUpTo(Routes.ROOM) { inclusive = false }
+                }
+            } else {
+                nav.popBackStack()
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -133,12 +160,23 @@ fun CreateVoiceRoomScreen(
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .background(Color(0xFFF5F6FA), RoundedCornerShape(12.dp)),
+                .background(
+                    if (titleError) Color(0xFFFFF0F0) else Color(0xFFF5F6FA),
+                    RoundedCornerShape(12.dp)
+                )
+                .border(
+                    width = if (titleError) 1.dp else 0.dp,
+                    color = if (titleError) Color(0xFFE53935) else Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                ),
             contentAlignment = Alignment.Center,
         ) {
             androidx.compose.material3.TextField(
                 value = roomTitle,
-                onValueChange = { roomTitle = it },
+                onValueChange = { inputVal ->
+                    roomTitle = inputVal
+                    if (titleError && inputVal.isNotBlank()) titleError = false
+                },
                 placeholder = { Text("Enter room title", color = TextMuted) },
                 singleLine = true,
                 modifier = Modifier
@@ -153,6 +191,14 @@ fun CreateVoiceRoomScreen(
                     focusedContainerColor = Color.Transparent,
                 ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            )
+        }
+        if (titleError) {
+            Text(
+                "Room name cannot be blank",
+                color = Color(0xFFE53935),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(start = 20.dp, top = 4.dp),
             )
         }
 
@@ -181,6 +227,83 @@ fun CreateVoiceRoomScreen(
                     checkedTrackColor = CyanBrand.copy(alpha = 0.5f),
                 ),
             )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Privacy toggle
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "Private Room",
+                    color = TextMain,
+                    fontSize = 15.sp,
+                )
+                Text(
+                    if (isPrivate) "Invite-only [DEMO]" else "Anyone can join [DEMO]",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                )
+            }
+            Switch(
+                checked = isPrivate,
+                onCheckedChange = { isPrivate = it },
+                colors = androidx.compose.material3.SwitchDefaults.colors(
+                    uncheckedThumbColor = Color(0xFFD1D5DB),
+                    uncheckedTrackColor = Color(0xFFE5E7EB),
+                    checkedThumbColor = CyanBrand,
+                    checkedTrackColor = CyanBrand.copy(alpha = 0.5f),
+                ),
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Max seats selector
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
+            Text(
+                "Max seats",
+                color = TextMuted,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+            )
+            Spacer(Modifier.height(10.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                seatOptions.forEach { seats ->
+                    val selected = maxSeats == seats
+                    Box(
+                        Modifier
+                            .clickable { maxSeats = seats }
+                            .background(
+                                if (selected) CyanBrand else Color(0xFFF5F5F9),
+                                RoundedCornerShape(10.dp)
+                            )
+                            .border(
+                                1.dp,
+                                if (selected) CyanBrand else Stroke,
+                                RoundedCornerShape(10.dp)
+                            )
+                            .padding(horizontal = 20.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            "$seats",
+                            color = if (selected) Color.White else TextBody,
+                            fontSize = 14.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(24.dp))
@@ -234,7 +357,7 @@ fun CreateVoiceRoomScreen(
                     TagChip(
                         tag = tag,
                         selected = selectedTag == index,
-                        onClick = { selectedTag = index },
+                        onClick = { selectedTag = if (selectedTag == index) -1 else index },
                     )
                 }
             }
@@ -269,7 +392,7 @@ fun CreateVoiceRoomScreen(
 
         Spacer(Modifier.height(30.dp))
 
-        // Confirm button
+        // Confirm button — with validation and loading state
         Box(
             Modifier
                 .fillMaxWidth()
@@ -280,15 +403,44 @@ fun CreateVoiceRoomScreen(
                 Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .background(CyanBrand, RoundedCornerShape(28.dp)),
+                    .background(
+                        if (isLoading) CyanBrand.copy(alpha = 0.7f) else CyanBrand,
+                        RoundedCornerShape(28.dp)
+                    )
+                    .clickable(enabled = !isLoading) {
+                        if (roomTitle.isBlank()) {
+                            titleError = true
+                        } else {
+                            isLoading = true
+                        }
+                    },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    "Confirm",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+                if (isLoading) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Text(
+                            "Creating room…",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                } else {
+                    Text(
+                        "Confirm",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
             }
         }
 

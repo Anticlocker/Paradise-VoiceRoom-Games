@@ -21,7 +21,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,6 +79,12 @@ private val rankList = listOf(
 fun RankingScreen(
     nav: NavHostController,
 ) {
+    var selectedCategory by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("Popularity") }
+    var selectedPeriod by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("Today") }
+
+    val categories = listOf("Popularity", "VIP", "Couple", "Room", "BFF", "Family")
+    val periods = listOf("Today", "Yesterday", "Celebrity", "Annual", "Global")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -118,14 +127,15 @@ fun RankingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            CategoryTab("Popularity", active = true)
-            CategoryTab("VIP", active = false)
-            CategoryTab("Couple", active = false)
-            CategoryTab("Room", active = false)
-            CategoryTab("BFF", active = false)
-            CategoryTab("Family", active = false)
+            categories.forEach { cat ->
+                CategoryTab(
+                    label = cat,
+                    active = cat == selectedCategory,
+                    onClick = { selectedCategory = cat },
+                )
+            }
         }
 
         Spacer(Modifier.height(14.dp))
@@ -137,11 +147,14 @@ fun RankingScreen(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            FilterChip("Today", active = false)
-            FilterChip("Yesterday", active = true)
-            FilterChip("Celebrity", active = false)
-            FilterChip("Annual", active = false)
-            FilterChip("Global", active = false, showArrow = true)
+            periods.forEach { period ->
+                FilterChip(
+                    label = period,
+                    active = period == selectedPeriod,
+                    showArrow = period == "Global",
+                    onClick = { selectedPeriod = period },
+                )
+            }
         }
 
         Spacer(Modifier.height(18.dp))
@@ -169,25 +182,26 @@ fun RankingScreen(
 }
 
 @Composable
-private fun CategoryTab(label: String, active: Boolean) {
+private fun CategoryTab(label: String, active: Boolean, onClick: () -> Unit = {}) {
     Text(
         label,
         color = if (active) TabActive else TabInactive,
         fontSize = 16.sp,
         fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+        modifier = Modifier.clickable(onClick = onClick),
     )
 }
 
 @Composable
-private fun FilterChip(label: String, active: Boolean, showArrow: Boolean = false) {
+private fun FilterChip(label: String, active: Boolean, showArrow: Boolean = false, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .background(
                 if (active) Color.White else Color(0x33FFFFFF),
                 RoundedCornerShape(20.dp),
             )
-            .padding(horizontal = 12.dp, vertical = 7.dp)
-            .clickable {},
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

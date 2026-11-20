@@ -37,6 +37,12 @@ import com.sundram.weplay.ui.theme.Divider
 import com.sundram.weplay.ui.theme.TextMain
 import com.sundram.weplay.ui.theme.TextMuted
 
+import com.sundram.weplay.ui.theme.VyboraBorder
+import com.sundram.weplay.ui.theme.VyboraPurple
+import com.sundram.weplay.ui.theme.VyboraSurface
+import com.sundram.weplay.ui.theme.VyboraTextPrimary
+import com.sundram.weplay.ui.theme.VyboraTextSecondary
+
 object Routes {
     const val HUB = "tab_hub"
     const val ROOM = "tab_room"
@@ -72,28 +78,35 @@ object Routes {
     const val RANKING = "tab_ranking"
     const val ME_SETTINGS = "tab_me_settings"
     const val CREATE_ROOM = "tab_create_room"
+    const val NOTIFICATIONS = "notifications"
+    const val SEARCH = "search"
+    const val GAME_ROOMS = "game/rooms"
 
     fun chatRoute(id: String) = "chat/$id"
     fun userRoute(id: String) = "user/$id"
     fun userDetailRoute(id: String) = "profile/detail/$id"
     fun roomRoute(id: String) = "room/$id"
+    fun notificationsRoute() = NOTIFICATIONS
+    fun searchRoute() = SEARCH
 
     val tabs = setOf(HUB, ROOM, DISCOVER, MSG, ME)
 }
 
-private data class TabItem(
+
+private data class TabItemDual(
     val route: String,
-    @DrawableRes val icon: Int,
+    @DrawableRes val iconOn: Int,
+    @DrawableRes val iconOff: Int,
     val label: String,
     val badge: () -> Int? = { null },
 )
 
-private val tabs = listOf(
-    TabItem(Routes.HUB, R.drawable.ic_nav_games, "WePlay"),
-    TabItem(Routes.ROOM, R.drawable.ic_nav_room, "Voice Room"),
-    TabItem(Routes.MSG, R.drawable.ic_nav_msg, "Chats"),
-    TabItem(Routes.DISCOVER, R.drawable.ic_nav_discover, "Discover"),
-    TabItem(Routes.ME, R.drawable.ic_nav_me, "Me"),
+private val tabsDual = listOf(
+    TabItemDual(Routes.HUB,      R.drawable.vb_nav_games_on,   R.drawable.vb_nav_games_off,   "WePlay"),
+    TabItemDual(Routes.ROOM,     R.drawable.vb_nav_voice_on,   R.drawable.vb_nav_voice_off,   "Voice Room"),
+    TabItemDual(Routes.MSG,      R.drawable.vb_nav_chats_on,   R.drawable.vb_nav_chats_off,   "Chats"),
+    TabItemDual(Routes.DISCOVER, R.drawable.vb_nav_discover_on,R.drawable.vb_nav_discover_off,"Discover"),
+    TabItemDual(Routes.ME,       R.drawable.vb_nav_me_on,      R.drawable.vb_nav_me_off,      "Me"),
 )
 
 private fun switch(controller: NavHostController, route: String) {
@@ -106,9 +119,9 @@ private fun switch(controller: NavHostController, route: String) {
 
 @Composable
 fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0) {
-    val navBarBg = Color.White
-    val inactiveColor = Color(0xFFB0BEC5)
-    val activeLabelColor = Color(0xFF151C33)
+    val navBarBg = VyboraSurface
+    val inactiveColor = VyboraTextSecondary
+    val activeLabelColor = VyboraPurple
     val badgeRed = Color(0xFFFF4D4F)
 
     Surface(
@@ -120,22 +133,22 @@ fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0)
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(0.8.dp)
-                    .background(Color(0xFFEEEEEE)),
+                    .height(1.dp)
+                    .background(VyboraBorder),
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(58.dp)
+                    .height(60.dp)
                     .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                tabs.forEach { tab ->
+                tabsDual.forEach { tab ->
                     val selected = current == tab.route
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .height(58.dp)
+                            .height(60.dp)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
@@ -145,28 +158,30 @@ fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                painter = painterResource(tab.icon),
+                                painter = painterResource(if (selected) tab.iconOn else tab.iconOff),
                                 contentDescription = tab.label,
-                                tint = if (selected) CyanBrand else inactiveColor,
-                                modifier = Modifier.size(24.dp),
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(26.dp),
                             )
                             // Chats badge with count
                             if (tab.route == Routes.MSG) {
-                                val badgeCount = if (msgBadge > 0) msgBadge else 44
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .offset(x = 10.dp, y = (-4).dp)
-                                        .size(16.dp)
-                                        .background(badgeRed, CircleShape),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = "$badgeCount",
-                                        color = Color.White,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold,
-                                    )
+                                val badgeCount = msgBadge
+                                if (badgeCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = 10.dp, y = (-4).dp)
+                                            .size(16.dp)
+                                            .background(badgeRed, CircleShape),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = "$badgeCount",
+                                            color = Color.White,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    }
                                 }
                             }
                             // Discover and Me red dot badges
@@ -183,8 +198,8 @@ fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0)
                         Spacer(Modifier.height(3.dp))
                         Text(
                             text = tab.label,
-                            color = if (selected) CyanBrand else inactiveColor,
-                            fontSize = 10.sp,
+                            color = if (selected) activeLabelColor else inactiveColor,
+                            fontSize = 11.sp,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                         )
                     }
