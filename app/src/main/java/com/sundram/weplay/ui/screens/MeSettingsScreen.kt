@@ -154,9 +154,9 @@ fun MeSettingsScreen(
                 Spacer(Modifier.weight(1f))
                 Icon(
                     painter = painterResource(R.drawable.ic_chevron_right),
-                    contentDescription = null,
+                    contentDescription = "Edit Profile",
                     tint = TextMuted,
-                    modifier = Modifier.size(18.dp).clickable {},
+                    modifier = Modifier.size(18.dp).clickable { nav.navigate(Routes.PROFILE_EDIT) },
                 )
             }
         }
@@ -176,7 +176,15 @@ fun MeSettingsScreen(
                     icon = item.icon,
                     tint = item.tint,
                     newBadge = item.newBadge,
-                    onClick = {},
+                    onClick = {
+                        when (item.label) {
+                            "VIP Center" -> nav.navigate(Routes.TOPUP)
+                            "Shop" -> nav.navigate(Routes.GIFTS)
+                            "PLAY Show" -> nav.navigate(Routes.DISCOVER)
+                            "My Home" -> nav.navigate(Routes.ME)
+                            else -> nav.navigate(Routes.SETTINGS)
+                        }
+                    },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -200,7 +208,16 @@ fun MeSettingsScreen(
                     tint = item.tint,
                     trailing = item.trailing,
                     badge = item.badge,
-                    onClick = {},
+                    onClick = {
+                        when (item.label) {
+                            "Stats" -> nav.navigate(Routes.RANKING)
+                            "Invite Friends" -> nav.navigate(Routes.MSG)
+                            "Badge" -> nav.navigate(Routes.BACKPACK)
+                            "Language" -> nav.navigate(Routes.GENERAL_SETTINGS)
+                            "Parental control mode" -> nav.navigate(Routes.PRIVACY_SETTINGS)
+                            else -> nav.navigate(Routes.DISCOVER)
+                        }
+                    },
                 )
                 DividerLine()
             }

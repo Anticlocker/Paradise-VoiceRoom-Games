@@ -65,6 +65,9 @@ import com.sundram.weplay.ui.screens.settings.TransactionsScreen
 import com.sundram.weplay.ui.screens.settings.VoiceSettingsScreen
 import com.sundram.weplay.ui.screens.settings.WalletSettingsScreen
 import com.sundram.weplay.ui.screens.GameLobbyScreen
+import com.sundram.weplay.ui.screens.GameRoomsScreen
+import com.sundram.weplay.ui.screens.NotificationsScreen
+import com.sundram.weplay.ui.screens.SearchScreen
 import com.sundram.weplay.ui.screens.VoiceRoomListScreen
 import com.sundram.weplay.ui.theme.ThemeMode
 import com.sundram.weplay.ui.theme.WePlayTheme
@@ -271,6 +274,15 @@ private fun WePlayApp(
             }
             composable(Routes.ABOUT) {
                 AboutScreen(nav)
+            }
+            composable(Routes.NOTIFICATIONS) {
+                NotificationsScreen(nav)
+            }
+            composable(Routes.SEARCH) {
+                SearchScreen(nav)
+            }
+            composable(Routes.GAME_ROOMS) {
+                GameRoomsScreen(nav)
             }
         }
     }

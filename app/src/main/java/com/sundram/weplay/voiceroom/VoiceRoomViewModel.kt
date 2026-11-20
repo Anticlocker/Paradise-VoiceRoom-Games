@@ -92,6 +92,13 @@ class VoiceRoomViewModel(
         }
     }
 
+    /** Explicitly disconnects the room engine. */
+    fun disconnect() {
+        viewModelScope.launch {
+            engine.stop()
+        }
+    }
+
     override fun onCleared() {
         // viewModelScope is cancelled here, so release on a detached scope.
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {

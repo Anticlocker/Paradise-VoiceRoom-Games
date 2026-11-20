@@ -26,6 +26,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -480,7 +483,7 @@ private fun WePlayGamesHeader(nav: NavHostController) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clickable { nav.navigate(Routes.ROOM) }
+                .clickable { nav.navigate(Routes.GAME_ROOMS) }
                 .padding(vertical = 4.dp, horizontal = 2.dp),
         ) {
             Canvas(Modifier.size(16.dp)) {
@@ -1344,6 +1347,13 @@ fun GamesHomeScreen(
     val showBackToTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 3 }
     }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    fun comingSoon(name: String) {
+        scope.launch {
+            snackbarHostState.showSnackbar("Coming soon – $name is under development [DEMO]")
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(LocalWePlayPalette.current.page)) {
         LazyColumn(
@@ -1377,7 +1387,7 @@ fun GamesHomeScreen(
                         borderBrush = Brush.linearGradient(listOf(Color(0xFFFFEE58), Color(0xFFFFB300), Color(0xFFFF8F00))),
                         title = "Petrol Pump Simulator",
                         drawIllustration = { w, h -> drawPetrolPumpSimulator(w, h) },
-                        onClick = {},
+                        onClick = { comingSoon("Petrol Pump Simulator") },
                     )
 
                     // 2. Who's the Spy
@@ -1396,7 +1406,7 @@ fun GamesHomeScreen(
                         title = "Paint to Hide",
                         badge = "New",
                         drawIllustration = { w, h -> drawPaintToHide(w, h) },
-                        onClick = {},
+                        onClick = { comingSoon("Paint to Hide") },
                     )
                 }
             }
@@ -1412,6 +1422,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFFBCAAA4), Color(0xFF8D6E63))),
                                 title = "Trickster's\nCafe",
                                 drawIllustration = { w, h -> drawTrickstersCafe(w, h) },
+                                onClick = { comingSoon("Trickster's Cafe") },
                             )
                         }
                         Box(Modifier.weight(1f)) {
@@ -1420,6 +1431,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFF80CBC4), Color(0xFF26A69A))),
                                 title = "Hide And\nSeek",
                                 drawIllustration = { w, h -> drawHideAndSeek(w, h) },
+                                onClick = { comingSoon("Hide And Seek") },
                             )
                         }
                     }
@@ -1432,6 +1444,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFFB39DDB), Color(0xFF7E57C2))),
                                 title = "Space\nWerewolf",
                                 drawIllustration = { w, h -> drawSpaceWerewolf(w, h) },
+                                onClick = { comingSoon("Space Werewolf") },
                             )
                         }
                         Box(Modifier.weight(1f)) {
@@ -1440,6 +1453,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFFA5D6A7), Color(0xFF43A047))),
                                 title = "Oh My\nCard",
                                 drawIllustration = { w, h -> drawOhMyCard(w, h) },
+                                onClick = { comingSoon("Oh My Card") },
                             )
                         }
                     }
@@ -1461,6 +1475,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFF80CBC4), Color(0xFF00897B))),
                                 title = "Guess My\nDrawing",
                                 drawIllustration = { w, h -> drawGuessMyDrawing(w, h) },
+                                onClick = { comingSoon("Guess My Drawing") },
                             )
                         }
                     }
@@ -1473,6 +1488,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFFF48FB1), Color(0xFFD81B60))),
                                 title = "Mic Grab",
                                 drawIllustration = { w, h -> drawMicGrabGame(w, h) },
+                                onClick = { comingSoon("Mic Grab") },
                             )
                         }
                         Box(Modifier.weight(1f)) {
@@ -1481,6 +1497,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFFC5E1A5), Color(0xFF689F38))),
                                 title = "Crazy\nAlpaca",
                                 drawIllustration = { w, h -> drawCrazyAlpacaGame(w, h) },
+                                onClick = { comingSoon("Crazy Alpaca") },
                             )
                         }
                     }
@@ -1493,6 +1510,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFFFFD54F), Color(0xFFFB8C00))),
                                 title = "Jackaroo",
                                 drawIllustration = { w, h -> drawJackaroo(w, h) },
+                                onClick = { comingSoon("Jackaroo") },
                             )
                         }
                         Box(Modifier.weight(1f)) {
@@ -1501,6 +1519,7 @@ fun GamesHomeScreen(
                                 borderBrush = Brush.linearGradient(listOf(Color(0xFFEF9A9A), Color(0xFFD32F2F))),
                                 title = "Survival\nChallenge",
                                 drawIllustration = { w, h -> drawSurvivalChallenge(w, h) },
+                                onClick = { comingSoon("Survival Challenge") },
                             )
                         }
                     }
@@ -1525,6 +1544,7 @@ fun GamesHomeScreen(
                                 badgeColor = Color(0xFFFFEE58),
                                 badgeTextColor = Color(0xFF5D4037),
                                 drawIllustration = { w, h -> drawBingoGame(w, h) },
+                                onClick = { comingSoon("Bingo") },
                             )
                         }
                     }
@@ -1548,6 +1568,14 @@ fun GamesHomeScreen(
             }
         }
 
+        // ── Snackbar host ────────────────────────────────────────────────────
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = pad.calculateBottomPadding() + 72.dp),
+        )
+
         // ── Floating Gift Pack Badge (Bottom-Right) ──────────────────────────
         Box(
             modifier = Modifier
@@ -1557,6 +1585,7 @@ fun GamesHomeScreen(
                 .clip(RoundedCornerShape(16.dp))
                 .background(Brush.verticalGradient(listOf(Color(0xFFFFF3E0), Color(0xFFFFE082))))
                 .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(16.dp))
+                .clickable { nav.navigate(Routes.GIFTS) }
                 .padding(horizontal = 7.dp, vertical = 5.dp),
             contentAlignment = Alignment.Center,
         ) {

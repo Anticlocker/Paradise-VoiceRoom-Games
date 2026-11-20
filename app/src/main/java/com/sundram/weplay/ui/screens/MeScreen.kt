@@ -19,8 +19,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -114,9 +117,71 @@ fun MeScreen(
                         Spacer(Modifier.width(10.dp))
                         Text("Age ${ageFromDob(profile.dobMillis)}", fontSize = 10.sp, color = TextMuted)
                     }
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Lv.${profile.level}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyanBrand)
+                        Spacer(Modifier.width(8.dp))
+                        LinearProgressIndicator(
+                            progress = { 0.65f },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            color = CyanBrand,
+                            trackColor = Color(0x3300CCF9),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("650/1000", fontSize = 10.sp, color = TextMuted)
+                    }
                 }
             }
         }
+
+        // Social stats row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .background(CardWhite, RoundedCornerShape(16.dp))
+                .padding(vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { nav.navigate(Routes.MSG) },
+            ) {
+                Text("24", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextMain)
+                Text("Friends", fontSize = 11.sp, color = TextMuted)
+            }
+            WalletDivider()
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { nav.navigate(Routes.DISCOVER) },
+            ) {
+                Text("142", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextMain)
+                Text("Following", fontSize = 11.sp, color = TextMuted)
+            }
+            WalletDivider()
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { nav.navigate(Routes.RANKING) },
+            ) {
+                Text("380", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextMain)
+                Text("Followers", fontSize = 11.sp, color = TextMuted)
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
 
         Row(
             modifier = Modifier
@@ -132,7 +197,74 @@ fun MeScreen(
             WalletDivider()
             Stat(R.drawable.ic_bolt, "${profile.level}", "Level", CyanBrand)
             WalletDivider()
-            Stat(R.drawable.ic_star, "0", "Badges", PinkGift)
+            Stat(R.drawable.ic_star, "4", "Badges", PinkGift) {
+                nav.navigate(Routes.BACKPACK)
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Badges showcase
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            SectionHeader("Badges Showcase", onAction = { nav.navigate(Routes.BACKPACK) })
+            Spacer(Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                val showcaseBadges = listOf(
+                    "🌟" to "Newcomer",
+                    "🎮" to "Ludo Master",
+                    "🎙️" to "Star Host",
+                    "👑" to "VIP Lv.1",
+                    "💎" to "Collector",
+                )
+                items(showcaseBadges, key = { it.second }) { (emoji, label) ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(CardWhite)
+                            .clickable { nav.navigate(Routes.BACKPACK) }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                    ) {
+                        Text(emoji, fontSize = 24.sp)
+                        Spacer(Modifier.height(4.dp))
+                        Text(label, fontSize = 10.sp, fontWeight = FontWeight.Medium, color = TextMain)
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Gift showcase
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            SectionHeader("Gift Showcase", onAction = { nav.navigate(Routes.GIFTS) })
+            Spacer(Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                val showcaseGifts = listOf(
+                    Triple("🌹", "Rose", 18),
+                    Triple("🍬", "Candy", 42),
+                    Triple("⭐", "Star", 9),
+                    Triple("💎", "Diamond", 3),
+                    Triple("👑", "Crown", 1),
+                )
+                items(showcaseGifts, key = { it.second }) { (emoji, name, count) ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(CardWhite)
+                            .clickable { nav.navigate(Routes.GIFTS) }
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                    ) {
+                        Text(emoji, fontSize = 20.sp)
+                        Spacer(Modifier.width(6.dp))
+                        Column {
+                            Text(name, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = TextMain)
+                            Text("×$count", fontSize = 10.sp, color = PinkGift, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(18.dp))

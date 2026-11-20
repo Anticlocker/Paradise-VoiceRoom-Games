@@ -34,8 +34,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,6 +51,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,6 +105,7 @@ private val InputBarBg   = Color(0xFF0D1428)
  * Live voice room: dark-themed redesign matching the WePlay visual reference.
  * Preserves all existing ViewModel wiring, seat interaction, mic toggle, and chat.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveVoiceRoomScreen(
     nav: NavHostController,
@@ -115,6 +125,11 @@ fun LiveVoiceRoomScreen(
     val state by vm.state.collectAsState()
     val room = Demo.rooms.firstOrNull { it.id == id } ?: Demo.rooms.first()
 
+    // FIX 2: Exit room confirmation state
+    var showExitDialog by rememberSaveable { mutableStateOf(false) }
+    // FIX 1: Gift panel state
+    var showGiftPanel by remember { mutableStateOf(false) }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
@@ -131,6 +146,36 @@ fun LiveVoiceRoomScreen(
         when {
             occupant == null -> vm.takeSeat(seat)
             occupant.isSelf  -> vm.leaveSeat()
+        }
+    }
+
+    // FIX 2: Exit dialog
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text("Leave this room?") },
+            text = { Text("You will be disconnected from the voice room.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExitDialog = false
+                    vm.disconnect()
+                    nav.popBackStack()
+                }) { Text("Leave") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) { Text("Cancel") }
+            },
+        )
+    }
+
+    // FIX 1: Gift ModalBottomSheet
+    if (showGiftPanel) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showGiftPanel = false },
+            sheetState = sheetState,
+        ) {
+            GiftPanelContent(onDismiss = { showGiftPanel = false })
         }
     }
 
@@ -153,7 +198,13 @@ fun LiveVoiceRoomScreen(
         Column(Modifier.fillMaxSize()) {
 
             // Header
-            RoomHeader(nav = nav, title = room.title, roomId = id, state = state)
+            RoomHeader(
+                nav = nav,
+                title = room.title,
+                roomId = id,
+                state = state,
+                onBack = { showExitDialog = true },
+            )
 
             // Connection error banner
             if (state.error != null) {
@@ -192,6 +243,7 @@ fun LiveVoiceRoomScreen(
                     }
                 },
                 onSend = vm::sendMessage,
+                onGiftClick = { showGiftPanel = true },
             )
         }
     }
@@ -275,6 +327,7 @@ private fun RoomHeader(
     title: String,
     roomId: String,
     state: VoiceRoomState,
+    onBack: () -> Unit,
 ) {
     Row(
         Modifier
@@ -284,7 +337,7 @@ private fun RoomHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Back button
-        CircleIconButton(icon = R.drawable.ic_back, description = "Back") { nav.popBackStack() }
+        CircleIconButton(icon = R.drawable.ic_back, description = "Back") { onBack() }
 
         Spacer(Modifier.width(10.dp))
 
@@ -696,6 +749,7 @@ private fun VoiceRoomInputBar(
     state: VoiceRoomState,
     onToggleMic: () -> Unit,
     onSend: (String) -> Unit,
+    onGiftClick: () -> Unit,
 ) {
     var draft by remember { mutableStateOf("") }
 
@@ -752,7 +806,8 @@ private fun VoiceRoomInputBar(
             Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(PinkGift),
+                .background(PinkGift)
+                .clickable(onClick = onGiftClick),
             contentAlignment = Alignment.Center,
         ) {
             Text("🎁", fontSize = 18.sp, textAlign = TextAlign.Center)
@@ -777,6 +832,59 @@ private fun VoiceRoomInputBar(
                     tint = Color(0xFF06202B),
                     modifier = Modifier.size(18.dp),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GiftPanelContent(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF1E1438))
+            .padding(16.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Send Gift", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = Color.White.copy(alpha = 0.7f))
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.height(240.dp),
+        ) {
+            items(com.sundram.weplay.data.DemoGifts) { gift ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF2A1C4E))
+                        .clickable {
+                            Toast.makeText(context, "Sent ${gift.name}!", Toast.LENGTH_SHORT).show()
+                            onDismiss()
+                        }
+                        .padding(8.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(gift.icon),
+                        contentDescription = gift.name,
+                        tint = Color(gift.tint),
+                        modifier = Modifier.size(32.dp),
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(gift.name, color = Color.White, fontSize = 11.sp, maxLines = 1)
+                    Text("${gift.cost} coins", color = Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

@@ -126,7 +126,9 @@ private fun PageHeader(nav: NavHostController, selected: String, onSelect: (Stri
             painter = painterResource(R.drawable.ic_search),
             contentDescription = "Search",
             tint = TextMain,
-            modifier = Modifier.size(23.dp),
+            modifier = Modifier
+                .size(23.dp)
+                .clickable { nav.navigate(Routes.SEARCH) },
         )
         Spacer(Modifier.width(14.dp))
         Box(

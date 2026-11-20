@@ -72,11 +72,16 @@ object Routes {
     const val RANKING = "tab_ranking"
     const val ME_SETTINGS = "tab_me_settings"
     const val CREATE_ROOM = "tab_create_room"
+    const val NOTIFICATIONS = "notifications"
+    const val SEARCH = "search"
+    const val GAME_ROOMS = "game/rooms"
 
     fun chatRoute(id: String) = "chat/$id"
     fun userRoute(id: String) = "user/$id"
     fun userDetailRoute(id: String) = "profile/detail/$id"
     fun roomRoute(id: String) = "room/$id"
+    fun notificationsRoute() = NOTIFICATIONS
+    fun searchRoute() = SEARCH
 
     val tabs = setOf(HUB, ROOM, DISCOVER, MSG, ME)
 }
@@ -152,21 +157,23 @@ fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0)
                             )
                             // Chats badge with count
                             if (tab.route == Routes.MSG) {
-                                val badgeCount = if (msgBadge > 0) msgBadge else 44
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .offset(x = 10.dp, y = (-4).dp)
-                                        .size(16.dp)
-                                        .background(badgeRed, CircleShape),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = "$badgeCount",
-                                        color = Color.White,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold,
-                                    )
+                                val badgeCount = msgBadge
+                                if (badgeCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = 10.dp, y = (-4).dp)
+                                            .size(16.dp)
+                                            .background(badgeRed, CircleShape),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = "$badgeCount",
+                                            color = Color.White,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    }
                                 }
                             }
                             // Discover and Me red dot badges

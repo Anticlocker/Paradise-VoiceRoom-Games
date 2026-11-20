@@ -117,7 +117,12 @@ private object VoiceRecorder {
         cancel()
         outputFile = java.io.File(context.cacheDir, "voice_${System.currentTimeMillis()}.m4a")
             .apply { parentFile?.mkdirs() }
-        val r = android.media.MediaRecorder()
+        val r = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            android.media.MediaRecorder(context)
+        } else {
+            @Suppress("DEPRECATION")
+            android.media.MediaRecorder()
+        }
         try {
             r.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
             r.setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
