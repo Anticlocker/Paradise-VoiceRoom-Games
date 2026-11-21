@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
+import com.sundram.weplay.ui.nav.Routes
 import com.sundram.weplay.ui.theme.CardWhite
 import com.sundram.weplay.ui.theme.CyanBrand
 import com.sundram.weplay.ui.theme.Gold
@@ -334,7 +335,9 @@ fun UserProfileDetailScreen(
                 Modifier
                     .weight(1f)
                     .height(56.dp)
-                    .background(CyanBrand, RoundedCornerShape(28.dp)),
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(CyanBrand)
+                    .clickable { nav.navigate(Routes.chatRoute(userId)) },
                 contentAlignment = Alignment.Center,
             ) {
                 Row(

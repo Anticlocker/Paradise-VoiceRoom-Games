@@ -2,6 +2,7 @@ package com.sundram.weplay.data
 
 import android.content.Context
 import kotlin.random.Random
+import com.sundram.weplay.R
 
 /**
  * Local demo messaging: users, chats, requests, notifications and blocking.
@@ -17,6 +18,9 @@ data class DirectoryUser(
     val level: Int = 1,
     val bio: String = "Hey there, I am using WePlay.",
     val online: Boolean = false,
+    val isOfficial: Boolean = false,
+    val isFamily: Boolean = false,
+    val isModerator: Boolean = false,
 )
 
 data class ReportEntry(
@@ -32,7 +36,31 @@ data class GiftLog(
     val at: Long,
 )
 
-enum class MsgType { TEXT, GIFT, IMAGE, VOICE }
+enum class MsgType {
+    TEXT,
+    GIFT,
+    IMAGE,
+    VOICE,
+    ROOM_INVITE,
+    GAME_INVITE,
+    PROFILE_SHARE,
+    SYSTEM,
+}
+
+enum class MsgStatus {
+    PENDING,
+    SENT,
+    DELIVERED,
+    READ,
+    FAILED,
+}
+
+data class ReplyQuote(
+    val id: String,
+    val senderName: String,
+    val text: String,
+    val type: MsgType = MsgType.TEXT,
+)
 
 data class ChatMessage(
     val id: String,
@@ -43,9 +71,31 @@ data class ChatMessage(
     val type: MsgType = MsgType.TEXT,
     val giftId: String? = null,      // GIFT
     val giftCost: Long = 0L,         // GIFT
+    val giftQuantity: Int = 1,       // GIFT
     val mediaPath: String? = null,   // IMAGE / VOICE
     val durationMs: Long = 0L,       // VOICE
     val recalled: Boolean = false,
+    val status: MsgStatus = if (read) MsgStatus.READ else MsgStatus.SENT,
+    val replyTo: ReplyQuote? = null,
+    val reactions: Map<String, List<String>> = emptyMap(), // emoji -> list of userIds
+    val roomId: String? = null,      // ROOM_INVITE
+    val roomTitle: String? = null,
+    val roomCoverRes: Int? = null,
+    val gameId: String? = null,      // GAME_INVITE
+    val gameTitle: String? = null,
+    val senderId: String? = null,    // for group messages
+    val senderName: String? = null,
+)
+
+data class GroupInfo(
+    val id: String,
+    val name: String,
+    val avatarRes: Int,
+    val memberIds: List<String>,
+    val ownerId: String,
+    val description: String = "",
+    val announcement: String = "",
+    val createdAt: Long = System.currentTimeMillis(),
 )
 
 data class Chat(
@@ -58,15 +108,32 @@ data class Chat(
     val wallpaper: Int = 0,      // 0=default; 1..3 alt backgrounds
     val draft: String = "",
     val lastReadTs: Long = 0L,
+    val isGroup: Boolean = false,
+    val isArchived: Boolean = false,
 ) {
     val lastMsg: ChatMessage? get() = messages.lastOrNull()
     val displayText: String get() {
         val lm = lastMsg ?: return "Say hello"
         return when {
             lm.recalled -> "Message recalled"
-            lm.type == MsgType.GIFT -> "Gift"
+            lm.type == MsgType.GIFT -> {
+                if (lm.text.isNotBlank()) lm.text
+                else {
+                    val total = lm.giftCost * lm.giftQuantity
+                    if (total > 0) "Sent gift · $total coins" else "Gift"
+                }
+            }
             lm.type == MsgType.IMAGE -> "Photo"
-            lm.type == MsgType.VOICE -> "Voice note"
+            lm.type == MsgType.VOICE -> {
+                if (lm.durationMs > 0) {
+                    val sec = (lm.durationMs / 1000).coerceAtLeast(1)
+                    "Voice note · 0:%02d".format(sec)
+                } else "Voice note"
+            }
+            lm.type == MsgType.ROOM_INVITE -> "Voice room: ${lm.roomTitle ?: "Live Room"}"
+            lm.type == MsgType.GAME_INVITE -> "Invited to play ${lm.gameTitle ?: "Game"}"
+            lm.type == MsgType.PROFILE_SHARE -> "Shared a contact"
+            lm.type == MsgType.SYSTEM -> lm.text
             else -> lm.text
         }
     }
@@ -193,7 +260,7 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
     fun sendRequest(id: String): Boolean {
         if (isMe(id) || isBlocked(id) || isFriend(id)) return false
         val inc = ordered(incomingKey)
-        if (inc.contains(id)) {           // they already asked → accept
+        if (inc.contains(id)) {           // they already asked -> accept
             acceptRequest(id)
             return true
         }
@@ -278,10 +345,7 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
     // ---------- chats ----------
 
     fun chat(id: String): Chat? {
-        val json = prefs.getString(listKey("chat", id), null) ?: run {
-            // first time: lazily create blank
-            return null
-        }
+        val json = prefs.getString(listKey("chat", id), null) ?: return null
         return decode(json, id)
     }
 
@@ -293,7 +357,7 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
         flushDueReplies()
         val ids = get("chat_ids")
         return ids.mapNotNull { chat(it) }
-            .filter { !isBlocked(it.userId) }
+            .filter { !it.isArchived && !isBlocked(it.userId) }
             .sortedWith(compareByDescending<Chat> { it.pinned }.thenByDescending { it.lastTs })
     }
 
@@ -301,7 +365,7 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
     fun giftLog(): List<GiftLog> =
         get("chat_ids").mapNotNull { chat(it) }.flatMap { c ->
             c.messages.filter { it.fromMe && it.type == MsgType.GIFT }.map {
-                GiftLog(c.userId, it.text, it.giftCost, it.ts)
+                GiftLog(c.userId, it.text, it.giftCost * it.giftQuantity, it.ts)
             }
         }
 
@@ -309,7 +373,7 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
 
     fun openChat(id: String): Chat {
         flushDueReplies()
-        val c = chat(id) ?: Chat(userId = id).also { setChat(it) }
+        val c = chat(id) ?: Chat(userId = id, isGroup = isGroup(id)).also { setChat(it) }
         val ids = get("chat_ids")
         if (!ids.contains(id)) set("chat_ids", ids + id)
         if (c.unread > 0 || c.lastReadTs < c.lastTs) {
@@ -319,6 +383,32 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
         }
         return c
     }
+
+    fun markChatRead(id: String) {
+        chat(id)?.let {
+            if (it.unread > 0) {
+                setChat(it.copy(unread = 0, lastReadTs = System.currentTimeMillis()))
+            }
+        }
+    }
+
+    fun markAllChatsRead() {
+        allChats().forEach { c ->
+            if (c.unread > 0) {
+                setChat(c.copy(unread = 0, lastReadTs = System.currentTimeMillis()))
+            }
+        }
+    }
+
+    fun archiveChat(id: String, archived: Boolean) {
+        chat(id)?.let { setChat(it.copy(isArchived = archived)) }
+    }
+
+    fun isArchived(id: String): Boolean = chat(id)?.isArchived == true
+
+    fun archivedChats(): List<Chat> =
+        get("chat_ids").mapNotNull { chat(it) }.filter { it.isArchived && !isBlocked(it.userId) }
+            .sortedByDescending { it.lastTs }
 
     private val pendingReplies: MutableSet<String> =
         (prefs.getStringSet("pending_replies", emptySet())?.toSet() ?: emptySet()).toMutableSet()
@@ -349,8 +439,14 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
         if (clean.isEmpty() || isBlocked(id)) return null
         flushDueReplies()
         val c = openChat(id)
-        val msg = ChatMessage("m${System.currentTimeMillis()}", fromMe = true, text = clean,
-            ts = System.currentTimeMillis(), read = false)
+        val msg = ChatMessage(
+            id = "m${System.currentTimeMillis()}",
+            fromMe = true,
+            text = clean,
+            ts = System.currentTimeMillis(),
+            read = false,
+            status = MsgStatus.SENT,
+        )
         val updated = c.copy(
             messages = c.messages + msg,
             lastTs = msg.ts,
@@ -359,6 +455,103 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
         setChat(updated)
         scheduleReply(id)
         return msg
+    }
+
+    /** Send a reply quoted message. */
+    fun sendReplyMessage(chatId: String, text: String, replyTo: ReplyQuote): ChatMessage? {
+        val clean = text.trim()
+        if (clean.isEmpty() || isBlocked(chatId)) return null
+        flushDueReplies()
+        val c = openChat(chatId)
+        val msg = ChatMessage(
+            id = "m${System.currentTimeMillis()}",
+            fromMe = true,
+            text = clean,
+            ts = System.currentTimeMillis(),
+            read = false,
+            type = MsgType.TEXT,
+            replyTo = replyTo,
+            status = MsgStatus.SENT,
+        )
+        val updated = c.copy(
+            messages = c.messages + msg,
+            lastTs = msg.ts,
+            lastReadTs = msg.ts,
+        )
+        setChat(updated)
+        scheduleReply(chatId)
+        return msg
+    }
+
+    /** Send voice room invitation into DM or group. */
+    fun sendRoomInviteMessage(chatId: String, roomId: String): ChatMessage? {
+        if (isBlocked(chatId)) return null
+        val room = Demo.rooms.firstOrNull { it.id == roomId } ?: Demo.rooms.first()
+        flushDueReplies()
+        val c = openChat(chatId)
+        val msg = ChatMessage(
+            id = "ri_${System.currentTimeMillis()}",
+            fromMe = true,
+            text = "Voice room invitation: ${room.title}",
+            ts = System.currentTimeMillis(),
+            read = false,
+            type = MsgType.ROOM_INVITE,
+            roomId = room.id,
+            roomTitle = room.title,
+            roomCoverRes = room.coverRes,
+            status = MsgStatus.SENT,
+        )
+        setChat(c.copy(messages = c.messages + msg, lastTs = msg.ts))
+        scheduleReply(chatId)
+        pushNotification(
+            NotificationKind.ROOM_INVITE,
+            "You invited ${userById(chatId)?.name ?: "friend"} to ${room.title}",
+            chatId,
+            roomId,
+        )
+        return msg
+    }
+
+    /** Send game invitation into DM or group. */
+    fun sendGameInviteMessage(chatId: String, gameId: String): ChatMessage? {
+        if (isBlocked(chatId)) return null
+        val gameTitle = if (gameId == "ludo") "Ludo Classic" else "Who's the Spy"
+        flushDueReplies()
+        val c = openChat(chatId)
+        val msg = ChatMessage(
+            id = "gi_${System.currentTimeMillis()}",
+            fromMe = true,
+            text = "Invited you to play $gameTitle",
+            ts = System.currentTimeMillis(),
+            read = false,
+            type = MsgType.GAME_INVITE,
+            gameId = gameId,
+            gameTitle = gameTitle,
+            status = MsgStatus.SENT,
+        )
+        setChat(c.copy(messages = c.messages + msg, lastTs = msg.ts))
+        scheduleReply(chatId)
+        return msg
+    }
+
+    /** Toggle emoji reaction on a message. */
+    fun toggleReaction(chatId: String, messageId: String, emoji: String, userId: String = meId()) {
+        val c = chat(chatId) ?: return
+        val updatedMsgs = c.messages.map { m ->
+            if (m.id == messageId) {
+                val cur = m.reactions.toMutableMap()
+                val userList = cur[emoji]?.toMutableList() ?: mutableListOf()
+                if (userList.contains(userId)) {
+                    userList.remove(userId)
+                    if (userList.isEmpty()) cur.remove(emoji) else cur[emoji] = userList
+                } else {
+                    userList.add(userId)
+                    cur[emoji] = userList
+                }
+                m.copy(reactions = cur)
+            } else m
+        }
+        setChat(c.copy(messages = updatedMsgs))
     }
 
     /** Delivers simulated replies once their delay has passed. */
@@ -371,13 +564,25 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
             pendingReplies.remove(id)
             val c = chat(id)
             if (c != null) {
-                // A reply means the other side read my last message.
-                val marked = c.messages.map { if (it.fromMe && !it.read) it.copy(read = true) else it }
-                val reply = ChatMessage("r${System.currentTimeMillis()}", fromMe = false,
-                    text = REPLY_POOL.random(rnd), ts = System.currentTimeMillis())
-                setChat(c.copy(messages = marked + reply, lastTs = reply.ts,
-                    unread = c.unread + 1))
-                pushNotification(NotificationKind.MESSAGE, "${userById(id)?.name}: ${reply.text}", id)
+                val marked = c.messages.map {
+                    if (it.fromMe && !it.read) it.copy(read = true, status = MsgStatus.READ) else it
+                }
+                val replyAuthor = if (c.isGroup) {
+                    val g = groupInfo(id)
+                    g?.memberIds?.filter { it != meId() }?.randomOrNull(rnd) ?: "priya"
+                } else id
+                val replyName = userById(replyAuthor)?.name ?: replyAuthor
+                val reply = ChatMessage(
+                    id = "r${System.currentTimeMillis()}",
+                    fromMe = false,
+                    text = REPLY_POOL.random(rnd),
+                    ts = System.currentTimeMillis(),
+                    senderId = replyAuthor,
+                    senderName = replyName,
+                    status = MsgStatus.READ,
+                )
+                setChat(c.copy(messages = marked + reply, lastTs = reply.ts, unread = c.unread + 1))
+                pushNotification(NotificationKind.MESSAGE, "$replyName: ${reply.text}", replyAuthor)
                 delivered = true
             }
             prefs.edit().remove(replyDueKey(id)).apply()
@@ -405,33 +610,54 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
         setChat(c.copy(messages = remaining, lastTs = remaining.lastOrNull()?.ts ?: 0L))
     }
 
-    /** Send a gift in DM: debit the wallet and persist the gift bubble. */
+    /** Send a gift in DM or group: debit the wallet and persist the gift bubble. */
     fun sendGift(
         chatId: String,
         giftId: String,
         onCoinsChanged: (Long) -> Unit,
+    ): Boolean = sendRichGift(chatId, giftId, 1, onCoinsChanged)
+
+    /** Send rich gift with quantity support. */
+    fun sendRichGift(
+        chatId: String,
+        giftId: String,
+        quantity: Int = 1,
+        onCoinsChanged: (Long) -> Unit,
     ): Boolean {
         if (isBlocked(chatId)) return false
-        val gift = DemoGifts.firstOrNull { it.id == giftId } ?: return false
-        val cost = gift.cost
-        if (cost <= 0L) return false
+        val q = quantity.coerceAtLeast(1)
+        val gift = DemoGifts.firstOrNull { it.id == giftId }
+            ?: Demo.gifts.firstOrNull { it.id == giftId }?.let {
+                GiftItem(it.id, it.name, "Stage Gift", R.drawable.ic_gift, 0xFFFF738F, it.coinCost.toLong())
+            }
+            ?: return false
+        val unitCost = gift.cost
+        val totalCost = unitCost * q
+        if (totalCost <= 0L) return false
         val bal = me?.coins ?: 0L
-        if (bal < cost) return false
+        if (bal < totalCost) return false
         flushDueReplies()
         val c = openChat(chatId)
         val msg = ChatMessage(
-            id = "g${System.currentTimeMillis()}", fromMe = true,
-            text = "Sent ${gift.name}", ts = System.currentTimeMillis(),
-            read = false, type = MsgType.GIFT, giftId = giftId, giftCost = cost,
+            id = "g${System.currentTimeMillis()}",
+            fromMe = true,
+            text = "Sent ${gift.name}${if (q > 1) " x$q" else ""}",
+            ts = System.currentTimeMillis(),
+            read = false,
+            type = MsgType.GIFT,
+            giftId = gift.id,
+            giftCost = unitCost,
+            giftQuantity = q,
+            status = MsgStatus.SENT,
         )
         setChat(c.copy(messages = c.messages + msg, lastTs = msg.ts))
         scheduleReply(chatId)
         pushNotification(
             NotificationKind.GIFT,
-            "${userById(chatId)?.name} received your ${gift.name}",
+            "${userById(chatId)?.name ?: "Contact"} received your ${gift.name}${if (q > 1) " x$q" else ""}",
             chatId,
         )
-        onCoinsChanged(bal - cost)
+        onCoinsChanged(bal - totalCost)
         return true
     }
 
@@ -442,9 +668,15 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
         val c = openChat(chatId)
         val label = if (type == MsgType.IMAGE) "Photo" else "Voice note"
         val msg = ChatMessage(
-            id = "md${System.currentTimeMillis()}", fromMe = true,
-            text = label, ts = System.currentTimeMillis(), read = false,
-            type = type, mediaPath = mediaPath, durationMs = durationMs,
+            id = "md${System.currentTimeMillis()}",
+            fromMe = true,
+            text = label,
+            ts = System.currentTimeMillis(),
+            read = false,
+            type = type,
+            mediaPath = mediaPath,
+            durationMs = durationMs,
+            status = MsgStatus.SENT,
         )
         setChat(c.copy(messages = c.messages + msg, lastTs = msg.ts))
         scheduleReply(chatId)
@@ -453,17 +685,17 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
 
     fun pushRoomInvite(senderId: String, roomTitle: String, roomId: String) {
         pushNotification(NotificationKind.ROOM_INVITE,
-            "${userById(senderId)?.name} invited you to $roomTitle", senderId, roomId)
+            "${userById(senderId)?.name ?: senderId} invited you to $roomTitle", senderId, roomId)
     }
 
     fun pushGift(senderId: String, giftName: String) {
         pushNotification(NotificationKind.GIFT,
-            "${userById(senderId)?.name} sent you a $giftName", senderId)
+            "${userById(senderId)?.name ?: senderId} sent you a $giftName", senderId)
     }
 
     fun pushFollow(senderId: String) {
         pushNotification(NotificationKind.FOLLOW,
-            "${userById(senderId)?.name} followed you", senderId)
+            "${userById(senderId)?.name ?: senderId} followed you", senderId)
     }
 
     fun setPinned(id: String, pinned: Boolean) {
@@ -476,6 +708,10 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
 
     fun cycleWallpaper(id: String) {
         chat(id)?.let { setChat(it.copy(wallpaper = (it.wallpaper + 1) % 4)) }
+    }
+
+    fun setWallpaper(id: String, index: Int) {
+        chat(id)?.let { setChat(it.copy(wallpaper = index % 4)) }
     }
 
     fun clearChat(id: String) {
@@ -493,6 +729,132 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
 
     fun saveDraft(id: String, draft: String) {
         chat(id)?.let { if (it.draft != draft) setChat(it.copy(draft = draft)) }
+    }
+
+    // ---------- Contact aliases & preferences ----------
+
+    fun getAlias(userId: String): String? = prefs.getString("alias_$userId", null)
+    fun setAlias(userId: String, alias: String) {
+        if (alias.isBlank()) prefs.edit().remove("alias_$userId").apply()
+        else prefs.edit().putString("alias_$userId", alias.trim()).apply()
+    }
+
+    fun isGameInvitesBlocked(userId: String): Boolean = prefs.getBoolean("block_game_$userId", false)
+    fun setGameInvitesBlocked(userId: String, blocked: Boolean) {
+        prefs.edit().putBoolean("block_game_$userId", blocked).apply()
+    }
+
+    fun isRoomInvitesBlocked(userId: String): Boolean = prefs.getBoolean("block_room_$userId", false)
+    fun setRoomInvitesBlocked(userId: String, blocked: Boolean) {
+        prefs.edit().putBoolean("block_room_$userId", blocked).apply()
+    }
+
+    // ---------- Voice Room Presence ----------
+
+    fun userActiveRoom(userId: String): RoomCard? {
+        return when (userId.lowercase()) {
+            "priya" -> Demo.rooms.firstOrNull { it.id == "r1" }
+            "raj" -> Demo.rooms.firstOrNull { it.id == "r2" }
+            "ankit" -> Demo.rooms.firstOrNull { it.id == "r3" }
+            "sam" -> Demo.rooms.firstOrNull { it.id == "r4" }
+            "sneha" -> Demo.rooms.firstOrNull { it.id == "r5" }
+            "kavya" -> Demo.rooms.firstOrNull { it.id == "r6" }
+            "vikram" -> Demo.rooms.firstOrNull { it.id == "r7" }
+            "arjun" -> Demo.rooms.firstOrNull { it.id == "r8" }
+            else -> null
+        }
+    }
+
+    fun isUserInVoiceRoom(userId: String): Boolean = userActiveRoom(userId) != null
+
+    fun usersInVoiceRooms(): List<DirectoryUser> =
+        allUsers().filter { isUserInVoiceRoom(it.id) && !isMe(it.id) && !isBlocked(it.id) }
+
+    // ---------- Group chats ----------
+
+    fun isGroup(id: String): Boolean = id.startsWith("group_") || get("group_ids").contains(id)
+
+    fun groupInfo(id: String): GroupInfo? {
+        val raw = prefs.getString("group_info_$id", null) ?: return null
+        val parts = splitEscaped(raw)
+        if (parts.size < 5) return null
+        return GroupInfo(
+            id = parts[0],
+            name = parts[1],
+            avatarRes = parts[2].toIntOrNull() ?: R.drawable.vb_chat_ic_groups,
+            memberIds = parts[3].split(",").filter { it.isNotEmpty() },
+            ownerId = parts[4],
+            description = if (parts.size >= 6) parts[5] else "",
+            announcement = if (parts.size >= 7) parts[6] else "",
+            createdAt = if (parts.size >= 8) parts[7].toLongOrNull() ?: 0L else 0L,
+        )
+    }
+
+    fun saveGroupInfo(info: GroupInfo) {
+        val escName = info.name.replace("|", "/")
+        val escDesc = info.description.replace("|", "/")
+        val escAnn = info.announcement.replace("|", "/")
+        val serialized = listOf(
+            info.id, escName, info.avatarRes.toString(), info.memberIds.joinToString(","),
+            info.ownerId, escDesc, escAnn, info.createdAt.toString(),
+        ).joinToString("|")
+        prefs.edit().putString("group_info_${info.id}", serialized).apply()
+        val gids = get("group_ids")
+        if (!gids.contains(info.id)) set("group_ids", gids + info.id)
+    }
+
+    fun createGroup(
+        name: String,
+        memberIds: List<String>,
+        description: String = "",
+        avatarRes: Int = R.drawable.vb_chat_avatar_07,
+    ): GroupInfo {
+        val cleanName = name.trim().ifEmpty { "New Group" }
+        val id = "group_${System.currentTimeMillis()}"
+        val allMembers = (listOf(meId()) + memberIds).distinct()
+        val info = GroupInfo(
+            id = id,
+            name = cleanName,
+            avatarRes = avatarRes,
+            memberIds = allMembers,
+            ownerId = meId(),
+            description = description,
+            createdAt = System.currentTimeMillis(),
+        )
+        saveGroupInfo(info)
+        // create initial group chat entry
+        val welcomeMsg = ChatMessage(
+            id = "m_init",
+            fromMe = true,
+            text = "Welcome to $cleanName!",
+            ts = System.currentTimeMillis(),
+            type = MsgType.SYSTEM,
+        )
+        setChat(Chat(
+            userId = id,
+            messages = listOf(welcomeMsg),
+            lastTs = welcomeMsg.ts,
+            isGroup = true,
+        ))
+        set("chat_ids", get("chat_ids") + id)
+        return info
+    }
+
+    fun allGroups(): List<GroupInfo> =
+        get("group_ids").mapNotNull { groupInfo(it) }
+
+    fun leaveGroup(groupId: String): Boolean {
+        val g = groupInfo(groupId) ?: return false
+        val nextMembers = g.memberIds.filterNot { it == meId() }
+        if (nextMembers.isEmpty()) {
+            prefs.edit().remove("group_info_$groupId").apply()
+            set("group_ids", get("group_ids") - groupId)
+            deleteChat(groupId)
+        } else {
+            saveGroupInfo(g.copy(memberIds = nextMembers))
+            deleteChat(groupId)
+        }
+        return true
     }
 
     // ---------- notifications ----------
@@ -548,13 +910,60 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
             set("chat_ids", get("chat_ids") + uid)
         }
         saveOrdered(friendsKey, listOf("priya", "raj", "ankit", "sneha"))
+
+        // Seed initial groups
+        val g1 = GroupInfo(
+            id = "group_desi_gamers",
+            name = "Desi Gamers Squad",
+            avatarRes = R.drawable.vb_chat_avatar_07,
+            memberIds = listOf("priya", "raj", "sam", meId()),
+            ownerId = "raj",
+            description = "Official squad for Ludo, Werewolf & Room party!",
+            announcement = "Ludo tournament tonight at 9 PM!",
+            createdAt = now - 86400_000L,
+        )
+        saveGroupInfo(g1)
+        setChat(Chat(
+            userId = g1.id,
+            messages = listOf(
+                ChatMessage("gm1", false, "Hey squad, who's up for Werewolf?", now - 45L * 60_000, senderId = "raj", senderName = "Raj"),
+                ChatMessage("gm2", false, "I'm ready! Starting in 10 mins.", now - 20L * 60_000, senderId = "priya", senderName = "Priya"),
+            ),
+            lastTs = now - 20L * 60_000,
+            unread = 2,
+            isGroup = true,
+        ))
+        set("chat_ids", get("chat_ids") + g1.id)
+
+        val g2 = GroupInfo(
+            id = "group_night_owls",
+            name = "Night Owls Lounge",
+            avatarRes = R.drawable.vb_chat_avatar_04,
+            memberIds = listOf("priya", "sneha", "kavya", meId()),
+            ownerId = "priya",
+            description = "Late night talks, chill music and acoustic KTV.",
+            announcement = "Welcome to our chill lounge!",
+            createdAt = now - 172800_000L,
+        )
+        saveGroupInfo(g2)
+        setChat(Chat(
+            userId = g2.id,
+            messages = listOf(
+                ChatMessage("gm3", false, "New acoustic playlist dropped in room 1!", now - 2L * 3600_000L, senderId = "sneha", senderName = "Sneha"),
+            ),
+            lastTs = now - 2L * 3600_000L,
+            unread = 0,
+            isGroup = true,
+        ))
+        set("chat_ids", get("chat_ids") + g2.id)
+
         pushNotification(NotificationKind.MESSAGE, "Ankit: match tomorrow?", "ankit")
         pushFollow("sneha")
         pushGift("priya", "Rose")
         pushRoomInvite("raj", "Werewolf Night", "r2")
     }
 
-    // ---------- encoding (pipe-delimited, -safe) ----------
+    // ---------- encoding (pipe-delimited, \-safe) ----------
 
     private fun encode(n: AppNotification): String {
         fun esc(s: String) = s.replace("\\", "\\\\").replace("|", "\\|").replace("\n", "\\n")
@@ -576,20 +985,42 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
         )
     }
 
+    private fun encodeReactions(reactions: Map<String, List<String>>): String {
+        if (reactions.isEmpty()) return ""
+        return reactions.entries.joinToString(",") { "${it.key}:${it.value.joinToString(";")}" }
+    }
+
+    private fun decodeReactions(str: String): Map<String, List<String>> {
+        if (str.isBlank()) return emptyMap()
+        val out = mutableMapOf<String, List<String>>()
+        str.split(",").forEach { pair ->
+            val parts = pair.split(":")
+            if (parts.size == 2) {
+                out[parts[0]] = parts[1].split(";").filter { it.isNotEmpty() }
+            }
+        }
+        return out
+    }
+
     private fun encode(c: Chat): String {
         fun esc(s: String) = s.replace("\\", "\\\\").replace("|", "\\|")
             .replace(";", "\\;").replace("#", "\\#").replace("\n", "\\n")
         val msgs = c.messages.joinToString(";") { m ->
+            val replyStr = m.replyTo?.let { "${it.id}^${it.senderName}^${it.text}^${it.type.name}" } ?: ""
             listOf(
                 m.id, if (m.fromMe) "1" else "0", esc(m.text), m.ts.toString(),
                 if (m.read) "1" else "0", m.type.name, m.giftId ?: "", m.giftCost.toString(),
                 esc(m.mediaPath ?: ""), m.durationMs.toString(), if (m.recalled) "1" else "0",
+                m.status.name, esc(m.roomId ?: ""), esc(m.roomTitle ?: ""), esc(m.gameId ?: ""), esc(m.gameTitle ?: ""),
+                m.giftQuantity.toString(), esc(replyStr), esc(encodeReactions(m.reactions)),
+                esc(m.senderId ?: ""), esc(m.senderName ?: "")
             ).joinToString("|")
         }
         return listOf(
             c.userId, msgs, c.lastTs.toString(), c.unread.toString(),
             if (c.pinned) "1" else "0", if (c.muted) "1" else "0",
             c.wallpaper.toString(), c.lastReadTs.toString(), esc(c.draft),
+            if (c.isGroup) "1" else "0", if (c.isArchived) "1" else "0",
         ).joinToString("#")
     }
 
@@ -601,16 +1032,42 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
             splitTop(parts[1], ';').mapNotNull { one ->
                 val p = splitEscaped(one)
                 if (p.size < 4) return@mapNotNull null
+                val type = if (p.size >= 6) runCatching { MsgType.valueOf(p[5]) }.getOrDefault(MsgType.TEXT) else MsgType.TEXT
+                val status = if (p.size >= 12) runCatching { MsgStatus.valueOf(p[11]) }.getOrDefault(MsgStatus.SENT) else (if (p.size >= 5 && p[4] == "1") MsgStatus.READ else MsgStatus.SENT)
+                val replyStr = if (p.size >= 18) p[17] else ""
+                val replyTo = if (replyStr.isNotEmpty()) {
+                    val rparts = replyStr.split("^")
+                    if (rparts.size >= 3) {
+                        ReplyQuote(
+                            id = rparts[0],
+                            senderName = rparts[1],
+                            text = rparts[2],
+                            type = if (rparts.size >= 4) runCatching { MsgType.valueOf(rparts[3]) }.getOrDefault(MsgType.TEXT) else MsgType.TEXT
+                        )
+                    } else null
+                } else null
+                val reactions = if (p.size >= 19) decodeReactions(p[18]) else emptyMap()
+
                 ChatMessage(
                     id = p[0], fromMe = p[1] == "1", text = p[2],
                     ts = p[3].toLongOrNull() ?: 0,
                     read = if (p.size >= 5) p[4] == "1" else true,
-                    type = if (p.size >= 6) runCatching { MsgType.valueOf(p[5]) }.getOrDefault(MsgType.TEXT) else MsgType.TEXT,
+                    type = type,
                     giftId = if (p.size >= 7) p[6].ifEmpty { null } else null,
                     giftCost = if (p.size >= 8) p[7].toLongOrNull() ?: 0L else 0L,
                     mediaPath = if (p.size >= 9) p[8].ifEmpty { null } else null,
                     durationMs = if (p.size >= 10) p[9].toLongOrNull() ?: 0L else 0L,
                     recalled = if (p.size >= 11) p[10] == "1" else false,
+                    status = status,
+                    roomId = if (p.size >= 13) p[12].ifEmpty { null } else null,
+                    roomTitle = if (p.size >= 14) p[13].ifEmpty { null } else null,
+                    gameId = if (p.size >= 15) p[14].ifEmpty { null } else null,
+                    gameTitle = if (p.size >= 16) p[15].ifEmpty { null } else null,
+                    giftQuantity = if (p.size >= 17) p[16].toIntOrNull() ?: 1 else 1,
+                    replyTo = replyTo,
+                    reactions = reactions,
+                    senderId = if (p.size >= 20) p[19].ifEmpty { null } else null,
+                    senderName = if (p.size >= 21) p[20].ifEmpty { null } else null,
                 )
             }
         }
@@ -624,6 +1081,8 @@ class MessagingStore(context: Context, private val meProvider: () -> UserProfile
             wallpaper = parts[6].toIntOrNull() ?: 0,
             draft = if (parts.size >= 9) unescape(parts[8]) else "",
             lastReadTs = parts[7].toLongOrNull() ?: 0,
+            isGroup = if (parts.size >= 10) parts[9] == "1" else false,
+            isArchived = if (parts.size >= 11) parts[10] == "1" else false,
         )
     }
 

@@ -107,8 +107,12 @@ fun Modifier.bounceClick(
  */
 fun NavHostController.navigateSafe(route: String) {
     if (currentDestination?.route != route) {
-        navigate(route) {
-            launchSingleTop = true
+        if (route in com.sundram.weplay.ui.nav.Routes.tabs) {
+            com.sundram.weplay.ui.nav.switchTab(this, route)
+        } else {
+            navigate(route) {
+                launchSingleTop = true
+            }
         }
     }
 }

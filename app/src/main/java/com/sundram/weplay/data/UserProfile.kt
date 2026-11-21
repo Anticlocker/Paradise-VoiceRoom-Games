@@ -51,6 +51,7 @@ data class UserProfile(
     val title: String = "",
     val badge: String = "",
     val qrContactCard: String = "",
+    val avatarId: String = "avatar_aurora_explorer",
 )
 
 private const val PASSWORD_ITERATIONS = 120_000
@@ -148,11 +149,13 @@ class ProfileStore(context: Context) {
             title = prefs.getString("title", "").orEmpty(),
             badge = prefs.getString("badge", "").orEmpty(),
             qrContactCard = prefs.getString("qr_contact_card", "").orEmpty(),
+            avatarId = prefs.getString("avatar_id", "avatar_aurora_explorer") ?: "avatar_aurora_explorer",
         )
     }
 
     fun save(profile: UserProfile) {
         prefs.edit()
+            .putString("avatar_id", profile.avatarId)
             .putString("name", profile.name)
             .putLong("dob", profile.dobMillis)
             .putString("id", profile.id)

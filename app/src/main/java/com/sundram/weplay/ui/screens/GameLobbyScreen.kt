@@ -63,6 +63,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
 import com.sundram.weplay.data.UserProfile
+import com.sundram.weplay.data.getAvatarById
+import com.sundram.weplay.ui.components.AnimatedAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.components.navigateSafe
 import com.sundram.weplay.ui.nav.Routes
@@ -88,22 +90,12 @@ private fun VyboraHomeHeader(nav: NavHostController, profile: UserProfile) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // User Profile Avatar with subtle glow ring and spring touch feedback
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .shadow(2.dp, CircleShape)
-                .clip(CircleShape)
-                .border(2.dp, VyboraPurple.copy(alpha = 0.45f), CircleShape)
-                .bounceClick { nav.navigateSafe(Routes.ME) },
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.vb_shortcut_avatar),
-                contentDescription = "My Profile",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-        }
+        AnimatedAvatar(
+            avatar = getAvatarById(profile.avatarId),
+            size = 48.dp,
+            animate = true,
+            onClick = { nav.navigateSafe(Routes.ME) },
+        )
 
         Spacer(Modifier.width(10.dp))
 
@@ -218,7 +210,7 @@ private data class VyboraShortcutItem(
 private fun VyboraShortcutsRow(nav: NavHostController) {
     val shortcuts = listOf(
         VyboraShortcutItem("Ranks", "Leaderboard", R.drawable.vb_shortcut_ranking, Color(0xFFF3E8FF), Routes.RANKING),
-        VyboraShortcutItem("Tasks", "Daily Quests", R.drawable.vb_shortcut_tasks, Color(0xFFE0F2FE), Routes.ME),
+        VyboraShortcutItem("Tasks", "Missions", R.drawable.vb_shortcut_tasks, Color(0xFFE0F2FE), Routes.TASKS),
         VyboraShortcutItem("Friends", "Social Hub", R.drawable.vb_shortcut_friends, Color(0xFFDCFCE7), Routes.MSG),
         VyboraShortcutItem("Lounge", "VIP Club", R.drawable.vb_shortcut_jungle_king, Color(0xFFFEF3C7), Routes.ROOM),
     )
@@ -775,25 +767,39 @@ data class ExploreUser(
     val id: String,
     val name: String,
     val gender: String, // "F" or "M"
-    val avatarBg: Color,
+    val avatarId: String,
+    val level: Int,
+    val isOnline: Boolean,
     val distance: String,
     val statusText: String,
     val isGameRoom: Boolean = false,
     val bio: String,
+    val isFollowed: Boolean = false,
 )
 
 private val exploreUsers = listOf(
-    ExploreUser("1", "Madiha", "F", Color(0xFFE1BEE7), "< 194km", "In Voice Room", false, "This is a very mysterious..."),
-    ExploreUser("2", "L4ZYK!D!!", "M", Color(0xFFFFCCBC), "< 213km", "In Voice Room", false, "If you are in choice yo..."),
-    ExploreUser("3", "Scooby", "F", Color(0xFFFFF9C4), "< 110km", "In Voice Room", false, "Ek flower do batterfl..."),
-    ExploreUser("4", "siddhi", "F", Color(0xFFFFCDD2), "", "In Voice Room", false, "Punjabi..."),
-    ExploreUser("5", "K O H L I", "M", Color(0xFFC8E6C9), "", "In Voice Room", false, "Gopiyo ka Kanhaaa"),
-    ExploreUser("6", "T!wariji", "F", Color(0xFFD1C4E9), "", "In Voice Room", false, "Hope obliterated!"),
-    ExploreUser("7", "K!RAN", "F", Color(0xFFB3E5FC), "", "In Voice Room", false, "Silence is the Best Answer for a..."),
+    ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Vybora explorer seeking great conversations!"),
+    ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Always up for a quick casual Ludo match!"),
+    ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music lover & trivia enthusiast 🎵"),
+    ExploreUser("4", "Siddhi", "F", "avatar_lunar_artist", 42, false, "", "Offline", false, "Artist & midnight listener in celestial lounges"),
+    ExploreUser("5", "K O H L I", "M", "avatar_diamond_crown", 48, true, "", "Playing Spy", false, "Master of Who's the Spy. Can you guess?"),
+    ExploreUser("6", "T!wariji", "M", "avatar_neon_musician", 16, true, "", "In Voice Room", false, "DJ in the house! Playing chill lo-fi beats"),
+    ExploreUser("7", "K!RAN", "F", "avatar_star_captain", 33, false, "", "Offline", false, "Silence is the best answer. Good vibes only."),
+    ExploreUser("8", "Aanya", "F", "avatar_royal_dreamer", 29, true, "< 85km", "In Voice Room", false, "Royal lounge regular & friendly host"),
+    ExploreUser("9", "Rohan", "M", "avatar_celestial_wanderer", 21, true, "< 140km", "Playing Ludo", false, "Rolling sixes and taking over the board!"),
+    ExploreUser("10", "Meera", "F", "avatar_crystal_guardian", 25, true, "< 60km", "In Voice Room", false, "Spreading peace and positivity in voice rooms ✨"),
+    ExploreUser("11", "Simran", "F", "avatar_cosmic_bunny", 14, false, "", "Offline", false, "New to VYBORA! Say hi 👋"),
+    ExploreUser("12", "Aryan", "M", "avatar_galaxy_dj", 37, true, "< 95km", "Playing Spy", false, "Catching the imposter every single round 🕵️"),
 )
 
 @Composable
-private fun ExploreFeedItem(user: ExploreUser, onClick: () -> Unit = {}) {
+private fun ExploreFeedItem(
+    user: ExploreUser,
+    onClick: () -> Unit = {},
+    onMessageClick: () -> Unit = {},
+) {
+    var isFollowed by rememberSaveable { mutableStateOf(user.isFollowed) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -801,26 +807,19 @@ private fun ExploreFeedItem(user: ExploreUser, onClick: () -> Unit = {}) {
             .clip(RoundedCornerShape(16.dp))
             .background(VyboraSurface)
             .border(1.dp, VyboraBorder, RoundedCornerShape(16.dp))
-            .bounceClick(scaleDown = 0.98f, onClick = onClick)
+            .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(user.avatarBg),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = user.name.take(1),
-                color = VyboraTextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+        // Animated 2.5D Character Avatar with Shimmer Glow Frame
+        AnimatedAvatar(
+            avatar = getAvatarById(user.avatarId),
+            size = 46.dp,
+            animate = true,
+            onClick = onClick,
+        )
 
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -837,6 +836,34 @@ private fun ExploreFeedItem(user: ExploreUser, onClick: () -> Unit = {}) {
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
+                Spacer(Modifier.width(6.dp))
+
+                // Level Badge
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(VyboraGold)
+                        .padding(horizontal = 4.dp, vertical = 1.dp),
+                ) {
+                    Text(
+                        text = "Lv.${user.level}",
+                        color = Color.Black,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
+                }
+
+                // Verified Online Green Dot
+                if (user.isOnline) {
+                    Spacer(Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF00E676)),
+                    )
+                }
+
                 if (user.distance.isNotEmpty()) {
                     Spacer(Modifier.width(6.dp))
                     Text(
@@ -846,7 +873,9 @@ private fun ExploreFeedItem(user: ExploreUser, onClick: () -> Unit = {}) {
                     )
                 }
             }
-            Spacer(Modifier.height(2.dp))
+
+            Spacer(Modifier.height(3.dp))
+
             Text(
                 text = user.bio,
                 color = VyboraTextSecondary,
@@ -854,22 +883,62 @@ private fun ExploreFeedItem(user: ExploreUser, onClick: () -> Unit = {}) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+
+            Spacer(Modifier.height(4.dp))
+
+            // Status Chip
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (user.isOnline) Color(0xFFE8F5E9) else Color(0xFFF5F5F5))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            ) {
+                Text(
+                    text = user.statusText,
+                    color = if (user.isOnline) Color(0xFF2E7D32) else VyboraTextSecondary,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
         }
 
         Spacer(Modifier.width(8.dp))
 
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFE8F5E9))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+        // Action Buttons Row: Follow + Message
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text(
-                text = user.statusText,
-                color = Color(0xFF2E7D32),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
+            // Follow Button
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (isFollowed) VyboraBg else VyboraPurple)
+                    .border(1.dp, if (isFollowed) VyboraBorder else Color.Transparent, RoundedCornerShape(10.dp))
+                    .clickable { isFollowed = !isFollowed }
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = if (isFollowed) "Following" else "Follow",
+                    color = if (isFollowed) VyboraTextSecondary else Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            // Message Button
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(VyboraBg)
+                    .border(1.dp, VyboraBorder, CircleShape)
+                    .clickable(onClick = onMessageClick),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("💬", fontSize = 12.sp)
+            }
         }
     }
 }
@@ -1301,20 +1370,30 @@ fun GamesHomeScreen(
                     }
                 }
 
-                // ── Section 8: Social Community Feed ──
+                // ── Section 8: Community Players ──
                 item {
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Player Community",
-                        color = VyboraTextPrimary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.padding(horizontal = 2.dp),
-                    )
+                    Spacer(Modifier.height(6.dp))
+                    Column(modifier = Modifier.padding(horizontal = 2.dp)) {
+                        Text(
+                            text = "Community Players",
+                            color = VyboraTextPrimary,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                        )
+                        Text(
+                            text = "Meet people who share your vibe",
+                            color = VyboraTextSecondary,
+                            fontSize = 12.sp,
+                        )
+                    }
                 }
 
                 items(exploreUsers, key = { it.id }) { user ->
-                    ExploreFeedItem(user = user, onClick = { nav.navigateSafe(Routes.ROOM) })
+                    ExploreFeedItem(
+                        user = user,
+                        onClick = { nav.navigateSafe(Routes.ROOM) },
+                        onMessageClick = { nav.navigateSafe(Routes.chatRoute(user.id)) },
+                    )
                 }
             }
         }
@@ -1349,11 +1428,12 @@ fun GamesHomeScreen(
 
         // ── Gift Pack Offers Modal Bottom Sheet ──
         if (showGiftPackSheet) {
-            HomeGiftPackSheet(
+            com.sundram.weplay.ui.components.GiftPackOffersSheet(
+                userId = profile.id,
                 onDismiss = { showGiftPackSheet = false },
-                onBrowseGifts = {
+                onOpenTopUp = {
                     showGiftPackSheet = false
-                    nav.navigateSafe(Routes.GIFTS)
+                    nav.navigateSafe(Routes.TOPUP)
                 },
             )
         }

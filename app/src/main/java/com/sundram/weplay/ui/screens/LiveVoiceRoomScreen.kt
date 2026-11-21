@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -204,6 +205,22 @@ fun LiveVoiceRoomScreen(
         }
     }
 
+    // ── Hardware & Gesture Back Interception ──
+    BackHandler {
+        when {
+            showExitDialog -> showExitDialog = false
+            selectedMemberForProfile != null -> selectedMemberForProfile = null
+            showParticipantsSheet -> showParticipantsSheet = false
+            showAudioSettingsSheet -> showAudioSettingsSheet = false
+            showGiftSheet -> showGiftSheet = false
+            showPkSheet -> showPkSheet = false
+            showGamesSheet -> showGamesSheet = false
+            showMoreSheet -> showMoreSheet = false
+            activeGiftAnimation != null -> activeGiftAnimation = null
+            else -> showExitDialog = true
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -307,7 +324,7 @@ fun LiveVoiceRoomScreen(
 
         // ── Celebratory Floating Gift Animation Overlay ──
         activeGiftAnimation?.let { data ->
-            GiftCelebrationOverlay(data = data)
+            GiftCelebrationOverlay(data = data, onDismiss = { activeGiftAnimation = null })
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -2042,11 +2059,16 @@ private data class GiftAnimationData(
 )
 
 @Composable
-private fun GiftCelebrationOverlay(data: GiftAnimationData) {
+private fun GiftCelebrationOverlay(data: GiftAnimationData, onDismiss: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x55000000)),
+            .background(Color(0x55000000))
+            .clickable(
+                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                indication = null,
+                onClick = onDismiss,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
