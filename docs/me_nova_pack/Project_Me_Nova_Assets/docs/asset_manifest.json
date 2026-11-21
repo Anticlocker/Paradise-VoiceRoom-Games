@@ -1,0 +1,590 @@
+{
+  "count": 65,
+  "assets": [
+    {
+      "name": "me_nova_ic_vip",
+      "category": "icon",
+      "description": "vip",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_shop",
+      "category": "icon",
+      "description": "shop",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_avatar_studio",
+      "category": "icon",
+      "description": "avatar studio",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_my_space",
+      "category": "icon",
+      "description": "my space",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_moments",
+      "category": "icon",
+      "description": "moments",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_stats",
+      "category": "icon",
+      "description": "stats",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_visitors",
+      "category": "icon",
+      "description": "visitors",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_invite",
+      "category": "icon",
+      "description": "invite",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_badges",
+      "category": "icon",
+      "description": "badges",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_contributions",
+      "category": "icon",
+      "description": "contributions",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_language",
+      "category": "icon",
+      "description": "language",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_parental_controls",
+      "category": "icon",
+      "description": "parental controls",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_help",
+      "category": "icon",
+      "description": "help",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_security",
+      "category": "icon",
+      "description": "security",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_settings",
+      "category": "icon",
+      "description": "settings",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_topup",
+      "category": "icon",
+      "description": "topup",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_edit_profile",
+      "category": "icon",
+      "description": "edit profile",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_gifts",
+      "category": "icon",
+      "description": "gifts",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_family",
+      "category": "icon",
+      "description": "family",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_backpack",
+      "category": "icon",
+      "description": "backpack",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_logout",
+      "category": "icon",
+      "description": "logout",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_about",
+      "category": "icon",
+      "description": "about",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_friends",
+      "category": "icon",
+      "description": "friends",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_followers",
+      "category": "icon",
+      "description": "followers",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_following",
+      "category": "icon",
+      "description": "following",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_level",
+      "category": "icon",
+      "description": "level",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_wallet",
+      "category": "icon",
+      "description": "wallet",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_privacy",
+      "category": "icon",
+      "description": "privacy",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_notifications",
+      "category": "icon",
+      "description": "notifications",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_devices",
+      "category": "icon",
+      "description": "devices",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_blocked",
+      "category": "icon",
+      "description": "blocked",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_report",
+      "category": "icon",
+      "description": "report",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_history",
+      "category": "icon",
+      "description": "history",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_achievement",
+      "category": "icon",
+      "description": "achievement",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_copy",
+      "category": "icon",
+      "description": "copy",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_verified",
+      "category": "icon",
+      "description": "verified",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_chevron",
+      "category": "icon",
+      "description": "chevron",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_camera",
+      "category": "icon",
+      "description": "camera",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_frame",
+      "category": "icon",
+      "description": "frame",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_gift_pack",
+      "category": "icon",
+      "description": "gift pack",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_checkin",
+      "category": "icon",
+      "description": "checkin",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_support",
+      "category": "icon",
+      "description": "support",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_shield",
+      "category": "icon",
+      "description": "shield",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_star",
+      "category": "icon",
+      "description": "star",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_crown",
+      "category": "icon",
+      "description": "crown",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_diamond",
+      "category": "icon",
+      "description": "diamond",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_home",
+      "category": "icon",
+      "description": "home",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_ic_profile",
+      "category": "icon",
+      "description": "profile",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_nova_avatar_01",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_avatar_02",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_avatar_03",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_avatar_04",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_avatar_05",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_avatar_06",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_avatar_07",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_avatar_08",
+      "category": "demo_avatar",
+      "description": "fictional demo portrait; do not overwrite real profile photos",
+      "dimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_nova_bg_pearl",
+      "category": "background",
+      "description": "light premium profile header background",
+      "dimensions": [
+        1024,
+        512
+      ]
+    },
+    {
+      "name": "me_nova_bg_aurora",
+      "category": "background",
+      "description": "light premium profile header background",
+      "dimensions": [
+        1024,
+        512
+      ]
+    },
+    {
+      "name": "me_nova_bg_sunset",
+      "category": "background",
+      "description": "light premium profile header background",
+      "dimensions": [
+        1024,
+        512
+      ]
+    },
+    {
+      "name": "me_nova_badge_host",
+      "category": "badge",
+      "description": "original decorative badge; show only when earned",
+      "dimensions": [
+        240,
+        240
+      ]
+    },
+    {
+      "name": "me_nova_badge_vip",
+      "category": "badge",
+      "description": "original decorative badge; show only when earned",
+      "dimensions": [
+        240,
+        240
+      ]
+    },
+    {
+      "name": "me_nova_badge_collector",
+      "category": "badge",
+      "description": "original decorative badge; show only when earned",
+      "dimensions": [
+        240,
+        240
+      ]
+    },
+    {
+      "name": "me_nova_badge_newcomer",
+      "category": "badge",
+      "description": "original decorative badge; show only when earned",
+      "dimensions": [
+        240,
+        240
+      ]
+    },
+    {
+      "name": "me_nova_badge_family",
+      "category": "badge",
+      "description": "original decorative badge; show only when earned",
+      "dimensions": [
+        240,
+        240
+      ]
+    },
+    {
+      "name": "me_nova_badge_gamer",
+      "category": "badge",
+      "description": "original decorative badge; show only when earned",
+      "dimensions": [
+        240,
+        240
+      ]
+    }
+  ]
+}

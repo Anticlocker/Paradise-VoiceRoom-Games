@@ -1,0 +1,2 @@
+Project Me Nova assets — BRAND NAME NOT FINALIZED.
+65 original static vector-rendered WebP files in android/app/src/main/res/drawable-nodpi. Import into your existing Android app module. Read docs/asset_manifest.json and ANTIGRAVITY_ME_MASTER_PROMPT.md. Demo portraits are fictional placeholders only. Do not overwrite real user photos. Badge art is illustrative, not proof of earned badges. Add subtle animation in Compose.
