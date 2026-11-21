@@ -1,0 +1,152 @@
+[
+  {
+    "file": "lb_common_ring.svg",
+    "tier": "common",
+    "purpose": "ring"
+  },
+  {
+    "file": "lb_common_podium.svg",
+    "tier": "common",
+    "purpose": "podium"
+  },
+  {
+    "file": "lb_common_crest.svg",
+    "tier": "common",
+    "purpose": "crest"
+  },
+  {
+    "file": "lb_common_shop_preview.svg",
+    "tier": "common",
+    "purpose": "shop_preview"
+  },
+  {
+    "file": "lb_rare_ring.svg",
+    "tier": "rare",
+    "purpose": "ring"
+  },
+  {
+    "file": "lb_rare_podium.svg",
+    "tier": "rare",
+    "purpose": "podium"
+  },
+  {
+    "file": "lb_rare_crest.svg",
+    "tier": "rare",
+    "purpose": "crest"
+  },
+  {
+    "file": "lb_rare_shop_preview.svg",
+    "tier": "rare",
+    "purpose": "shop_preview"
+  },
+  {
+    "file": "lb_epic_ring.svg",
+    "tier": "epic",
+    "purpose": "ring"
+  },
+  {
+    "file": "lb_epic_podium.svg",
+    "tier": "epic",
+    "purpose": "podium"
+  },
+  {
+    "file": "lb_epic_crest.svg",
+    "tier": "epic",
+    "purpose": "crest"
+  },
+  {
+    "file": "lb_epic_shop_preview.svg",
+    "tier": "epic",
+    "purpose": "shop_preview"
+  },
+  {
+    "file": "lb_legendary_ring.svg",
+    "tier": "legendary",
+    "purpose": "ring"
+  },
+  {
+    "file": "lb_legendary_podium.svg",
+    "tier": "legendary",
+    "purpose": "podium"
+  },
+  {
+    "file": "lb_legendary_crest.svg",
+    "tier": "legendary",
+    "purpose": "crest"
+  },
+  {
+    "file": "lb_legendary_shop_preview.svg",
+    "tier": "legendary",
+    "purpose": "shop_preview"
+  },
+  {
+    "file": "lb_mythic_ring.svg",
+    "tier": "mythic",
+    "purpose": "ring"
+  },
+  {
+    "file": "lb_mythic_podium.svg",
+    "tier": "mythic",
+    "purpose": "podium"
+  },
+  {
+    "file": "lb_mythic_crest.svg",
+    "tier": "mythic",
+    "purpose": "crest"
+  },
+  {
+    "file": "lb_mythic_shop_preview.svg",
+    "tier": "mythic",
+    "purpose": "shop_preview"
+  },
+  {
+    "file": "lb_celestial_ring.svg",
+    "tier": "celestial",
+    "purpose": "ring"
+  },
+  {
+    "file": "lb_celestial_podium.svg",
+    "tier": "celestial",
+    "purpose": "podium"
+  },
+  {
+    "file": "lb_celestial_crest.svg",
+    "tier": "celestial",
+    "purpose": "crest"
+  },
+  {
+    "file": "lb_celestial_shop_preview.svg",
+    "tier": "celestial",
+    "purpose": "shop_preview"
+  },
+  {
+    "file": "lb_category_popularity_banner.svg",
+    "category": "popularity",
+    "purpose": "banner"
+  },
+  {
+    "file": "lb_category_vip_banner.svg",
+    "category": "vip",
+    "purpose": "banner"
+  },
+  {
+    "file": "lb_category_couple_banner.svg",
+    "category": "couple",
+    "purpose": "banner"
+  },
+  {
+    "file": "lb_category_room_banner.svg",
+    "category": "room",
+    "purpose": "banner"
+  },
+  {
+    "file": "lb_category_bff_banner.svg",
+    "category": "bff",
+    "purpose": "banner"
+  },
+  {
+    "file": "lb_category_family_banner.svg",
+    "category": "family",
+    "purpose": "banner"
+  }
+]

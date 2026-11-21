@@ -87,6 +87,7 @@ object Routes {
     fun userRoute(id: String) = "user/$id"
     fun userDetailRoute(id: String) = "profile/detail/$id"
     fun roomRoute(id: String) = "room/$id"
+    fun roomDetail(roomId: String) = "room/$roomId"
     fun notificationsRoute() = NOTIFICATIONS
     fun searchRoute() = SEARCH
     fun tasksRoute() = TASKS

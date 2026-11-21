@@ -1,0 +1,549 @@
+{
+  "total": 68,
+  "assets": [
+    {
+      "name": "family_ic_family",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_leader",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_deputy",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_admin",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_moderator",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_member",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_recruit",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_application",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_invite",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_kick",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_transfer",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_task",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_daily",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_weekly",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_activeness",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_funds",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_coins",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_donate",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_cheer",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_gift",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_chest_normal",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_chest_advanced",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_chest_rare",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_chest_super",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_gacha",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_barrier",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_rival",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_level",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_upgrade",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_ranking",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_treasury",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_announcement",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_news",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_chat",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_voice",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_family_sign",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_family_frame",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_shop",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_history",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_settings",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_privacy",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_rules",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_search",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_join",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_create",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_leave",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_checkin",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_calendar",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_reward",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_medal",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_lock",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_crown",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_sparkle",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_quest",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_badge",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_report",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_mute",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_shield",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_ic_event",
+      "type": "icon",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "family_tier_bronze",
+      "type": "tier_badge",
+      "dimensions": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "family_tier_silver",
+      "type": "tier_badge",
+      "dimensions": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "family_tier_gold",
+      "type": "tier_badge",
+      "dimensions": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "family_tier_platinum",
+      "type": "tier_badge",
+      "dimensions": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "family_tier_diamond",
+      "type": "tier_badge",
+      "dimensions": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "family_tier_legend",
+      "type": "tier_badge",
+      "dimensions": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "family_bg_pearl",
+      "type": "background",
+      "dimensions": [
+        1000,
+        420
+      ]
+    },
+    {
+      "name": "family_bg_aurora",
+      "type": "background",
+      "dimensions": [
+        1000,
+        420
+      ]
+    },
+    {
+      "name": "family_bg_festival",
+      "type": "background",
+      "dimensions": [
+        1000,
+        420
+      ]
+    }
+  ]
+}

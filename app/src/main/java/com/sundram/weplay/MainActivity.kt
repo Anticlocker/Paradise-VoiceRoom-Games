@@ -198,7 +198,11 @@ private fun WePlayApp(
                 )
             }
             composable(Routes.RANKING) {
-                RankingScreen(nav = nav)
+                RankingScreen(
+                    nav = nav,
+                    profile = profile,
+                    onSaveProfile = onSaveProfile,
+                )
             }
             composable(Routes.TASKS) {
                 com.sundram.weplay.ui.screens.TaskCenterScreen(

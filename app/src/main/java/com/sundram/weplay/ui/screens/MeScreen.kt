@@ -28,18 +28,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
@@ -48,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +54,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -76,38 +68,40 @@ import com.sundram.weplay.data.DemoBackpack
 import com.sundram.weplay.data.FeaturedOfferState
 import com.sundram.weplay.data.GiftPackOffer
 import com.sundram.weplay.data.GiftPackRotationManager
+import com.sundram.weplay.data.FrameTier
 import com.sundram.weplay.data.UserProfile
-import com.sundram.weplay.data.ageFromDob
+import com.sundram.weplay.ui.components.AvatarWithFrame
 import com.sundram.weplay.ui.components.UserAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.nav.Routes
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Color Palette — PROJECT ME NOVA 2.0 (Light White / Lavender / Cyan / Gold)
+//  Color Palette — ME PAGE 3.0 / CLEAN PREMIUM EDITION
+//  Bright, warm, eye-comfortable, consistent with Games & Voice Room
 // ─────────────────────────────────────────────────────────────────────────────
-private val PageBg          = Color(0xFFFAF9FF)
-private val CardBg          = Color(0xFFFFFFFF)
-private val CardBorder      = Color(0xFFECE8FA)
-private val TextInk         = Color(0xFF29263E)
-private val TextSub         = Color(0xFF7F7B93)
-private val BrandCyan       = Color(0xFF35CCD6)
-private val BrandViolet     = Color(0xFF7656D9)
-private val BrandGold       = Color(0xFFF5BD6C)
-private val SoftLavender    = Color(0xFFEFE8FF)
-private val DangerRed       = Color(0xFFFF4D4F)
+private val CleanCanvas      = Color(0xFFFAF9FF)
+private val CleanWhite       = Color(0xFFFFFFFF)
+private val CleanInk         = Color(0xFF26233C)
+private val CleanSecondary   = Color(0xFF8D8AA3)
+private val CleanLavender    = Color(0xFFEFE9FF)
+private val CleanCyan        = Color(0xFF31CAD9)
+private val CleanPeach       = Color(0xFFFFE7D2)
+private val CleanGold        = Color(0xFFF5BD62)
+private val CleanHairline    = Color(0xFFF0ECF9)
+private val CleanDanger      = Color(0xFFFF4D4F)
 
 /**
- * Project Me Page 2.0: Complete native Redesign of Screen 5.
+ * MeScreen (ME Page 3.0 Clean Premium Edition)
  *
- * Implements a light white/lavender/cyan/gold theme with:
- * - Aurora hero banner, verified identity, copyable user ID, XP progress
- * - Social metrics strip (Friends, Following, Followers)
- * - Compact wallet & stats chips (Coins, Level, Badges)
- * - 4 Quick-Access Tiles: VIP Center, Shop, Avatar Studio, My Space
- * - Illustrated Badge Showcase (`me_nova_badge_*`) & Gift Showcase
- * - 48h Featured Gift Pack Offer Bar
- * - Grouped action cards (Activity & Social, Wallet & Collection, Account & Safety)
- * - Native sheets for VIP, Shop, Avatar Studio, My Space, Stats, Visitors, Language, Parental Controls
+ * Implements a clean, bright, eye-comfortable social profile hub:
+ * - Warm cream/peach to lavender gradient profile header (~190dp)
+ * - 84dp rounded-square actual avatar with camera action
+ * - Bold username, verified badge, copyable ID with toast, level pill & XP bar
+ * - Four illustrated quick shortcut icons (VIP Center, Shop, Avatar Studio, My Space)
+ * - Social micro-strip (Friends, Following, Followers, Wallet)
+ * - Elegant grouped white menu rows with subtle hairline dividers
+ * - Floating 48h promotional gift pack banner
+ * - Fully interactive bottom sheets for all submenus
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,23 +123,21 @@ fun MeScreen(
     var showStatsSheet by rememberSaveable { mutableStateOf(false) }
     var showVisitorsSheet by rememberSaveable { mutableStateOf(false) }
     var showContributionsSheet by rememberSaveable { mutableStateOf(false) }
+    var showBadgesSheet by rememberSaveable { mutableStateOf(false) }
     var showLanguageSheet by rememberSaveable { mutableStateOf(false) }
     var showParentalControlsSheet by rememberSaveable { mutableStateOf(false) }
     var showGiftPackSheet by rememberSaveable { mutableStateOf(false) }
-    var selectedBadgeForDetail by remember { mutableStateOf<BadgeItemData?>(null) }
+    var showFollowingSheet by rememberSaveable { mutableStateOf(false) }
+    var showFollowersSheet by rememberSaveable { mutableStateOf(false) }
 
-    // 48h Featured Offer State
+    // 48-Hour Featured Offer Manager
     val giftPackManager = remember(profile.id) { GiftPackRotationManager(context, profile.id) }
     val featuredOfferState = remember(profile.id) { giftPackManager.getFeaturedOffer() }
 
-    // Avatar ring frame from backpack
-    val ringColor = DemoBackpack.firstOrNull { it.id == profile.frame }?.frame?.let { Color(it) }
-
-    // Back handling for nested sheets and dialogs
+    // Back handling in LIFO order
     BackHandler {
         when {
             showLogoutDialog -> showLogoutDialog = false
-            selectedBadgeForDetail != null -> selectedBadgeForDetail = null
             showVipSheet -> showVipSheet = false
             showShopSheet -> showShopSheet = false
             showAvatarStudioSheet -> showAvatarStudioSheet = false
@@ -153,317 +145,266 @@ fun MeScreen(
             showStatsSheet -> showStatsSheet = false
             showVisitorsSheet -> showVisitorsSheet = false
             showContributionsSheet -> showContributionsSheet = false
+            showBadgesSheet -> showBadgesSheet = false
             showLanguageSheet -> showLanguageSheet = false
             showParentalControlsSheet -> showParentalControlsSheet = false
             showGiftPackSheet -> showGiftPackSheet = false
-            else -> nav.popBackStack()
+            showFollowingSheet -> showFollowingSheet = false
+            showFollowersSheet -> showFollowersSheet = false
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PageBg)
-            .statusBarsPadding()
-            .padding(bottom = pad.calculateBottomPadding())
-            .verticalScroll(rememberScrollState()),
+            .background(CleanCanvas)
+            .padding(bottom = pad.calculateBottomPadding()),
     ) {
-        // ── 1. Profile Hero Section ──
-        ProfileHeroSection(
-            profile = profile,
-            ringColor = ringColor,
-            onAvatarClick = { showAvatarStudioSheet = true },
-            onCopyId = {
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("User ID", profile.id))
-                Toast.makeText(context, "ID ${profile.id} copied to clipboard", Toast.LENGTH_SHORT).show()
-            },
-            onShareProfile = {
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, "Connect with ${profile.name} on the app! Profile ID: ${profile.id}")
-                }
-                context.startActivity(Intent.createChooser(shareIntent, "Share Profile"))
-            },
-            onEditProfile = { nav.navigate(Routes.PROFILE_EDIT) },
-        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 80.dp),
+        ) {
+            // ── 1. Compact Warm Peach Header (~190dp) ──
+            item(key = "clean_header") {
+                CleanProfileHeader(
+                    profile = profile,
+                    onEditProfile = { nav.navigate(Routes.PROFILE_EDIT) },
+                    onAvatarClick = { showAvatarStudioSheet = true },
+                    onShareProfile = {
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Connect with me on the app! Profile ID: ${profile.id}"
+                            )
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "Share Profile"))
+                    },
+                    onCopyId = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("User ID", profile.id))
+                        Toast.makeText(context, "ID copied to clipboard!", Toast.LENGTH_SHORT).show()
+                    },
+                )
+            }
 
-        Spacer(Modifier.height(8.dp))
+            // ── 2. Four Clean Quick-Access Shortcuts ──
+            item(key = "clean_shortcuts") {
+                CleanShortcutsRow(
+                    onVipClick = { showVipSheet = true },
+                    onShopClick = { showShopSheet = true },
+                    onAvatarStudioClick = { showAvatarStudioSheet = true },
+                    onMySpaceClick = { showMySpaceSheet = true },
+                )
+            }
 
-        // ── 2. Social Metrics Strip (Friends, Following, Followers) ──
-        SocialMetricsStrip(
-            onFriendsClick = { nav.navigate(Routes.MSG) },
-            onFollowingClick = { nav.navigate(Routes.DISCOVER) },
-            onFollowersClick = { nav.navigate(Routes.RANKING) },
-        )
+            // ── 3. Social & Wallet Micro-Strip ──
+            item(key = "clean_social_strip") {
+                CleanSocialMicroStrip(
+                    coins = profile.coins,
+                    onFriendsClick = { nav.navigate(Routes.MSG) },
+                    onFollowingClick = { showFollowingSheet = true },
+                    onFollowersClick = { showFollowersSheet = true },
+                    onWalletClick = { nav.navigate(Routes.TOPUP) },
+                )
+            }
 
-        Spacer(Modifier.height(10.dp))
+            // ── 4. Group 1: Activity & Social (Moments, Stats, Visitors) ──
+            item(key = "group_activity") {
+                CleanMenuGroup(
+                    items = listOf(
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_moments,
+                            title = "Moments",
+                            subtitle = "Posts & Feed",
+                            onClick = { nav.navigate(Routes.DISCOVER) },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_stats,
+                            title = "Game & Voice Stats",
+                            subtitle = "Level ${profile.level}",
+                            onClick = { showStatsSheet = true },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_visitors,
+                            title = "Visitors",
+                            subtitle = "Recent visits",
+                            onClick = { showVisitorsSheet = true },
+                        ),
+                    ),
+                )
+            }
 
-        // ── 3. Wallet, Level & Badges Quick Bar ──
-        WalletMetricsBar(
-            coins = profile.coins,
-            level = profile.level,
-            onCoinsClick = { nav.navigate(Routes.TOPUP) },
-            onLevelClick = { showStatsSheet = true },
-            onBadgesClick = { nav.navigate(Routes.BACKPACK) },
-        )
+            // ── 5. Group 2: Growth & Community (Invite, Badges, Contributions, Family) ──
+            item(key = "group_growth") {
+                CleanMenuGroup(
+                    items = listOf(
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_invite,
+                            title = "Invite Friends",
+                            subtitle = "Share with friends",
+                            onClick = {
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        "Join me in rooms and play games together! Use code: ${profile.id}"
+                                    )
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, "Invite Friends"))
+                            },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_badges,
+                            title = "Badge Center",
+                            subtitle = "6 Badges",
+                            onClick = { showBadgesSheet = true },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_contributions,
+                            title = "Contributions",
+                            subtitle = "Guild milestones",
+                            onClick = { showContributionsSheet = true },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_family,
+                            title = "Family Hub",
+                            subtitle = profile.family ?: "Join Guild",
+                            onClick = { nav.navigate(Routes.FAMILY) },
+                        ),
+                    ),
+                )
+            }
 
-        Spacer(Modifier.height(14.dp))
+            // ── 6. Group 3: Assets & Collection (Wallet/Top Up, My Gifts, Backpack) ──
+            item(key = "group_assets") {
+                CleanMenuGroup(
+                    items = listOf(
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_wallet,
+                            title = "Wallet & Top Up",
+                            subtitle = "${profile.coins} Coins",
+                            onClick = { nav.navigate(Routes.TOPUP) },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_gifts,
+                            title = "My Gifts",
+                            subtitle = "Collection",
+                            onClick = { nav.navigate(Routes.GIFTS) },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_backpack,
+                            title = "Backpack",
+                            subtitle = "Frames & Bubbles",
+                            onClick = { nav.navigate(Routes.BACKPACK) },
+                        ),
+                    ),
+                )
+            }
 
-        // ── 4. Four Core Quick-Access Tiles (VIP, Shop, Avatar Studio, My Space) ──
-        QuickTilesGrid(
-            onVipClick = { showVipSheet = true },
-            onShopClick = { showShopSheet = true },
-            onAvatarStudioClick = { showAvatarStudioSheet = true },
-            onMySpaceClick = { showMySpaceSheet = true },
-        )
+            // ── 7. Group 4: Settings & Trust (Language, Parental, Help, Security, Settings) ──
+            item(key = "group_settings") {
+                CleanMenuGroup(
+                    items = listOf(
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_language,
+                            title = "Language",
+                            subtitle = "English",
+                            onClick = { showLanguageSheet = true },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_parental,
+                            title = "Parental Control Mode",
+                            subtitle = "Safe Mode",
+                            onClick = { showParentalControlsSheet = true },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_help,
+                            title = "Help Center",
+                            subtitle = "FAQ & Support",
+                            onClick = { nav.navigate(Routes.SUPPORT_SETTINGS) },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_security,
+                            title = "Security Center",
+                            subtitle = "Account Safety",
+                            onClick = { nav.navigate(Routes.ACCOUNT_SETTINGS) },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_settings,
+                            title = "Settings",
+                            subtitle = null,
+                            onClick = { nav.navigate(Routes.SETTINGS) },
+                        ),
+                    ),
+                )
+            }
 
-        Spacer(Modifier.height(14.dp))
+            // ── 8. Group 5: System & Logout (About, Log Out) ──
+            item(key = "group_system") {
+                CleanMenuGroup(
+                    items = listOf(
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_about,
+                            title = "About",
+                            subtitle = "v2.5.0",
+                            onClick = { nav.navigate(Routes.ABOUT) },
+                        ),
+                        CleanMenuItemData(
+                            iconRes = R.drawable.me_clean_logout,
+                            title = "Log Out",
+                            subtitle = null,
+                            isDanger = true,
+                            onClick = { showLogoutDialog = true },
+                        ),
+                    ),
+                )
+            }
 
-        // ── 5. Illustrated Badge Showcase ──
-        BadgeShowcaseSection(
-            onSeeAll = { nav.navigate(Routes.BACKPACK) },
-            onBadgeClick = { badge -> selectedBadgeForDetail = badge },
-        )
-
-        Spacer(Modifier.height(14.dp))
-
-        // ── 6. Gift Showcase ──
-        GiftShowcaseSection(
-            onViewGifts = { nav.navigate(Routes.GIFTS) },
-        )
-
-        Spacer(Modifier.height(14.dp))
-
-        // ── 7. 48-Hour Featured Gift Pack Offer Bar ──
-        FeaturedGiftPackBanner(
-            offerTitle = featuredOfferState.offer.title,
-            timeRemaining = featuredOfferState.formattedTimeRemaining,
-            onOpenOffer = { showGiftPackSheet = true },
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        // ── 8. Grouped Actions: Activity & Social ──
-        ActionGroupCard(title = "Activity & Social") {
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_moments,
-                title = "Moments",
-                subtitle = "Your public updates and posts",
-                onClick = { nav.navigate(Routes.DISCOVER) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_stats,
-                title = "Game & Voice Stats",
-                subtitle = "Wins, hours and level history",
-                onClick = { showStatsSheet = true },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_visitors,
-                title = "Visitors",
-                subtitle = "Recent guests and privacy",
-                onClick = { showVisitorsSheet = true },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_invite,
-                title = "Invite Friends",
-                subtitle = "Share your invite link",
-                onClick = {
-                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Join me to play and voice chat! Download the app: https://weplay.app/invite/${profile.id}")
-                    }
-                    context.startActivity(Intent.createChooser(shareIntent, "Invite Friends"))
-                },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_contributions,
-                title = "Contributions",
-                subtitle = "Room and guild support points",
-                onClick = { showContributionsSheet = true },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_family,
-                title = "Family Hub",
-                subtitle = profile.family ?: "Join or create a social family",
-                onClick = { nav.navigate(Routes.FAMILY) },
-            )
+            item(key = "bottom_spacer") {
+                Spacer(Modifier.height(16.dp))
+            }
         }
 
-        Spacer(Modifier.height(14.dp))
-
-        // ── 9. Grouped Actions: Wallet & Collection ──
-        ActionGroupCard(title = "Wallet & Collection") {
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_topup,
-                title = "Top Up Coins",
-                subtitle = "Add balance to your wallet",
-                trailingText = "%,d".format(profile.coins),
-                onClick = { nav.navigate(Routes.TOPUP) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_gifts,
-                title = "My Gifts",
-                subtitle = "Received and sent gift collection",
-                onClick = { nav.navigate(Routes.GIFTS) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_backpack,
-                title = "Backpack",
-                subtitle = "Frames, bubbles, badges and cosmetics",
-                onClick = { nav.navigate(Routes.BACKPACK) },
-            )
-        }
-
-        Spacer(Modifier.height(14.dp))
-
-        // ── 10. Grouped Actions: Account & Safety ──
-        ActionGroupCard(title = "Account & Safety") {
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_edit_profile,
-                title = "Edit Profile",
-                subtitle = "Name, avatar, bio and birthday",
-                onClick = { nav.navigate(Routes.PROFILE_EDIT) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_language,
-                title = "Language",
-                subtitle = "Change application language",
-                trailingText = "English",
-                onClick = { showLanguageSheet = true },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_parental_controls,
-                title = "Parental Control Mode",
-                subtitle = "Safe mode and usage limits",
-                onClick = { showParentalControlsSheet = true },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_help,
-                title = "Help Center",
-                subtitle = "FAQs and support tickets",
-                onClick = { nav.navigate(Routes.SUPPORT_SETTINGS) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_security,
-                title = "Security Center",
-                subtitle = "Password, login sessions and verification",
-                onClick = { nav.navigate(Routes.ACCOUNT_SETTINGS) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_settings,
-                title = "Settings",
-                subtitle = "Notifications, audio and privacy",
-                onClick = { nav.navigate(Routes.SETTINGS) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_about,
-                title = "About",
-                subtitle = "Version, legal terms and licenses",
-                onClick = { nav.navigate(Routes.ABOUT) },
-            )
-            ActionDivider()
-            ActionRowItem(
-                iconRes = R.drawable.me_nova_ic_logout,
-                title = "Log Out",
-                subtitle = "Sign out from this device",
-                tint = DangerRed,
-                onClick = { showLogoutDialog = true },
-            )
-        }
-
-        Spacer(Modifier.height(20.dp))
-
-        // Footer info
+        // ── Floating 48h Promotional Gift Pack Banner ──
         Box(
             modifier = Modifier
+                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            contentAlignment = Alignment.Center,
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
-            Text(
-                text = "Social Gaming Hub • Version 2.4.0 (Build 240)",
-                color = TextSub.copy(alpha = 0.7f),
-                fontSize = 11.sp,
+            CleanFloatingOfferPill(
+                title = featuredOfferState.offer.title,
+                timeRemaining = featuredOfferState.formattedTimeRemaining,
+                onClick = { showGiftPackSheet = true },
             )
         }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Interactive Modals & Bottom Sheets
+    //  Interactive Bottom Sheets & Modals
     // ─────────────────────────────────────────────────────────────────────────
 
-    // 1. Log Out Dialog
-    if (showLogoutDialog) {
-        AlertDialog(
-            onDismissRequest = { showLogoutDialog = false },
-            containerColor = CardBg,
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text("Log Out?", color = TextInk, fontWeight = FontWeight.Bold)
-            },
-            text = {
-                Text("You will return to the welcome screen. Your saved preferences will be preserved on this device.", color = TextSub, fontSize = 13.sp)
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showLogoutDialog = false
-                        onLogout()
-                    }
-                ) {
-                    Text("Log Out", color = DangerRed, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel", color = TextSub)
-                }
-            },
-        )
-    }
-
-    // 2. VIP Center Bottom Sheet
+    // 1. VIP Center Sheet
     if (showVipSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showVipSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            VipCenterBottomSheet(
-                level = profile.level,
-                onDismiss = { showVipSheet = false },
-            )
+            CleanVipBottomSheet(onDismiss = { showVipSheet = false })
         }
     }
 
-    // 3. Shop Bottom Sheet
+    // 2. Shop Sheet
     if (showShopSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showShopSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            ShopBottomSheet(
-                coins = profile.coins,
-                onTopUpClick = {
+            CleanShopBottomSheet(
+                onTopUp = {
                     showShopSheet = false
                     nav.navigate(Routes.TOPUP)
                 },
@@ -472,132 +413,110 @@ fun MeScreen(
         }
     }
 
-    // 4. Avatar Studio Bottom Sheet
+    // 3. Avatar Studio Sheet (with 6 demo avatars and frame customization)
     if (showAvatarStudioSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showAvatarStudioSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            AvatarStudioBottomSheet(
-                profile = profile,
-                onSelectPreset = { presetRes ->
-                    // In local preview, save preset selection
-                    Toast.makeText(context, "Avatar preset selected! [DEMO]", Toast.LENGTH_SHORT).show()
-                },
-                onEditDetails = {
+            CleanAvatarStudioBottomSheet(
+                currentProfile = profile,
+                onSave = { updatedProfile ->
+                    onSaveProfile(updatedProfile)
                     showAvatarStudioSheet = false
-                    nav.navigate(Routes.PROFILE_EDIT)
+                    Toast.makeText(context, "Avatar updated successfully!", Toast.LENGTH_SHORT).show()
                 },
                 onDismiss = { showAvatarStudioSheet = false },
             )
         }
     }
 
-    // 5. My Space Bottom Sheet
+    // 4. My Space Sheet
     if (showMySpaceSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showMySpaceSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            MySpaceBottomSheet(
-                profile = profile,
-                onDismiss = { showMySpaceSheet = false },
-            )
+            CleanMySpaceBottomSheet(onDismiss = { showMySpaceSheet = false })
         }
     }
 
-    // 6. Game & Voice Stats Bottom Sheet
+    // 5. Stats Sheet
     if (showStatsSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showStatsSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            StatsBottomSheet(
-                profile = profile,
-                onDismiss = { showStatsSheet = false },
-            )
+            CleanStatsBottomSheet(profile = profile, onDismiss = { showStatsSheet = false })
         }
     }
 
-    // 7. Profile Visitors Bottom Sheet
+    // 6. Visitors Sheet
     if (showVisitorsSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showVisitorsSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            VisitorsBottomSheet(
-                onDismiss = { showVisitorsSheet = false },
-            )
+            CleanVisitorsBottomSheet(onDismiss = { showVisitorsSheet = false })
         }
     }
 
-    // 8. Contributions Bottom Sheet
+    // 7. Contributions Sheet
     if (showContributionsSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showContributionsSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            ContributionsBottomSheet(
-                onDismiss = { showContributionsSheet = false },
-            )
+            CleanContributionsBottomSheet(onDismiss = { showContributionsSheet = false })
         }
     }
 
-    // 9. Language Selection Bottom Sheet
+    // 8. Badge Center Sheet
+    if (showBadgesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBadgesSheet = false },
+            containerColor = CleanWhite,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        ) {
+            CleanBadgesBottomSheet(onDismiss = { showBadgesSheet = false })
+        }
+    }
+
+    // 9. Language Sheet
     if (showLanguageSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showLanguageSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            LanguageBottomSheet(
-                onDismiss = { showLanguageSheet = false },
-            )
+            CleanLanguageBottomSheet(onDismiss = { showLanguageSheet = false })
         }
     }
 
-    // 10. Parental Controls Bottom Sheet
+    // 10. Parental Controls Sheet
     if (showParentalControlsSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showParentalControlsSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            ParentalControlsBottomSheet(
-                onDismiss = { showParentalControlsSheet = false },
-            )
+            CleanParentalControlsBottomSheet(onDismiss = { showParentalControlsSheet = false })
         }
     }
 
-    // 11. Gift Pack Offer Bottom Sheet
+    // 11. Gift Pack Offer Sheet
     if (showGiftPackSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showGiftPackSheet = false },
-            sheetState = sheetState,
-            containerColor = CardBg,
+            containerColor = CleanWhite,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            GiftPackOfferBottomSheet(
+            CleanGiftPackOfferBottomSheet(
                 offer = featuredOfferState.offer,
                 timeRemaining = featuredOfferState.formattedTimeRemaining,
                 onClaim = {
@@ -609,455 +528,283 @@ fun MeScreen(
         }
     }
 
-    // 12. Badge Details Dialog
-    selectedBadgeForDetail?.let { badge ->
+    // 12. Following List Sheet
+    if (showFollowingSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showFollowingSheet = false },
+            containerColor = CleanWhite,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        ) {
+            CleanSocialListBottomSheet(
+                title = "Following (142)",
+                items = listOf("Aria Vance", "Kiran Patel", "Elena Rostova", "Marcus Brody"),
+                onDismiss = { showFollowingSheet = false },
+            )
+        }
+    }
+
+    // 13. Followers List Sheet
+    if (showFollowersSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showFollowersSheet = false },
+            containerColor = CleanWhite,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        ) {
+            CleanSocialListBottomSheet(
+                title = "Followers (380)",
+                items = listOf("Rohan Sharma", "Sofia Chen", "Zayd Malik", "Liam O'Connor"),
+                onDismiss = { showFollowersSheet = false },
+            )
+        }
+    }
+
+    // 14. Logout Confirmation Dialog
+    if (showLogoutDialog) {
         AlertDialog(
-            onDismissRequest = { selectedBadgeForDetail = null },
-            containerColor = CardBg,
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(badge.iconRes),
-                        contentDescription = badge.name,
-                        modifier = Modifier.size(36.dp),
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text(badge.name, color = TextInk, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-                }
-            },
-            text = {
-                Column {
-                    Text(badge.description, color = TextSub, fontSize = 13.sp)
-                    Spacer(Modifier.height(10.dp))
-                    Text("Requirement: ${badge.requirement}", color = BrandViolet, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = if (badge.isEarned) "Status: Earned & Active" else "Status: Locked",
-                        color = if (badge.isEarned) Color(0xFF00C853) else TextSub,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            },
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Log Out", color = CleanInk, fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to log out of your account?", color = CleanSecondary) },
             confirmButton = {
-                TextButton(onClick = { selectedBadgeForDetail = null }) {
-                    Text("Close", color = BrandViolet, fontWeight = FontWeight.Bold)
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    }
+                ) {
+                    Text("Log Out", color = CleanDanger, fontWeight = FontWeight.Bold)
                 }
             },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancel", color = CleanSecondary)
+                }
+            },
+            containerColor = CleanWhite,
+            shape = RoundedCornerShape(20.dp),
         )
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  1. Profile Hero Section
+//  1. Profile Header Component (Warm peach-to-lavender, ~190dp)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun ProfileHeroSection(
+private fun CleanProfileHeader(
     profile: UserProfile,
-    ringColor: Color?,
-    onAvatarClick: () -> Unit,
-    onCopyId: () -> Unit,
-    onShareProfile: () -> Unit,
     onEditProfile: () -> Unit,
+    onAvatarClick: () -> Unit,
+    onShareProfile: () -> Unit,
+    onCopyId: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFFE8E5F8), Color(0xFFF6F3FF), PageBg)
+                    colors = listOf(
+                        CleanPeach.copy(alpha = 0.85f),
+                        CleanLavender.copy(alpha = 0.50f),
+                        CleanCanvas,
+                    )
                 )
-            ),
+            )
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
     ) {
-        // Decorative background header artwork
-        Image(
-            painter = painterResource(R.drawable.me_nova_bg_aurora),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(160.dp),
-            contentScale = ContentScale.Crop,
-            alpha = 0.35f,
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 12.dp),
-        ) {
-            // Top Action Row (Share + Edit)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Top Action Row (Share & Edit Profile)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Share Icon
+                // Share Shortcut
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.85f))
-                        .border(1.dp, CardBorder, CircleShape)
+                        .background(CleanWhite.copy(alpha = 0.85f))
                         .bounceClick(onClick = onShareProfile),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.vb_vr_ic_share),
+                        painter = painterResource(R.drawable.me_clean_share),
                         contentDescription = "Share Profile",
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(18.dp),
                     )
                 }
 
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(10.dp))
 
-                // Edit Profile Icon
+                // Edit Profile Shortcut
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.85f))
-                        .border(1.dp, CardBorder, CircleShape)
+                        .background(CleanWhite.copy(alpha = 0.85f))
                         .bounceClick(onClick = onEditProfile),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.me_nova_ic_edit_profile),
+                        painter = painterResource(R.drawable.me_clean_profile),
                         contentDescription = "Edit Profile",
                         modifier = Modifier.size(18.dp),
                     )
                 }
             }
 
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(8.dp))
 
-            // Profile Info Row
+            // Main Profile Identity Row
             Row(
-                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Avatar with Frame & Camera icon
+                // 84dp Rounded-Square Avatar
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
-                        .bounceClick(onClick = onAvatarClick),
-                    contentAlignment = Alignment.Center,
+                        .size(84.dp)
+                        .bounceClick(scaleDown = 0.94f, onClick = onAvatarClick),
                 ) {
-                    UserAvatar(
+                    AvatarWithFrame(
                         name = profile.name,
                         photoPath = profile.photoPath,
-                        size = 72.dp,
-                        ring = ringColor,
+                        size = 80.dp,
+                        frameTier = FrameTier.fromId(profile.frame),
+                        animated = true,
+                        showCrown = profile.level >= 20,
                     )
-                    // Camera / Studio badge
+
+                    // Camera Action Badge
                     Box(
                         modifier = Modifier
-                            .align(Alignment.BottomEnd)
                             .size(24.dp)
+                            .align(Alignment.BottomEnd)
                             .clip(CircleShape)
-                            .background(BrandViolet)
-                            .border(1.5.dp, Color.White, CircleShape),
+                            .background(CleanWhite)
+                            .border(1.dp, CleanHairline, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.me_nova_ic_camera),
-                            contentDescription = "Change photo",
-                            modifier = Modifier.size(12.dp),
+                            painter = painterResource(R.drawable.me_clean_camera),
+                            contentDescription = "Change Avatar",
+                            modifier = Modifier.size(14.dp),
                         )
                     }
                 }
 
-                Spacer(Modifier.width(14.dp))
+                Spacer(Modifier.width(16.dp))
 
-                // Name, Verified, Copyable ID, Age
-                Column(Modifier.weight(1f)) {
+                // User Identity Info Column
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(onClick = onEditProfile),
+                ) {
+                    // Display Name & Verified Badge
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            text = profile.name,
-                            fontSize = 20.sp,
+                            text = profile.name.ifBlank { "User ${profile.id}" },
+                            fontSize = 19.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextInk,
+                            color = CleanInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        // Verified badge (Shown only when verified)
+
+                        // Verified Icon (Rendered ONLY if verified)
                         if (profile.phoneVerified || profile.emailVerified) {
                             Spacer(Modifier.width(6.dp))
                             Image(
-                                painter = painterResource(R.drawable.me_nova_ic_verified),
+                                painter = painterResource(R.drawable.me_clean_verify),
                                 contentDescription = "Verified Account",
-                                modifier = Modifier.size(18.dp),
+                                modifier = Modifier.size(16.dp),
                             )
                         }
                     }
 
                     Spacer(Modifier.height(4.dp))
 
-                    // Copyable ID Pill
+                    // ID Row with Copy Action
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White.copy(alpha = 0.8f))
-                            .border(1.dp, CardBorder, RoundedCornerShape(8.dp))
                             .clickable(onClick = onCopyId)
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                            .padding(vertical = 2.dp),
                     ) {
                         Text(
                             text = "ID: ${profile.id}",
-                            fontSize = 11.sp,
-                            color = TextSub,
+                            fontSize = 12.sp,
+                            color = CleanSecondary,
                             fontWeight = FontWeight.Medium,
                         )
-                        Spacer(Modifier.width(5.dp))
+                        Spacer(Modifier.width(6.dp))
                         Image(
-                            painter = painterResource(R.drawable.me_nova_ic_copy),
+                            painter = painterResource(R.drawable.me_clean_share),
                             contentDescription = "Copy ID",
-                            modifier = Modifier.size(11.dp),
+                            modifier = Modifier.size(12.dp),
                         )
                     }
 
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(8.dp))
 
-                    // Online & Age Tag
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Level & XP Progress
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        // Level Pill
                         Box(
                             modifier = Modifier
-                                .size(7.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF00E676)),
-                        )
-                        Spacer(Modifier.width(5.dp))
-                        Text("Online", fontSize = 11.sp, color = TextSub, fontWeight = FontWeight.Medium)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(CleanGold)
+                                .padding(horizontal = 7.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "Lv.${profile.level}",
+                                color = CleanWhite,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+
                         Spacer(Modifier.width(8.dp))
-                        Text("•", fontSize = 10.sp, color = TextSub)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Age ${ageFromDob(profile.dobMillis)}", fontSize = 11.sp, color = TextSub)
-                        if (profile.gender.isNotBlank() && profile.gender != "Not specified") {
-                            Spacer(Modifier.width(8.dp))
-                            Text("•", fontSize = 10.sp, color = TextSub)
-                            Spacer(Modifier.width(8.dp))
-                            Text(profile.gender, fontSize = 11.sp, color = TextSub)
+
+                        val xpProgress = ((profile.coins % 1000) / 1000f).coerceIn(0f, 1f)
+                        Column(modifier = Modifier.weight(1f)) {
+                            LinearProgressIndicator(
+                                progress = { xpProgress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(5.dp)
+                                    .clip(RoundedCornerShape(3.dp)),
+                                color = CleanCyan,
+                                trackColor = CleanWhite.copy(alpha = 0.7f),
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = "${profile.coins % 1000} / 1000 XP",
+                                fontSize = 9.sp,
+                                color = CleanSecondary,
+                            )
                         }
                     }
                 }
             }
-
-            Spacer(Modifier.height(14.dp))
-
-            // Level & XP Progress Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.85f))
-                    .border(1.dp, CardBorder, RoundedCornerShape(12.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Lv.${profile.level}",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = BrandViolet,
-                )
-                Spacer(Modifier.width(10.dp))
-                LinearProgressIndicator(
-                    progress = { 0.65f },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(7.dp)
-                        .clip(RoundedCornerShape(3.5.dp)),
-                    color = BrandViolet,
-                    trackColor = SoftLavender,
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "650 / 1000 XP",
-                    fontSize = 10.sp,
-                    color = TextSub,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  2. Social Metrics Strip
+//  2. Four Clean Quick-Access Shortcuts (VIP, Shop, Avatar Studio, My Space)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun SocialMetricsStrip(
-    onFriendsClick: () -> Unit,
-    onFollowingClick: () -> Unit,
-    onFollowersClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(CardBg)
-            .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
-            .shadow(1.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x08000000))
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        SocialMetricItem(count = "24", label = "Friends", iconRes = R.drawable.me_nova_ic_friends, onClick = onFriendsClick)
-        Box(Modifier.width(1.dp).height(28.dp).background(CardBorder))
-        SocialMetricItem(count = "142", label = "Following", iconRes = R.drawable.me_nova_ic_following, onClick = onFollowingClick)
-        Box(Modifier.width(1.dp).height(28.dp).background(CardBorder))
-        SocialMetricItem(count = "380", label = "Followers", iconRes = R.drawable.me_nova_ic_followers, onClick = onFollowersClick)
-    }
-}
-
-@Composable
-private fun SocialMetricItem(
-    count: String,
-    label: String,
-    iconRes: Int,
-    onClick: () -> Unit,
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .bounceClick(scaleDown = 0.95f, onClick = onClick)
-            .padding(horizontal = 16.dp),
-    ) {
-        Text(text = count, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextInk)
-        Spacer(Modifier.height(2.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                modifier = Modifier.size(12.dp),
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(text = label, fontSize = 11.sp, color = TextSub)
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  3. Wallet, Level & Badges Quick Bar
-// ─────────────────────────────────────────────────────────────────────────────
-@Composable
-private fun WalletMetricsBar(
-    coins: Long,
-    level: Int,
-    onCoinsClick: () -> Unit,
-    onLevelClick: () -> Unit,
-    onBadgesClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(CardBg)
-            .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
-            .padding(vertical = 12.dp, horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        // Coins
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .bounceClick(scaleDown = 0.96f, onClick = onCoinsClick),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFFFF8E7)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_wallet),
-                    contentDescription = "Wallet Coins",
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(text = "%,d".format(coins), color = TextInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text(text = "Coins • Top up", color = BrandGold, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-            }
-        }
-
-        Box(Modifier.width(1.dp).height(28.dp).background(CardBorder))
-
-        // Level
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .bounceClick(scaleDown = 0.96f, onClick = onLevelClick)
-                .padding(start = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(SoftLavender),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_level),
-                    contentDescription = "User Level",
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(text = "Level $level", color = TextInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text(text = "Stats & XP", color = BrandViolet, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-            }
-        }
-
-        Box(Modifier.width(1.dp).height(28.dp).background(CardBorder))
-
-        // Badges
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .bounceClick(scaleDown = 0.96f, onClick = onBadgesClick)
-                .padding(start = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFE0F7FA)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_badges),
-                    contentDescription = "Badges",
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(text = "6 Badges", color = TextInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text(text = "Backpack", color = BrandCyan, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-            }
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  4. Four Quick-Access Tiles (VIP, Shop, Avatar Studio, My Space)
-// ─────────────────────────────────────────────────────────────────────────────
-@Composable
-private fun QuickTilesGrid(
+private fun CleanShortcutsRow(
     onVipClick: () -> Unit,
     onShopClick: () -> Unit,
     onAvatarStudioClick: () -> Unit,
@@ -1066,340 +813,292 @@ private fun QuickTilesGrid(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        QuickTileCard(
-            modifier = Modifier.weight(1f),
-            title = "VIP Center",
-            subtitle = "Exclusive perks",
-            iconRes = R.drawable.me_nova_ic_vip,
-            badge = "PREMIUM",
-            badgeColor = BrandGold,
+        CleanShortcutTile(
+            iconRes = R.drawable.me_clean_vip,
+            label = "VIP Center",
             onClick = onVipClick,
         )
-        QuickTileCard(
-            modifier = Modifier.weight(1f),
-            title = "Shop",
-            subtitle = "Frames & themes",
-            iconRes = R.drawable.me_nova_ic_shop,
+        CleanShortcutTile(
+            iconRes = R.drawable.me_clean_shop,
+            label = "Shop",
             onClick = onShopClick,
         )
-        QuickTileCard(
-            modifier = Modifier.weight(1f),
-            title = "Avatar Studio",
-            subtitle = "Custom styles",
-            iconRes = R.drawable.me_nova_ic_avatar_studio,
-            badge = "HOT",
-            badgeColor = BrandViolet,
+        CleanShortcutTile(
+            iconRes = R.drawable.me_clean_avatar,
+            label = "Avatar Studio",
             onClick = onAvatarStudioClick,
         )
-        QuickTileCard(
-            modifier = Modifier.weight(1f),
-            title = "My Space",
-            subtitle = "Room & decor",
-            iconRes = R.drawable.me_nova_ic_my_space,
+        CleanShortcutTile(
+            iconRes = R.drawable.me_clean_home,
+            label = "My Space",
             onClick = onMySpaceClick,
         )
     }
 }
 
 @Composable
-private fun QuickTileCard(
-    modifier: Modifier = Modifier,
-    title: String,
-    subtitle: String,
+private fun CleanShortcutTile(
     iconRes: Int,
-    badge: String? = null,
-    badgeColor: Color = BrandViolet,
+    label: String,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .height(96.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(CardBg)
-            .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
-            .bounceClick(scaleDown = 0.95f, onClick = onClick)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = Modifier
+            .bounceClick(scaleDown = 0.92f, onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+        Box(
+            modifier = Modifier
+                .size(54.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(CleanWhite)
+                .border(1.dp, CleanHairline, RoundedCornerShape(16.dp))
+                .shadow(1.dp, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center,
         ) {
             Image(
                 painter = painterResource(iconRes),
-                contentDescription = title,
-                modifier = Modifier.size(32.dp),
-            )
-            Spacer(Modifier.height(5.dp))
-            Text(
-                text = title,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextInk,
-                maxLines = 1,
-            )
-            Text(
-                text = subtitle,
-                fontSize = 9.sp,
-                color = TextSub,
-                maxLines = 1,
+                contentDescription = label,
+                modifier = Modifier.size(34.dp),
             )
         }
-
-        if (badge != null) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(badgeColor)
-                    .padding(horizontal = 4.dp, vertical = 1.dp),
-            ) {
-                Text(
-                    text = badge,
-                    color = Color.White,
-                    fontSize = 7.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                )
-            }
-        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = CleanInk,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  5. Illustrated Badge Showcase
-// ─────────────────────────────────────────────────────────────────────────────
-data class BadgeItemData(
-    val name: String,
-    val iconRes: Int,
-    val description: String,
-    val requirement: String,
-    val isEarned: Boolean,
-)
-
-private val ShowcaseBadgesList = listOf(
-    BadgeItemData("Newcomer", R.drawable.me_nova_badge_newcomer, "Awarded for joining the community", "Complete sign-up", isEarned = true),
-    BadgeItemData("Ludo Gamer", R.drawable.me_nova_badge_gamer, "Mastered casual tabletop games", "Win 5 board game matches", isEarned = true),
-    BadgeItemData("Star Host", R.drawable.me_nova_badge_host, "Hosted engaging live voice lounges", "Host 2 hours on stage", isEarned = true),
-    BadgeItemData("VIP Member", R.drawable.me_nova_badge_vip, "Supporter of the platform", "Unlock VIP Membership", isEarned = false),
-    BadgeItemData("Collector", R.drawable.me_nova_badge_collector, "Amassed rare gifts & cosmetics", "Collect 10 unique gift items", isEarned = true),
-    BadgeItemData("Family Guild", R.drawable.me_nova_badge_family, "Active family guild contributor", "Reach 1,000 family points", isEarned = false),
-)
-
-@Composable
-private fun BadgeShowcaseSection(
-    onSeeAll: () -> Unit,
-    onBadgeClick: (BadgeItemData) -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Badge Showcase",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextInk,
-            )
-            Text(
-                text = "See all ›",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = BrandViolet,
-                modifier = Modifier.clickable(onClick = onSeeAll),
-            )
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            items(ShowcaseBadgesList, key = { it.name }) { badge ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .width(76.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(CardBg)
-                        .border(1.dp, CardBorder, RoundedCornerShape(14.dp))
-                        .bounceClick(scaleDown = 0.94f) { onBadgeClick(badge) }
-                        .padding(8.dp),
-                ) {
-                    Image(
-                        painter = painterResource(badge.iconRes),
-                        contentDescription = badge.name,
-                        modifier = Modifier.size(42.dp),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = badge.name,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (badge.isEarned) TextInk else TextSub.copy(alpha = 0.6f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  6. Gift Showcase Section
+//  3. Social Micro-Strip (Friends, Following, Followers, Wallet)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun GiftShowcaseSection(
-    onViewGifts: () -> Unit,
-) {
-    val sampleGifts = listOf(
-        Triple("Rose", R.drawable.vb_gift_rose, 18),
-        Triple("Star", R.drawable.vb_gift_star, 9),
-        Triple("Diamond", R.drawable.vb_gift_diamond, 4),
-        Triple("Crown", R.drawable.vb_gift_crown, 1),
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Gift Showcase",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextInk,
-            )
-            Text(
-                text = "View collection ›",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = BrandViolet,
-                modifier = Modifier.clickable(onClick = onViewGifts),
-            )
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            items(sampleGifts, key = { it.first }) { (name, iconRes, count) ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(CardBg)
-                        .border(1.dp, CardBorder, RoundedCornerShape(12.dp))
-                        .bounceClick(scaleDown = 0.95f, onClick = onViewGifts)
-                        .padding(horizontal = 10.dp, vertical = 7.dp),
-                ) {
-                    Image(
-                        painter = painterResource(iconRes),
-                        contentDescription = name,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text(text = name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextInk)
-                        Text(text = "×$count", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFF4081))
-                    }
-                }
-            }
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  7. 48-Hour Featured Gift Pack Offer Banner
-// ─────────────────────────────────────────────────────────────────────────────
-@Composable
-private fun FeaturedGiftPackBanner(
-    offerTitle: String,
-    timeRemaining: String,
-    onOpenOffer: () -> Unit,
+private fun CleanSocialMicroStrip(
+    coins: Long,
+    onFriendsClick: () -> Unit,
+    onFollowingClick: () -> Unit,
+    onFollowersClick: () -> Unit,
+    onWalletClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(Color(0xFF7656D9), Color(0xFF35CCD6))
-                )
-            )
-            .bounceClick(scaleDown = 0.98f, onClick = onOpenOffer)
-            .padding(14.dp),
+            .background(CleanWhite)
+            .border(1.dp, CleanHairline, RoundedCornerShape(16.dp))
+            .padding(vertical = 10.dp, horizontal = 12.dp),
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
+            // Friends
+            Column(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.25f)),
-                contentAlignment = Alignment.Center,
+                    .weight(1f)
+                    .clickable(onClick = onFriendsClick),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_gift_pack),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                )
+                Text(text = "24", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CleanInk)
+                Text(text = "Friends", fontSize = 11.sp, color = CleanSecondary)
             }
 
-            Spacer(Modifier.width(12.dp))
+            Box(Modifier.width(1.dp).height(24.dp).background(CleanHairline))
 
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "48H FEATURED OFFER",
-                        color = Color(0xFFFFD54F),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp,
+            // Following
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onFollowingClick),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(text = "142", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CleanInk)
+                Text(text = "Following", fontSize = 11.sp, color = CleanSecondary)
+            }
+
+            Box(Modifier.width(1.dp).height(24.dp).background(CleanHairline))
+
+            // Followers
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onFollowersClick),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(text = "380", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CleanInk)
+                Text(text = "Followers", fontSize = 11.sp, color = CleanSecondary)
+            }
+
+            Box(Modifier.width(1.dp).height(24.dp).background(CleanHairline))
+
+            // Wallet (Coins)
+            Row(
+                modifier = Modifier
+                    .weight(1.2f)
+                    .clickable(onClick = onWalletClick)
+                    .padding(start = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.me_clean_wallet),
+                    contentDescription = "Wallet Coins",
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(Modifier.width(6.dp))
+                Column {
+                    Text(text = "$coins", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = CleanGold)
+                    Text(text = "Top Up", fontSize = 10.sp, color = CleanSecondary)
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  4. Clean Grouped Menu Cards (Generous 58-64dp height, hairline dividers)
+// ─────────────────────────────────────────────────────────────────────────────
+data class CleanMenuItemData(
+    val iconRes: Int,
+    val title: String,
+    val subtitle: String?,
+    val isDanger: Boolean = false,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun CleanMenuGroup(
+    items: List<CleanMenuItemData>,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(CleanWhite)
+            .border(1.dp, CleanHairline, RoundedCornerShape(16.dp)),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            items.forEachIndexed { index, item ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .clickable(onClick = item.onClick)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Image(
+                        painter = painterResource(item.iconRes),
+                        contentDescription = item.title,
+                        modifier = Modifier.size(26.dp),
                     )
-                    Spacer(Modifier.width(6.dp))
+
+                    Spacer(Modifier.width(14.dp))
+
                     Text(
-                        text = "⏳ $timeRemaining",
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 10.sp,
+                        text = item.title,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (item.isDanger) CleanDanger else CleanInk,
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    if (item.subtitle != null) {
+                        Text(
+                            text = item.subtitle,
+                            fontSize = 12.sp,
+                            color = CleanSecondary,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    }
+
+                    Image(
+                        painter = painterResource(R.drawable.me_clean_share),
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
                     )
                 }
-                Spacer(Modifier.height(2.dp))
+
+                if (index < items.size - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 56.dp, end = 16.dp),
+                        thickness = 0.5.dp,
+                        color = CleanHairline,
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  5. Floating 48h Promotional Offer Pill
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun CleanFloatingOfferPill(
+    title: String,
+    timeRemaining: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.horizontalGradient(
+                    listOf(Color(0xFF7B52E8), Color(0xFF31CAD9))
+                )
+            )
+            .bounceClick(scaleDown = 0.98f, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.me_clean_giftpack),
+                contentDescription = null,
+                modifier = Modifier.size(28.dp),
+            )
+
+            Spacer(Modifier.width(10.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = offerTitle,
-                    color = Color.White,
-                    fontSize = 14.sp,
+                    text = title,
+                    color = CleanWhite,
                     fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                )
+                Text(
+                    text = "Limited 48h offer • $timeRemaining left",
+                    color = CleanWhite.copy(alpha = 0.85f),
+                    fontSize = 11.sp,
                 )
             }
 
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White)
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                    .background(CleanWhite)
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
             ) {
                 Text(
                     text = "View",
-                    color = BrandViolet,
+                    color = Color(0xFF7B52E8),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -1409,121 +1108,11 @@ private fun FeaturedGiftPackBanner(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  8. Grouped Action Card & Action Row Item
-// ─────────────────────────────────────────────────────────────────────────────
-@Composable
-private fun ActionGroupCard(
-    title: String,
-    content: @Composable () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-    ) {
-        Text(
-            text = title,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextInk,
-            modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(CardBg)
-                .border(1.dp, CardBorder, RoundedCornerShape(18.dp))
-                .padding(vertical = 4.dp),
-        ) {
-            content()
-        }
-    }
-}
-
-@Composable
-private fun ActionRowItem(
-    iconRes: Int,
-    title: String,
-    subtitle: String,
-    trailingText: String? = null,
-    tint: Color = TextInk,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(SoftLavender.copy(alpha = 0.6f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = title,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = title,
-                color = tint,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(Modifier.height(1.dp))
-            Text(
-                text = subtitle,
-                color = TextSub,
-                fontSize = 11.sp,
-            )
-        }
-
-        if (trailingText != null) {
-            Text(
-                text = trailingText,
-                color = BrandViolet,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.width(6.dp))
-        }
-
-        Image(
-            painter = painterResource(R.drawable.me_nova_ic_chevron),
-            contentDescription = null,
-            modifier = Modifier.size(14.dp),
-        )
-    }
-}
-
-@Composable
-private fun ActionDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 14.dp),
-        thickness = 0.8.dp,
-        color = CardBorder.copy(alpha = 0.6f),
-    )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  9. Interactive Sheets Implementation
+//  6. Submenu Bottom Sheets
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun VipCenterBottomSheet(
-    level: Int,
-    onDismiss: () -> Unit,
-) {
+private fun CleanVipBottomSheet(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1534,77 +1123,54 @@ private fun VipCenterBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_vip),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("VIP Center", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("VIP Center", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "Unlock exclusive privileges, golden room badges, animated stage entrances and priority support.",
-            color = TextSub,
-            fontSize = 12.sp,
-        )
+        Spacer(Modifier.height(10.dp))
+        Text("Unlock royal privileges, exclusive room entrances, and custom badges.", color = CleanSecondary, fontSize = 13.sp)
 
         Spacer(Modifier.height(16.dp))
 
-        // VIP Tier Cards
-        val tiers = listOf(
-            Triple("Silver VIP", "Lv.1 - 5", "5% coin discount • Silver Frame"),
-            Triple("Gold VIP", "Lv.6 - 15", "10% coin discount • Golden Crown Frame"),
-            Triple("Platinum VIP", "Lv.16 - 25", "20% coin bonus • Stage Entry Splash"),
-            Triple("Diamond VIP", "Lv.26+", "Custom animated frame • Personal VIP Concierge"),
-        )
-        tiers.forEach { (name, req, perk) ->
+        listOf(
+            Triple("Free Tier", "Standard features & social lounge access", CleanSecondary),
+            Triple("Silver VIP", "Chat glow, 5% coin rebate, custom room badges", Color(0xFF9E9E9E)),
+            Triple("Gold VIP", "Exclusive vehicle entrance, animated avatar frames", CleanGold),
+            Triple("Diamond Elite", "Host priority, room banner takeover, 24/7 concierge", CleanCyan),
+        ).forEach { (tier, perk, color) ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFFAF7EE))
-                    .border(1.dp, BrandGold.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                    .background(CleanCanvas)
                     .padding(12.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                    )
+                    Spacer(Modifier.width(10.dp))
                     Column {
-                        Text(name, color = TextInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Text(perk, color = TextSub, fontSize = 11.sp)
+                        Text(tier, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(perk, color = CleanSecondary, fontSize = 11.sp)
                     }
-                    Text(req, color = BrandGold, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = "• VIP purchases require Google Play Billing verification [DEMO MODE]",
-            color = TextSub,
-            fontSize = 11.sp,
-        )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
     }
 }
 
 @Composable
-private fun ShopBottomSheet(
-    coins: Long,
-    onTopUpClick: () -> Unit,
+private fun CleanShopBottomSheet(
+    onTopUp: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedCategory by remember { mutableStateOf("Frames") }
-    val categories = listOf("Frames", "Bubbles", "Themes", "Effects")
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1615,85 +1181,50 @@ private fun ShopBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_shop),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Cosmetics Shop", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("Cosmetics Shop", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("Balance: %,d coins".format(coins), color = BrandGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-            Text(
-                "Top Up Coins ›",
-                color = BrandViolet,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                modifier = Modifier.clickable(onClick = onTopUpClick),
-            )
-        }
+        Spacer(Modifier.height(10.dp))
+        Text("Customize your voice room persona with frames and enter effects.", color = CleanSecondary, fontSize = 13.sp)
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(14.dp))
 
-        // Category Filter
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            categories.forEach { cat ->
-                val active = cat == selectedCategory
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (active) BrandViolet else SoftLavender)
-                        .clickable { selectedCategory = cat }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                ) {
-                    Text(cat, color = if (active) Color.White else TextInk, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        // Sample Catalog Items
-        val items = listOf(
-            Triple("Aurora Neon Frame", 200, R.drawable.me_nova_ic_frame),
-            Triple("Golden Crown Frame", 500, R.drawable.me_nova_ic_crown),
-            Triple("Celestial Night Theme", 350, R.drawable.me_nova_bg_pearl),
-            Triple("Diamond Sparkle Entry", 800, R.drawable.me_nova_ic_diamond),
-        )
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            items(items) { (name, price, icon) ->
-                Column(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(PageBg)
-                        .border(1.dp, CardBorder, RoundedCornerShape(12.dp))
-                        .padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
+        listOf(
+            Triple("Cyan Halo Frame", "500 Coins", R.drawable.me_clean_frame),
+            Triple("Gold Star Crown", "1,200 Coins", R.drawable.me_clean_crown),
+            Triple("Royal Enter Shimmer", "2,500 Coins", R.drawable.me_clean_giftpack),
+        ).forEach { (title, price, icon) ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(CleanCanvas)
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
                         painter = painterResource(icon),
-                        contentDescription = name,
+                        contentDescription = title,
                         modifier = Modifier.size(36.dp),
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Text(name, color = TextInk, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                    Text("$price coins", color = BrandGold, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(title, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(price, color = CleanGold, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(CleanCyan)
+                        .clickable(onClick = onTopUp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                ) {
+                    Text("Acquire", color = CleanWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -1703,22 +1234,22 @@ private fun ShopBottomSheet(
 }
 
 @Composable
-private fun AvatarStudioBottomSheet(
-    profile: UserProfile,
-    onSelectPreset: (Int) -> Unit,
-    onEditDetails: () -> Unit,
+private fun CleanAvatarStudioBottomSheet(
+    currentProfile: UserProfile,
+    onSave: (UserProfile) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val presetAvatars = listOf(
-        R.drawable.me_nova_avatar_01,
-        R.drawable.me_nova_avatar_02,
-        R.drawable.me_nova_avatar_03,
-        R.drawable.me_nova_avatar_04,
-        R.drawable.me_nova_avatar_05,
-        R.drawable.me_nova_avatar_06,
-        R.drawable.me_nova_avatar_07,
-        R.drawable.me_nova_avatar_08,
+    // 6 Fictional Demo Avatars from me_clean_demo_avatar_01..06
+    val demoAvatars = listOf(
+        R.drawable.me_clean_demo_avatar_01,
+        R.drawable.me_clean_demo_avatar_02,
+        R.drawable.me_clean_demo_avatar_03,
+        R.drawable.me_clean_demo_avatar_04,
+        R.drawable.me_clean_demo_avatar_05,
+        R.drawable.me_clean_demo_avatar_06,
     )
+
+    var selectedIndex by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier
@@ -1731,64 +1262,85 @@ private fun AvatarStudioBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Avatar Studio", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("Avatar Studio", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Cancel", color = CleanSecondary) }
         }
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
-            text = "Select from original illustrated vector presets or upload a custom photo in Edit Profile.",
-            color = TextSub,
+            text = "Select a demo style preset or equip an original avatar.",
+            color = CleanSecondary,
             fontSize = 12.sp,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(Modifier.height(16.dp))
 
-        // 8 Preset Avatars Grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
+        // Selected Preview
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                .size(92.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .border(2.dp, CleanCyan, RoundedCornerShape(24.dp)),
+            contentAlignment = Alignment.Center,
         ) {
-            items(presetAvatars) { avatarRes ->
+            Image(
+                painter = painterResource(demoAvatars[selectedIndex]),
+                contentDescription = "Selected Avatar Preview",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Preset Grid Row
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            items(demoAvatars.size) { idx ->
+                val isSelected = idx == selectedIndex
                 Box(
                     modifier = Modifier
-                        .size(68.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(PageBg)
-                        .border(1.5.dp, SoftLavender, RoundedCornerShape(16.dp))
-                        .bounceClick { onSelectPreset(avatarRes) },
-                    contentAlignment = Alignment.Center,
+                        .padding(horizontal = 6.dp)
+                        .size(54.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(
+                            if (isSelected) 2.dp else 1.dp,
+                            if (isSelected) CleanCyan else CleanHairline,
+                            RoundedCornerShape(14.dp),
+                        )
+                        .clickable { selectedIndex = idx }
+                        .padding(2.dp),
                 ) {
                     Image(
-                        painter = painterResource(avatarRes),
-                        contentDescription = "Avatar Preset",
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape),
+                        painter = painterResource(demoAvatars[idx]),
+                        contentDescription = "Demo Avatar ${idx + 1}",
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Crop,
                     )
                 }
             }
         }
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(20.dp))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(44.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(BrandViolet)
-                .bounceClick(onClick = onEditDetails),
+                .height(46.dp)
+                .clip(RoundedCornerShape(23.dp))
+                .background(CleanCyan)
+                .bounceClick {
+                    // Update user profile avatar ID
+                    val updated = currentProfile.copy(
+                        avatarId = "clean_demo_${selectedIndex + 1}"
+                    )
+                    onSave(updated)
+                },
             contentAlignment = Alignment.Center,
         ) {
-            Text("Upload Custom Photo in Edit Profile", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text("Apply Avatar Preset", color = CleanWhite, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -1796,10 +1348,7 @@ private fun AvatarStudioBottomSheet(
 }
 
 @Composable
-private fun MySpaceBottomSheet(
-    profile: UserProfile,
-    onDismiss: () -> Unit,
-) {
+private fun CleanMySpaceBottomSheet(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1810,49 +1359,32 @@ private fun MySpaceBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_my_space),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("My Space", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("My Space", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = "Personal room profile, space decorations, and visitor highlights.",
-            color = TextSub,
-            fontSize = 12.sp,
-        )
+        Spacer(Modifier.height(8.dp))
+        Text("Your personalized lounge space. Decorate furniture, stage showcases, and invite friends.", color = CleanSecondary, fontSize = 12.sp)
 
         Spacer(Modifier.height(16.dp))
 
-        // Space preview card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(130.dp)
-                .clip(RoundedCornerShape(16.dp)),
+                .clip(RoundedCornerShape(16.dp))
+                .background(CleanLavender.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center,
         ) {
-            Image(
-                painter = painterResource(R.drawable.me_nova_bg_pearl),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x33000000))
-                    .padding(14.dp),
-                verticalArrangement = Arrangement.Bottom,
-            ) {
-                Text(text = "${profile.name}'s Cozy Lounge", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Text(text = "Theme: Pearl Aurora • Status: Open to Friends", color = Color.White.copy(alpha = 0.85f), fontSize = 11.sp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(R.drawable.me_clean_home),
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                )
+                Spacer(Modifier.height(8.dp))
+                Text("Personal Space Lounge", color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("Custom 3D room themes arriving in upcoming season update.", color = CleanSecondary, fontSize = 11.sp)
             }
         }
 
@@ -1861,10 +1393,7 @@ private fun MySpaceBottomSheet(
 }
 
 @Composable
-private fun StatsBottomSheet(
-    profile: UserProfile,
-    onDismiss: () -> Unit,
-) {
+private fun CleanStatsBottomSheet(profile: UserProfile, onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1875,42 +1404,38 @@ private fun StatsBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.me_nova_ic_stats),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Game & Voice Stats", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("Game & Voice Stats", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
         Spacer(Modifier.height(12.dp))
 
-        val stats = listOf(
-            Triple("Matches Played", "48", "Ludo & Spy games"),
-            Triple("Victory Count", "31", "64.5% win rate"),
-            Triple("Voice Lounge Time", "14.5 hrs", "Host & listener"),
-            Triple("Login Streak", "7 Days", "Active weekly streak"),
-        )
-        stats.forEach { (label, value, sub) ->
+        listOf(
+            Triple("Ludo Matches", "42 played • 28 won (66% win rate)", CleanCyan),
+            Triple("Spy Fall Rounds", "19 played • 14 won", Color(0xFF7B52E8)),
+            Triple("Voice Lounge Hours", "18.5 hours hosted", CleanGold),
+            Triple("Total Room XP", "${profile.coins * 2} lifetime XP", CleanSecondary),
+        ).forEach { (game, stat, color) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp)
+                    .padding(vertical = 5.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(PageBg)
+                    .background(CleanCanvas)
                     .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                )
+                Spacer(Modifier.width(10.dp))
                 Column {
-                    Text(label, color = TextInk, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    Text(sub, color = TextSub, fontSize = 11.sp)
+                    Text(game, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(stat, color = CleanSecondary, fontSize = 11.sp)
                 }
-                Text(value, color = BrandViolet, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
 
@@ -1919,10 +1444,8 @@ private fun StatsBottomSheet(
 }
 
 @Composable
-private fun VisitorsBottomSheet(
-    onDismiss: () -> Unit,
-) {
-    var allowVisitors by remember { mutableStateOf(true) }
+private fun CleanVisitorsBottomSheet(onDismiss: () -> Unit) {
+    var incognitoMode by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -1934,59 +1457,65 @@ private fun VisitorsBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Profile Visitors", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("Recent Profile Visitors", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
+        Spacer(Modifier.height(8.dp))
+
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(CleanCanvas)
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("Record Profile Visits", color = TextInk, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                Text("Allow others to see when you view their profiles", color = TextSub, fontSize = 11.sp)
+                Text("Incognito Browsing", color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("Don't leave footprint when visiting others", color = CleanSecondary, fontSize = 11.sp)
             }
             Switch(
-                checked = allowVisitors,
-                onCheckedChange = { allowVisitors = it },
-                colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = BrandViolet),
+                checked = incognitoMode,
+                onCheckedChange = { incognitoMode = it },
+                colors = SwitchDefaults.colors(checkedThumbColor = CleanWhite, checkedTrackColor = CleanCyan),
             )
         }
 
         Spacer(Modifier.height(14.dp))
+        Text("Recent Visitors (Today)", color = CleanSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
 
-        Text("Recent Visitors (Today)", color = TextSub, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
 
-        val visitors = listOf(
-            Pair("Arjun", "15m ago"),
-            Pair("Tara", "2h ago"),
-            Pair("Vikram", "Yesterday"),
-        )
-        visitors.forEach { (name, time) ->
+        listOf(
+            Pair("Maya Lin", "12 minutes ago"),
+            Pair("Julian Ross", "1 hour ago"),
+            Pair("Priya Sharma", "3 hours ago"),
+        ).forEach { (name, time) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
+                            .size(32.dp)
                             .clip(CircleShape)
-                            .background(SoftLavender),
+                            .background(CleanLavender),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(name.take(1), color = BrandViolet, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(name.take(1), color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     }
                     Spacer(Modifier.width(10.dp))
-                    Text(name, color = TextInk, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text(name, color = CleanInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 }
-                Text(time, color = TextSub, fontSize = 11.sp)
+                Text(time, color = CleanSecondary, fontSize = 11.sp)
             }
+            HorizontalDivider(color = CleanHairline)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -1994,9 +1523,7 @@ private fun VisitorsBottomSheet(
 }
 
 @Composable
-private fun ContributionsBottomSheet(
-    onDismiss: () -> Unit,
-) {
+private fun CleanContributionsBottomSheet(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -2007,12 +1534,12 @@ private fun ContributionsBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Contributions", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("Contributions", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
-        Text("Your community and family guild support milestones.", color = TextSub, fontSize = 12.sp)
+        Text("Your community and guild support milestone score.", color = CleanSecondary, fontSize = 12.sp)
 
         Spacer(Modifier.height(14.dp))
 
@@ -2020,14 +1547,14 @@ private fun ContributionsBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(PageBg)
+                .background(CleanCanvas)
                 .padding(14.dp),
         ) {
             Column {
-                Text("Total Guild Score: 1,420 pts", color = TextInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("Total Guild Score: 1,420 pts", color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(Modifier.height(4.dp))
-                Text("• Gifting contributions: 850 pts", color = TextSub, fontSize = 12.sp)
-                Text("• Room hosting contributions: 570 pts", color = TextSub, fontSize = 12.sp)
+                Text("• Gifting contributions: 850 pts", color = CleanSecondary, fontSize = 12.sp)
+                Text("• Room hosting contributions: 570 pts", color = CleanSecondary, fontSize = 12.sp)
             }
         }
 
@@ -2036,9 +1563,64 @@ private fun ContributionsBottomSheet(
 }
 
 @Composable
-private fun LanguageBottomSheet(
-    onDismiss: () -> Unit,
-) {
+private fun CleanBadgesBottomSheet(onDismiss: () -> Unit) {
+    val badges = listOf(
+        Pair("Star Host", "Hosted 10+ active voice rooms"),
+        Pair("VIP Elite", "Held active VIP subscription"),
+        Pair("Master Collector", "Unlocked 5+ avatar frames"),
+        Pair("Guild Pillar", "Contributed 500+ guild points"),
+        Pair("Game Master", "Won 25+ matches in social games"),
+        Pair("Nova Pioneer", "Early adopter community badge"),
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Badge Center", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        Text("Earn badges by participating in rooms, games, and guilds.", color = CleanSecondary, fontSize = 12.sp)
+
+        Spacer(Modifier.height(14.dp))
+
+        badges.forEach { (name, desc) ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(CleanCanvas)
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.me_clean_crown),
+                    contentDescription = name,
+                    modifier = Modifier.size(28.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text(name, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(desc, color = CleanSecondary, fontSize = 11.sp)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun CleanLanguageBottomSheet(onDismiss: () -> Unit) {
     var selectedLanguage by remember { mutableStateOf("English") }
     val languages = listOf("English", "Hindi", "Español", "Français", "Deutsch", "日本語")
 
@@ -2052,8 +1634,8 @@ private fun LanguageBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Select Language", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("Select Language", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
         Spacer(Modifier.height(10.dp))
@@ -2067,16 +1649,16 @@ private fun LanguageBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(lang, color = TextInk, fontSize = 14.sp, fontWeight = if (lang == selectedLanguage) FontWeight.Bold else FontWeight.Normal)
+                Text(lang, color = CleanInk, fontSize = 14.sp, fontWeight = if (lang == selectedLanguage) FontWeight.Bold else FontWeight.Normal)
                 if (lang == selectedLanguage) {
                     Image(
-                        painter = painterResource(R.drawable.me_nova_ic_verified),
+                        painter = painterResource(R.drawable.me_clean_verify),
                         contentDescription = "Selected",
                         modifier = Modifier.size(18.dp),
                     )
                 }
             }
-            HorizontalDivider(color = CardBorder.copy(alpha = 0.5f))
+            HorizontalDivider(color = CleanHairline)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -2084,9 +1666,7 @@ private fun LanguageBottomSheet(
 }
 
 @Composable
-private fun ParentalControlsBottomSheet(
-    onDismiss: () -> Unit,
-) {
+private fun CleanParentalControlsBottomSheet(onDismiss: () -> Unit) {
     var safeModeEnabled by remember { mutableStateOf(false) }
 
     Column(
@@ -2099,14 +1679,14 @@ private fun ParentalControlsBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Parental Control Mode", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("Parental Control Mode", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
         Spacer(Modifier.height(6.dp))
         Text(
-            text = "Restrict voice chat with strangers, filter mature content, and set daily screen time limits.",
-            color = TextSub,
+            text = "Restrict voice chat with strangers, filter mature content, and set screen time alerts.",
+            color = CleanSecondary,
             fontSize = 12.sp,
         )
 
@@ -2118,13 +1698,13 @@ private fun ParentalControlsBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("Enable Restricted Safe Mode", color = TextInk, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Text("Requires 4-digit guardian PIN to disable", color = TextSub, fontSize = 11.sp)
+                Text("Restricted Safe Mode", color = CleanInk, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("Requires guardian PIN to change", color = CleanSecondary, fontSize = 11.sp)
             }
             Switch(
                 checked = safeModeEnabled,
                 onCheckedChange = { safeModeEnabled = it },
-                colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = BrandViolet),
+                colors = SwitchDefaults.colors(checkedThumbColor = CleanWhite, checkedTrackColor = CleanCyan),
             )
         }
 
@@ -2133,8 +1713,8 @@ private fun ParentalControlsBottomSheet(
 }
 
 @Composable
-private fun GiftPackOfferBottomSheet(
-    offer: com.sundram.weplay.data.GiftPackOffer,
+private fun CleanGiftPackOfferBottomSheet(
+    offer: GiftPackOffer,
     timeRemaining: String,
     onClaim: () -> Unit,
     onDismiss: () -> Unit,
@@ -2150,24 +1730,24 @@ private fun GiftPackOfferBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("48-Hour Starter Offer", color = TextInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = TextSub) }
+            Text("48-Hour Starter Offer", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "Limited promotional pack • Expires in $timeRemaining",
-            color = BrandGold,
+            text = "Limited promotional offer • Expires in $timeRemaining",
+            color = CleanGold,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
         )
 
         Spacer(Modifier.height(14.dp))
 
-        Text(offer.title, color = TextInk, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+        Text(offer.title, color = CleanInk, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(4.dp))
-        Text(offer.description, color = TextSub, fontSize = 13.sp)
+        Text(offer.description, color = CleanSecondary, fontSize = 13.sp)
 
         Spacer(Modifier.height(16.dp))
 
@@ -2187,8 +1767,8 @@ private fun GiftPackOfferBottomSheet(
                         modifier = Modifier.size(44.dp),
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text(item.name, color = TextInk, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text("×${item.count}", color = BrandViolet, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(item.name, color = CleanInk, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("×${item.count}", color = CleanCyan, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
                 }
             }
         }
@@ -2200,18 +1780,64 @@ private fun GiftPackOfferBottomSheet(
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(
-                    Brush.horizontalGradient(listOf(BrandViolet, BrandCyan))
-                )
+                .background(CleanCyan)
                 .bounceClick(onClick = onClaim),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "Claim Offer (₹${offer.demoPriceRupees}) [DEMO]",
-                color = Color.White,
+                color = CleanWhite,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
             )
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun CleanSocialListBottomSheet(
+    title: String,
+    items: List<String>,
+    onDismiss: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(title, color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        items.forEach { person ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(CleanPeach),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(person.take(1), color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
+                Spacer(Modifier.width(12.dp))
+                Text(person, color = CleanInk, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
+            HorizontalDivider(color = CleanHairline)
         }
 
         Spacer(Modifier.height(16.dp))
