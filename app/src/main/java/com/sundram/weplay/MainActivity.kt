@@ -214,7 +214,7 @@ private fun WePlayApp(
                 CreateVoiceRoomScreen(nav = nav)
             }
             composable(Routes.ME) {
-                MeScreen(nav, pad, profile, onLogout)
+                MeScreen(nav, pad, profile, onLogout, onSaveProfile)
             }
             composable(Routes.LUDO) {
                 LudoScreen(nav)
