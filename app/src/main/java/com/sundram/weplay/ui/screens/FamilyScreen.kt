@@ -199,7 +199,7 @@ fun FamilyScreen(
                         onBack = { nav.popBackStack() },
                         onVoiceRoomClick = {
                             family.voiceRoomId?.let { roomId ->
-                                nav.navigate(Routes.ROOM_DETAIL.replace("{roomId}", roomId))
+                                nav.navigate(Routes.roomDetail(roomId))
                             } ?: Toast.makeText(context, "Family Voice Room unlocking at Level 4", Toast.LENGTH_SHORT).show()
                         },
                         onChatClick = {
@@ -262,7 +262,7 @@ fun FamilyScreen(
                                 },
                                 onDonateClick = { showDonateDialog = true },
                                 onVoiceRoomClick = {
-                                    family.voiceRoomId?.let { nav.navigate(Routes.ROOM_DETAIL.replace("{roomId}", it)) }
+                                    family.voiceRoomId?.let { nav.navigate(Routes.roomDetail(it)) }
                                 },
                                 topContributors = members.sortedByDescending { it.weeklyActiveness }.take(3),
                             )
