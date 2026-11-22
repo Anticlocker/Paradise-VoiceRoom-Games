@@ -1,0 +1,234 @@
+{
+  "product": "Aurora Paradise 3.0 \u2014 Source-Mapped Art Upgrade",
+  "based_on": "Uploaded tempplay-main.zip",
+  "assets_count": 15,
+  "assets": [
+    {
+      "name": "ap3r_bg_games_palace",
+      "filename": "ap3r_bg_games_palace.webp",
+      "category": "background",
+      "pixel_size": [
+        1080,
+        1920
+      ],
+      "source": "Newly generated original celestial palace illustration",
+      "intended_use": "Primary full-height Games background; atmospheric palace upper third",
+      "sha256_prefix": "cfb5644814ddd4",
+      "alpha": false
+    },
+    {
+      "name": "ap3r_bg_event_festival",
+      "filename": "ap3r_bg_event_festival.webp",
+      "category": "background",
+      "pixel_size": [
+        1080,
+        1920
+      ],
+      "source": "Color-treated variation of ap3r_bg_games_palace",
+      "intended_use": "Festival Event Center background, gold tinted variant",
+      "sha256_prefix": "6fc319669aa7ca",
+      "alpha": false
+    },
+    {
+      "name": "ap3r_bg_profile_dream",
+      "filename": "ap3r_bg_profile_dream.webp",
+      "category": "background",
+      "pixel_size": [
+        1080,
+        1920
+      ],
+      "source": "Brightness-treated variation of ap3r_bg_games_palace",
+      "intended_use": "Profile hero background only; fade into solid panel below",
+      "sha256_prefix": "d1ef5537e78c71",
+      "alpha": false
+    },
+    {
+      "name": "ap3r_bg_voice_midnight",
+      "filename": "ap3r_bg_voice_midnight.webp",
+      "category": "background",
+      "pixel_size": [
+        1080,
+        1920
+      ],
+      "source": "New composition using existing vb_voice_background.webp",
+      "intended_use": "Subtle dark voice-room ambient backdrop; overlay real seats/chat",
+      "sha256_prefix": "47aeda32180cb1",
+      "alpha": false
+    },
+    {
+      "name": "ap3r_overlay_sparkle_particles",
+      "filename": "ap3r_overlay_sparkle_particles.webp",
+      "category": "effect",
+      "pixel_size": [
+        1080,
+        820
+      ],
+      "source": "Newly generated particle overlay",
+      "intended_use": "Transparent optional particle sheet; animate only if visible",
+      "sha256_prefix": "2a8ce0c8acadda",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_fx_gift_ambient_glow",
+      "filename": "ap3r_fx_gift_ambient_glow.webp",
+      "category": "effect",
+      "pixel_size": [
+        980,
+        430
+      ],
+      "source": "New transparent radial glow",
+      "intended_use": "Put behind existing chest illustration; not a real chest image",
+      "sha256_prefix": "5d313eae97313a",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_banner_home_festival",
+      "filename": "ap3r_banner_home_festival.webp",
+      "category": "banner",
+      "pixel_size": [
+        1600,
+        610
+      ],
+      "source": "New original composite with existing vb_character_royal_dice.webp and custom gradient/ornaments",
+      "intended_use": "Home featured festival",
+      "sha256_prefix": "f1c97f2df286bd",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_event_welcome",
+      "filename": "ap3r_event_welcome.webp",
+      "category": "banner",
+      "pixel_size": [
+        1280,
+        565
+      ],
+      "source": "New original composite with existing vb_character_space_werewolf.webp and custom gradient/ornaments",
+      "intended_use": "Welcome event / newcomer",
+      "sha256_prefix": "23deb00bf793d6",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_event_first_topup",
+      "filename": "ap3r_event_first_topup.webp",
+      "category": "banner",
+      "pixel_size": [
+        1280,
+        565
+      ],
+      "source": "New original composite with existing vb_gift_pack.webp and custom gradient/ornaments",
+      "intended_use": "First recharge",
+      "sha256_prefix": "890f451de4b4fe",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_event_starlight",
+      "filename": "ap3r_event_starlight.webp",
+      "category": "banner",
+      "pixel_size": [
+        1280,
+        565
+      ],
+      "source": "New original composite with existing vb_character_royal_dice.webp and custom gradient/ornaments",
+      "intended_use": "Starlight",
+      "sha256_prefix": "596ad806dc3aca",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_event_family",
+      "filename": "ap3r_event_family.webp",
+      "category": "banner",
+      "pixel_size": [
+        1280,
+        565
+      ],
+      "source": "New original composite with existing vb_vr_emblem_crown.webp and custom gradient/ornaments",
+      "intended_use": "Family festival",
+      "sha256_prefix": "f957e85c8c8ade",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_event_pk",
+      "filename": "ap3r_event_pk.webp",
+      "category": "banner",
+      "pixel_size": [
+        1280,
+        565
+      ],
+      "source": "New original composite with existing vb_character_whos_the_spy.webp and custom gradient/ornaments",
+      "intended_use": "PK Arena",
+      "sha256_prefix": "5637f44c7ade81",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_banner_voice_rooms",
+      "filename": "ap3r_banner_voice_rooms.webp",
+      "category": "banner",
+      "pixel_size": [
+        1380,
+        530
+      ],
+      "source": "New original composite with existing vb_vr_emblem_studio_mic.webp and custom gradient/ornaments",
+      "intended_use": "Voice discovery feature banner",
+      "sha256_prefix": "9b3747f740f14f",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_event_game_night",
+      "filename": "ap3r_event_game_night.webp",
+      "category": "banner",
+      "pixel_size": [
+        1280,
+        565
+      ],
+      "source": "New original composite with existing vb_character_oh_my_card.webp and custom gradient/ornaments",
+      "intended_use": "Game Night",
+      "sha256_prefix": "f54cc4597593d2",
+      "alpha": true
+    },
+    {
+      "name": "ap3r_fx_reward_pedestal",
+      "filename": "ap3r_fx_reward_pedestal.webp",
+      "category": "effect",
+      "pixel_size": [
+        1024,
+        430
+      ],
+      "source": "New transparent vector-like illustrated platform",
+      "intended_use": "Layer beneath gift box or claim modal, leave gift item interactive",
+      "sha256_prefix": "fe07db014bfab9",
+      "alpha": true
+    }
+  ],
+  "source_mapping": {
+    "GameLobbyScreen.kt": [
+      "ap3r_bg_games_palace",
+      "ap3r_banner_home_festival",
+      "ap3r_overlay_sparkle_particles"
+    ],
+    "EventCenterScreen.kt": [
+      "ap3r_bg_event_festival",
+      "ap3r_event_welcome",
+      "ap3r_event_first_topup",
+      "ap3r_event_starlight",
+      "ap3r_event_family",
+      "ap3r_event_pk",
+      "ap3r_event_game_night"
+    ],
+    "VoiceRoomListScreen.kt": [
+      "ap3r_banner_voice_rooms",
+      "ap3r_bg_voice_midnight"
+    ],
+    "LiveVoiceRoomScreen.kt": [
+      "ap3r_bg_voice_midnight",
+      "ap3r_overlay_sparkle_particles"
+    ],
+    "GiftPackOffersSheet.kt": [
+      "ap3r_fx_gift_ambient_glow",
+      "ap3r_fx_reward_pedestal"
+    ],
+    "MeScreen.kt": [
+      "ap3r_bg_profile_dream"
+    ]
+  },
+  "note": "The suite contains 1 newly generated original palace illustration and multiple disclosed derivative backgrounds; additional art is composed using the user-provided project assets. No claim that all generated assets are standalone 3D artwork."
+}

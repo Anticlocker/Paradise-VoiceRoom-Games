@@ -240,12 +240,24 @@ fun AuroraGamesBackground(
             .fillMaxSize()
             .background(CelestialNavy),
     ) {
-        // High-resolution celestial WebP background
+        // High-resolution celestial WebP background (ap3r_bg_games_palace)
         Image(
-            painter = painterResource(R.drawable.aurora3_bg_games),
+            painter = painterResource(R.drawable.ap3r_bg_games_palace),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
+        )
+
+        // Subtle sparkle particles overlay
+        Image(
+            painter = painterResource(R.drawable.ap3r_overlay_sparkle_particles),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(320.dp)
+                .align(Alignment.TopCenter),
+            contentScale = ContentScale.Crop,
+            alpha = starAlpha * 0.45f,
         )
 
         // Contrast Scrim + Soft Radial Vignette
@@ -419,7 +431,7 @@ fun AuroraVoiceRoomBackground(
             .background(CelestialNavy),
     ) {
         Image(
-            painter = painterResource(R.drawable.aurora3_bg_voice_room),
+            painter = painterResource(R.drawable.ap3r_bg_voice_midnight),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -473,7 +485,7 @@ fun AuroraProfileBackground(
             .background(CelestialNavy),
     ) {
         Image(
-            painter = painterResource(R.drawable.aurora3_bg_profile),
+            painter = painterResource(R.drawable.ap3r_bg_profile_dream),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -558,7 +570,7 @@ fun CelestialVoiceRoomBackground(
             .background(CelestialNavy),
     ) {
         Image(
-            painter = painterResource(R.drawable.aurora3_bg_voice_room),
+            painter = painterResource(R.drawable.ap3r_bg_voice_midnight),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -683,7 +695,7 @@ fun FestivalEventBackground(
             .background(CelestialNavy),
     ) {
         Image(
-            painter = painterResource(R.drawable.aurora3_bg_event),
+            painter = painterResource(R.drawable.ap3r_bg_event_festival),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -785,7 +797,7 @@ fun CelestialHeader(
     userName: String,
     userLevel: Int,
     coins: Long,
-    crystals: Long = 850L,
+    crystals: Long? = null,
     onAvatarClick: () -> Unit,
     onCoinsClick: () -> Unit,
     onCrystalsClick: () -> Unit,
@@ -795,9 +807,6 @@ fun CelestialHeader(
 ) {
     val formattedCoins = remember(coins) {
         NumberFormat.getIntegerInstance().format(coins)
-    }
-    val formattedCrystals = remember(crystals) {
-        NumberFormat.getIntegerInstance().format(crystals)
     }
 
     Row(
@@ -871,23 +880,27 @@ fun CelestialHeader(
 
         // 3. Gold Currency Pill
         CrystalCurrencyPill(
-            iconRes = R.drawable.aurora3_ic_coin,
+            iconRes = R.drawable.vb_coin,
             amount = formattedCoins,
             gradient = Brush.horizontalGradient(listOf(Color(0xFF38230D), Color(0xFF2A1608))),
             borderColor = RoyalGold,
             onClick = onCoinsClick,
         )
 
-        Spacer(Modifier.width(6.dp))
-
-        // 4. Crystal Diamond Currency Pill
-        CrystalCurrencyPill(
-            iconRes = R.drawable.aurora3_ic_diamond,
-            amount = formattedCrystals,
-            gradient = Brush.horizontalGradient(listOf(Color(0xFF0F2646), Color(0xFF141F3C))),
-            borderColor = CrystalBlue,
-            onClick = onCrystalsClick,
-        )
+        // 4. Crystal Diamond Currency Pill (only when user has verified crystal balance)
+        if (crystals != null) {
+            Spacer(Modifier.width(6.dp))
+            val formattedCrystals = remember(crystals) {
+                NumberFormat.getIntegerInstance().format(crystals)
+            }
+            CrystalCurrencyPill(
+                iconRes = R.drawable.aurora3_ic_diamond,
+                amount = formattedCrystals,
+                gradient = Brush.horizontalGradient(listOf(Color(0xFF0F2646), Color(0xFF141F3C))),
+                borderColor = CrystalBlue,
+                onClick = onCrystalsClick,
+            )
+        }
 
         Spacer(Modifier.width(8.dp))
 
@@ -1533,13 +1546,33 @@ fun PremiumGiftPack(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // 3D Treasure Box Icon
-            Image(
-                painter = painterResource(R.drawable.aurora3_gift_royal),
-                contentDescription = "Gift Box",
+            // 3D Treasure Box Presentation with Ambient Glow & Pedestal
+            Box(
                 modifier = Modifier.size(64.dp),
-                contentScale = ContentScale.Fit,
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ap3r_fx_gift_ambient_glow),
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    contentScale = ContentScale.Fit,
+                )
+                Image(
+                    painter = painterResource(R.drawable.ap3r_fx_reward_pedestal),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(54.dp)
+                        .align(Alignment.BottomCenter)
+                        .offset(y = 6.dp),
+                    contentScale = ContentScale.Fit,
+                )
+                Image(
+                    painter = painterResource(R.drawable.vb_gift_pack),
+                    contentDescription = "Gift Box",
+                    modifier = Modifier.size(52.dp),
+                    contentScale = ContentScale.Fit,
+                )
+            }
 
             Spacer(Modifier.width(12.dp))
 

@@ -82,7 +82,7 @@ private fun AuroraHomeHeader(nav: NavHostController, profile: UserProfile) {
         userName = profile.name,
         userLevel = profile.level,
         coins = profile.coins,
-        crystals = 850L,
+        crystals = null, // Verified wallet balance: crystals safely omitted until supported by backend wallet
         onAvatarClick = { nav.navigateSafe(Routes.ME) },
         onCoinsClick = { nav.navigateSafe(Routes.WALLET_SETTINGS) },
         onCrystalsClick = { nav.navigateSafe(Routes.TOPUP) },
@@ -190,12 +190,15 @@ private fun AuroraGameRoomsBanner(nav: NavHostController) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  4. Section A — Hero Featured Game Card (Sunset Fantasy + Royal Gold)
+//  4. Section A — Hero Featured Game & Festival Carousel
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun HeroFeaturedGameCard(
     onPlayClick: () -> Unit,
+    onFestivalClick: () -> Unit,
 ) {
+    var activeSlide by rememberSaveable { mutableStateOf(0) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -212,91 +215,194 @@ private fun HeroFeaturedGameCard(
                 )
             )
             .border(1.2.dp, com.sundram.weplay.ui.theme.RoyalGold.copy(alpha = 0.65f), RoundedCornerShape(22.dp))
-            .bounceClick(scaleDown = 0.98f, onClick = onPlayClick),
+            .bounceClick(scaleDown = 0.98f, onClick = {
+                if (activeSlide == 0) onPlayClick() else onFestivalClick()
+            }),
     ) {
-        // Decorative radial highlight
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(160.dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.20f), Color.Transparent)
-                    ),
-                    CircleShape
-                ),
-        )
-
-        // Left Content: Tag + Title + Subtitle + Action Button
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 18.dp, top = 14.dp, bottom = 14.dp)
-                .fillMaxWidth(0.58f),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            // Featured Tag
+        if (activeSlide == 0) {
+            // Slide 0: Petrol Pump Simulator
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-            ) {
-                Text(
-                    text = "⚡ FEATURED GAME",
-                    color = com.sundram.weplay.ui.theme.DeepInk,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.5.sp,
-                )
-            }
+                    .align(Alignment.TopEnd)
+                    .size(160.dp)
+                    .background(
+                        Brush.radialGradient(
+                            listOf(com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.20f), Color.Transparent)
+                        ),
+                        CircleShape
+                    ),
+            )
 
-            Column {
-                Text(
-                    text = "Petrol Pump Simulator",
-                    color = com.sundram.weplay.ui.theme.CloudWhite,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    lineHeight = 21.sp,
-                )
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    text = "Refuel, manage & upgrade your speed station",
-                    color = com.sundram.weplay.ui.theme.DreamLavender,
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp,
-                    maxLines = 2,
-                )
-            }
-
-            // Play Action Pill
-            Row(
+            Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
-                    .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite, RoundedCornerShape(14.dp))
-                    .padding(horizontal = 14.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .align(Alignment.CenterStart)
+                    .padding(start = 18.dp, top = 14.dp, bottom = 14.dp)
+                    .fillMaxWidth(0.58f),
+                verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = "▶ Play Now",
-                    color = com.sundram.weplay.ui.theme.DeepInk,
-                    fontSize = 11.5.sp,
-                    fontWeight = FontWeight.Black,
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = "⚡ FEATURED GAME",
+                        color = com.sundram.weplay.ui.theme.DeepInk,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp,
+                    )
+                }
+
+                Column {
+                    Text(
+                        text = "Petrol Pump Simulator",
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        lineHeight = 21.sp,
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "Refuel, manage & upgrade your speed station",
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 2,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "▶ Play Now",
+                        color = com.sundram.weplay.ui.theme.DeepInk,
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
+            }
+
+            Image(
+                painter = painterResource(R.drawable.vb_character_petrol_pump),
+                contentDescription = "Petrol Pump Simulator",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(138.dp)
+                    .padding(end = 6.dp, bottom = 4.dp),
+                contentScale = ContentScale.Fit,
+            )
+        } else {
+            // Slide 1: Featured Celestial Festival Banner (ap3r_banner_home_festival)
+            Image(
+                painter = painterResource(R.drawable.ap3r_banner_home_festival),
+                contentDescription = "Festival Gala",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                com.sundram.weplay.ui.theme.CelestialNavy.copy(alpha = 0.85f),
+                                Color.Transparent,
+                            )
+                        )
+                    )
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 18.dp, top = 14.dp, bottom = 14.dp)
+                    .fillMaxWidth(0.60f),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(com.sundram.weplay.ui.theme.SunsetRose)
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = "✨ CELESTIAL FESTIVAL",
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp,
+                    )
+                }
+
+                Column {
+                    Text(
+                        text = "Starlight & Dice Gala",
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        lineHeight = 21.sp,
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "Celebrate starlight week with royal dice challenges",
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 2,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.sunsetFantasy)
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "★ Join Gala",
+                        color = Color.White,
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
             }
         }
 
-        // Right Illustration
-        Image(
-            painter = painterResource(R.drawable.vb_character_petrol_pump),
-            contentDescription = "Petrol Pump Simulator",
+        // Carousel dots at bottom-center
+        Row(
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .size(138.dp)
-                .padding(end = 6.dp, bottom = 4.dp),
-            contentScale = ContentScale.Fit,
-        )
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(if (activeSlide == 0) 16.dp else 6.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(if (activeSlide == 0) com.sundram.weplay.ui.theme.RoyalGold else Color.White.copy(alpha = 0.35f))
+                    .clickable { activeSlide = 0 }
+            )
+            Box(
+                modifier = Modifier
+                    .width(if (activeSlide == 1) 16.dp else 6.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(if (activeSlide == 1) com.sundram.weplay.ui.theme.RoyalGold else Color.White.copy(alpha = 0.35f))
+                    .clickable { activeSlide = 1 }
+            )
+        }
     }
 }
 
@@ -1011,10 +1117,11 @@ fun GamesHomeScreen(
                     }
                 }
             } else {
-                // ── Section 5: Section A — Hero Featured Game ──
+                // ── Section 5: Section A — Hero Featured Game & Festival ──
                 item {
                     HeroFeaturedGameCard(
-                        onPlayClick = { comingSoon("Petrol Pump Simulator") }
+                        onPlayClick = { comingSoon("Petrol Pump Simulator") },
+                        onFestivalClick = { nav.navigateSafe(Routes.EVENT_CENTER) },
                     )
                 }
 

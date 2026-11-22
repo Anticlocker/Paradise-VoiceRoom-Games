@@ -204,13 +204,34 @@ fun GiftPackOffersSheet(
                     }
                 }
 
-                // Main 3D Gift Box Body with Animated Lid
-                Box(contentAlignment = Alignment.Center) {
+                // Main 3D Gift Box Body with Ambient Glow & Reward Pedestal
+                Box(
+                    modifier = Modifier.size(110.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // Ambient glow layer
                     Image(
-                        painter = painterResource(R.drawable.ic_gift_box_3d),
+                        painter = painterResource(R.drawable.ap3r_fx_gift_ambient_glow),
+                        contentDescription = null,
+                        modifier = Modifier.size(110.dp),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    )
+                    // Pedestal layer
+                    Image(
+                        painter = painterResource(R.drawable.ap3r_fx_reward_pedestal),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(96.dp)
+                            .align(Alignment.BottomCenter)
+                            .offset(y = 12.dp),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    )
+                    // Animated 3D Gift Chest
+                    Image(
+                        painter = painterResource(R.drawable.vb_gift_pack),
                         contentDescription = "3D Gift Box",
                         modifier = Modifier
-                            .size(76.dp)
+                            .size(80.dp)
                             .offset(y = (lidOffset.value * 0.3f).dp)
                             .rotate(lidRotation.value * 0.2f),
                     )

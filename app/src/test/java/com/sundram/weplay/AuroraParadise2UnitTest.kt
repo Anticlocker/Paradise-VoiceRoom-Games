@@ -104,4 +104,21 @@ class AuroraParadise2UnitTest {
         )
         assertEquals("Must preserve all 40 navigation routes", 40, allRoutes.size)
     }
+
+    @Test
+    fun testEventModelRepoSpecificArtworkMapped() {
+        val events = com.sundram.weplay.data.EventRepository.ALL_EVENTS
+        val welcome = events.find { it.id == "evt_welcome" }
+        val topup = events.find { it.id == "evt_first_topup" }
+        val starlight = events.find { it.id == "evt_starlight" }
+        val family = events.find { it.id == "evt_family_fest" }
+        val pk = events.find { it.id == "evt_royal_arena" }
+
+        org.junit.Assert.assertNotNull(welcome)
+        assertEquals(R.drawable.ap3r_event_welcome, welcome?.coverRes)
+        assertEquals(R.drawable.ap3r_event_first_topup, topup?.coverRes)
+        assertEquals(R.drawable.ap3r_event_starlight, starlight?.coverRes)
+        assertEquals(R.drawable.ap3r_event_family, family?.coverRes)
+        assertEquals(R.drawable.ap3r_event_pk, pk?.coverRes)
+    }
 }

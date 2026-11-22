@@ -512,6 +512,15 @@ private fun TonightsSpotlightCard(
             .bounceClick(scaleDown = 0.98f, onClick = onExploreClick)
             .padding(16.dp),
     ) {
+        // Voice Discovery Backdrop Banner (ap3r_banner_voice_rooms)
+        Image(
+            painter = painterResource(R.drawable.ap3r_banner_voice_rooms),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.32f,
+        )
+
         // Decorative radial overlay
         Box(
             modifier = Modifier
