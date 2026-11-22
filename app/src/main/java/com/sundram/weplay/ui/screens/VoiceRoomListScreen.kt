@@ -59,7 +59,7 @@ import com.sundram.weplay.ui.theme.AuroraBackground
 import com.sundram.weplay.ui.theme.AuroraBorder
 import com.sundram.weplay.ui.theme.AuroraCoral
 import com.sundram.weplay.ui.theme.AuroraCyan
-import com.sundram.weplay.ui.theme.AuroraGamesBackground
+import com.sundram.weplay.ui.theme.AuroraVoiceRoomBackground
 import com.sundram.weplay.ui.theme.AuroraGold
 import com.sundram.weplay.ui.theme.AuroraGradients
 import com.sundram.weplay.ui.theme.AuroraLavender
@@ -195,7 +195,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
         }
     }
 
-    AuroraGamesBackground(
+    AuroraVoiceRoomBackground(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()

@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="128dp"
+    android:height="128dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+    <!-- Outer faint glow ring -->
+    <path
+        android:strokeColor="#B89BFF"
+        android:strokeAlpha="0.24"
+        android:strokeWidth="10"
+        android:pathData="M64,64 m-44,0 a44,44 0 1,0 88,0 a44,44 0 1,0 -88,0" />
+    <!-- Inner metallic ring -->
+    <path
+        android:strokeColor="#B89BFF"
+        android:strokeWidth="7"
+        android:pathData="M64,64 m-38,0 a38,38 0 1,0 76,0 a38,38 0 1,0 -76,0" />
+    <!-- Crest star at top -->
+    <path
+        android:fillColor="#B89BFF"
+        android:pathData="M64,4 L70,20 L86,26 L70,32 L64,48 L58,32 L42,26 L58,20 Z" />
+    <!-- Sparkle accents -->
+    <path
+        android:fillColor="#EDE4FF"
+        android:pathData="M26,94 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M104,90 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+</vector>

@@ -69,6 +69,7 @@ import com.sundram.weplay.ui.theme.Stroke
 import com.sundram.weplay.ui.theme.MintGreen
 import com.sundram.weplay.ui.theme.TextMuted
 import com.sundram.weplay.ui.theme.Divider
+import com.sundram.weplay.ui.theme.AuroraChatBackground
 
 private enum class MsgTab { CHATS, PEOPLE, ALERTS }
 
@@ -118,12 +119,14 @@ fun MessagesScreen(
         onUnreadChange(snapshot.unreadTotal)
     }
 
-    Column(
+    AuroraChatBackground(
         modifier = Modifier
             .fillMaxSize()
-            .background(PageWhite)
             .padding(pad),
     ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
         // ---------- header ----------
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -463,6 +466,7 @@ fun MessagesScreen(
             }
         }
     }
+}
 
     // ---------- dialogs ----------
     confirmDecline?.let { u ->

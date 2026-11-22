@@ -73,275 +73,124 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  1. Distinctive Aurora Paradise Header with Premium Coin Wallet & Star Icon
+//  1. Distinctive Aurora Paradise 3.0 Header with Premium Coins & Diamond Crystals
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun AuroraHomeHeader(nav: NavHostController, profile: UserProfile) {
-    val formattedCoins = remember(profile.coins) {
-        NumberFormat.getIntegerInstance().format(profile.coins)
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        // User Profile Avatar with subtle glow ring and spring touch feedback
-        AnimatedAvatar(
-            avatar = getAvatarById(profile.avatarId),
-            size = 46.dp,
-            animate = true,
-            onClick = { nav.navigateSafe(Routes.ME) },
-        )
-
-        Spacer(Modifier.width(10.dp))
-
-        // Personalized Welcome Greeting
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Welcome back 👋",
-                color = AuroraTextSecondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-            )
-            Text(
-                text = profile.name,
-                color = AuroraTextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-
-        Spacer(Modifier.width(6.dp))
-
-        // B6: Premium Coin Wallet Pill [ 🪙 1,250 + ]
-        Row(
-            modifier = Modifier
-                .height(34.dp)
-                .shadow(1.dp, RoundedCornerShape(17.dp))
-                .clip(RoundedCornerShape(17.dp))
-                .background(Color(0xFFFFFDF8)) // Champagne / Pearl white
-                .border(1.dp, AuroraBorder, RoundedCornerShape(17.dp))
-                .padding(horizontal = 7.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // Tap coin balance -> Wallet
-            Row(
-                modifier = Modifier
-                    .bounceClick { nav.navigateSafe(Routes.WALLET_SETTINGS) },
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_gold_coin_3d),
-                    contentDescription = "Coins",
-                    modifier = Modifier.size(20.dp),
-                )
-                Spacer(Modifier.width(5.dp))
-                Text(
-                    text = formattedCoins,
-                    color = AuroraTextPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    maxLines = 1,
-                )
-            }
-
-            Spacer(Modifier.width(6.dp))
-
-            // Tap Plus -> Top Up
-            Box(
-                modifier = Modifier
-                    .size(18.dp)
-                    .clip(CircleShape)
-                    .background(AuroraGradients.sunsetFantasy)
-                    .bounceClick { nav.navigateSafe(Routes.TOPUP) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "+",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        }
-
-        Spacer(Modifier.width(8.dp))
-
-        // B2: Upper-Right Star Icon -> Event Center
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .shadow(1.dp, CircleShape)
-                .clip(CircleShape)
-                .background(AuroraSurface)
-                .border(1.dp, AuroraBorder, CircleShape)
-                .bounceClick { nav.navigateSafe(Routes.EVENT_CENTER) },
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.ic_star_event),
-                contentDescription = "Event Center",
-                modifier = Modifier.size(18.dp),
-            )
-        }
-
-        Spacer(Modifier.width(6.dp))
-
-        // Notifications Shortcut Button
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .shadow(1.dp, CircleShape)
-                .clip(CircleShape)
-                .background(AuroraSurface)
-                .border(1.dp, AuroraBorder, CircleShape)
-                .bounceClick { nav.navigateSafe(Routes.NOTIFICATIONS) },
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_bell),
-                contentDescription = "Notifications",
-                tint = AuroraTextPrimary,
-                modifier = Modifier.size(17.dp),
-            )
-        }
-    }
+    com.sundram.weplay.ui.theme.CelestialHeader(
+        avatarRes = getAvatarById(profile.avatarId).drawableRes,
+        userName = profile.name,
+        userLevel = profile.level,
+        coins = profile.coins,
+        crystals = 850L,
+        onAvatarClick = { nav.navigateSafe(Routes.ME) },
+        onCoinsClick = { nav.navigateSafe(Routes.WALLET_SETTINGS) },
+        onCrystalsClick = { nav.navigateSafe(Routes.TOPUP) },
+        onEventsClick = { nav.navigateSafe(Routes.EVENT_CENTER) },
+        onNotificationsClick = { nav.navigateSafe(Routes.NOTIFICATIONS) },
+    )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  2. B1: Rebalanced 3-Action Quick Shortcuts (VIP Lounge removed from header)
+//  2. Rebalanced Quick Shortcuts with Celestial 3D Styling
 // ─────────────────────────────────────────────────────────────────────────────
 private data class AuroraShortcutItem(
     val title: String,
     val subtitle: String,
     val iconRes: Int,
-    val tintBg: Color,
     val route: String,
+    val badge: String? = null,
 )
 
 @Composable
 private fun AuroraShortcutsRow(nav: NavHostController) {
-    // Exactly 3 balanced primary shortcuts (Ranks, Tasks, Friends)
     val shortcuts = listOf(
-        AuroraShortcutItem("Ranks", "Leaderboard", R.drawable.ap_ic_trophy, Color(0xFFF0ECFF), Routes.RANKING),
-        AuroraShortcutItem("Tasks", "Missions", R.drawable.ap_ic_shield, Color(0xFFE2F8FA), Routes.TASKS),
-        AuroraShortcutItem("Friends", "Social Hub", R.drawable.ap_ic_chat, Color(0xFFFFF0EC), Routes.MSG),
+        AuroraShortcutItem("Ranks", "Leaderboard", R.drawable.ap_ic_trophy, Routes.RANKING),
+        AuroraShortcutItem("Tasks", "Daily", R.drawable.ap_ic_shield, Routes.TASKS),
+        AuroraShortcutItem("Social", "Chats", R.drawable.ap_ic_chat, Routes.MSG),
+        AuroraShortcutItem("Events", "Festival", R.drawable.aurora3_ic_nav_star, Routes.EVENT_CENTER, "HOT"),
     )
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         shortcuts.forEach { item ->
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .shadow(2.dp, RoundedCornerShape(18.dp))
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(AuroraSurface)
-                    .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
-                    .bounceClick { nav.navigateSafe(item.route) }
-                    .padding(vertical = 10.dp, horizontal = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(CircleShape)
-                        .background(item.tintBg),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        painter = painterResource(item.iconRes),
-                        contentDescription = item.title,
-                        modifier = Modifier.size(28.dp),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = item.title,
-                    color = AuroraTextPrimary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = item.subtitle,
-                    color = AuroraTextSecondary,
-                    fontSize = 10.sp,
-                    maxLines = 1,
-                )
-            }
+            com.sundram.weplay.ui.theme.PremiumShortcut(
+                title = item.title,
+                subtitle = item.subtitle,
+                iconRes = item.iconRes,
+                badgeText = item.badge,
+                onClick = { nav.navigateSafe(item.route) },
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  3. B4: Compact Multiple Game Rooms Action Bar
+//  3. Compact Glossy Game Rooms Banner
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun AuroraGameRoomsBanner(nav: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
-            .shadow(1.dp, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
+            .height(52.dp)
+            .shadow(2.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.horizontalGradient(
                     listOf(
-                        Color(0xFFFFECE5),
-                        Color(0xFFF0ECFF),
+                        Color(0xFF2B165C),
+                        Color(0xFF1B1242),
                     )
                 )
             )
-            .border(1.dp, AuroraBorder, RoundedCornerShape(16.dp))
+            .border(1.2.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
             .bounceClick { nav.navigateSafe(Routes.GAME_ROOMS) }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
             painter = painterResource(R.drawable.vb_room_door),
             contentDescription = null,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(24.dp),
         )
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Multiplayer Game Rooms",
-                color = AuroraTextPrimary,
-                fontSize = 13.sp,
+                color = com.sundram.weplay.ui.theme.CloudWhite,
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Custom matches, lobbies & voice parties",
-                color = AuroraTextSecondary,
+                text = "Custom lobbies, voice parties & competitions",
+                color = com.sundram.weplay.ui.theme.DreamLavender,
                 fontSize = 10.sp,
             )
         }
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(11.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .background(AuroraGradients.sunsetFantasy)
-                .padding(horizontal = 11.dp, vertical = 4.dp),
+                .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .padding(horizontal = 12.dp, vertical = 5.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "Browse ›",
                 color = Color.White,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
             )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  4. Section A — Hero Featured Game Card (Sunset Fantasy + Aurora Cyan)
+//  4. Section A — Hero Featured Game Card (Sunset Fantasy + Royal Gold)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun HeroFeaturedGameCard(
@@ -350,19 +199,19 @@ private fun HeroFeaturedGameCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(152.dp)
-            .shadow(4.dp, RoundedCornerShape(22.dp))
+            .height(156.dp)
+            .shadow(6.dp, RoundedCornerShape(22.dp))
             .clip(RoundedCornerShape(22.dp))
             .background(
-                Brush.linearGradient(
+                Brush.horizontalGradient(
                     listOf(
-                        Color(0xFFFF7A68),
-                        Color(0xFFA17BEB),
-                        Color(0xFF42CFD8),
+                        Color(0xFF381568),
+                        Color(0xFF5A22A8),
+                        Color(0xFF24104B),
                     )
                 )
             )
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(22.dp))
+            .border(1.2.dp, com.sundram.weplay.ui.theme.RoyalGold.copy(alpha = 0.65f), RoundedCornerShape(22.dp))
             .bounceClick(scaleDown = 0.98f, onClick = onPlayClick),
     ) {
         // Decorative radial highlight
@@ -370,7 +219,12 @@ private fun HeroFeaturedGameCard(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .size(160.dp)
-                .background(Color.White.copy(alpha = 0.10f), CircleShape),
+                .background(
+                    Brush.radialGradient(
+                        listOf(com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.20f), Color.Transparent)
+                    ),
+                    CircleShape
+                ),
         )
 
         // Left Content: Tag + Title + Subtitle + Action Button
@@ -385,12 +239,12 @@ private fun HeroFeaturedGameCard(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(AuroraGold)
+                    .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
                     .padding(horizontal = 8.dp, vertical = 2.dp),
             ) {
                 Text(
                     text = "⚡ FEATURED GAME",
-                    color = Color(0xFF4A3200),
+                    color = com.sundram.weplay.ui.theme.DeepInk,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.5.sp,
@@ -400,7 +254,7 @@ private fun HeroFeaturedGameCard(
             Column {
                 Text(
                     text = "Petrol Pump Simulator",
-                    color = Color.White,
+                    color = com.sundram.weplay.ui.theme.CloudWhite,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.ExtraBold,
                     lineHeight = 21.sp,
@@ -408,7 +262,7 @@ private fun HeroFeaturedGameCard(
                 Spacer(Modifier.height(3.dp))
                 Text(
                     text = "Refuel, manage & upgrade your speed station",
-                    color = Color.White.copy(alpha = 0.90f),
+                    color = com.sundram.weplay.ui.theme.DreamLavender,
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     maxLines = 2,
@@ -419,15 +273,16 @@ private fun HeroFeaturedGameCard(
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White)
-                    .padding(horizontal = 12.dp, vertical = 5.dp),
+                    .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
+                    .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite, RoundedCornerShape(14.dp))
+                    .padding(horizontal = 14.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "▶ Play Now",
-                    color = AuroraOrchid,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.ExtraBold,
+                    color = com.sundram.weplay.ui.theme.DeepInk,
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Black,
                 )
             }
         }
@@ -446,7 +301,7 @@ private fun HeroFeaturedGameCard(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  5. Section B — Popular Games (Dreamy Sky & Sunset Fantasy Cards)
+//  5. Section B — Popular Games (Deep Celestial Violet & Rose Cards)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun PopularGamesRow(
@@ -467,12 +322,12 @@ private fun PopularGamesRow(
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            Color(0xFF26B2C8),
-                            Color(0xFF6E74E5),
+                            Color(0xFF142252),
+                            Color(0xFF2C1E62),
                         )
                     )
                 )
-                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
+                .border(1.dp, com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onSpyClick),
         ) {
             Column(
@@ -484,23 +339,24 @@ private fun PopularGamesRow(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color.White.copy(alpha = 0.25f))
+                        .background(com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.25f))
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.CrystalBlue, RoundedCornerShape(6.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text("🔍 Mystery", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("🔍 Mystery", color = com.sundram.weplay.ui.theme.CrystalBlue, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Column(modifier = Modifier.fillMaxWidth(0.62f)) {
                     Text(
                         text = "Who's the Spy",
-                        color = Color.White,
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         lineHeight = 17.sp,
                     )
                     Text(
                         text = "Pass & play",
-                        color = Color.White.copy(alpha = 0.90f),
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
                         fontSize = 10.sp,
                     )
                 }
@@ -527,12 +383,12 @@ private fun PopularGamesRow(
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            Color(0xFFFF7A68),
-                            Color(0xFFF477AC),
+                            Color(0xFF45144A),
+                            Color(0xFF22113F),
                         )
                     )
                 )
-                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
+                .border(1.dp, com.sundram.weplay.ui.theme.SunsetRose.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onPaintClick),
         ) {
             Column(
@@ -544,23 +400,24 @@ private fun PopularGamesRow(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(AuroraGold)
+                        .background(com.sundram.weplay.ui.theme.SunsetRose.copy(alpha = 0.25f))
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.SunsetRose, RoundedCornerShape(6.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text("🎨 New", color = Color(0xFF4A3200), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("🎨 New", color = com.sundram.weplay.ui.theme.SunsetRose, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Column(modifier = Modifier.fillMaxWidth(0.62f)) {
                     Text(
                         text = "Paint to Hide",
-                        color = Color.White,
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         lineHeight = 17.sp,
                     )
                     Text(
                         text = "Graffiti party",
-                        color = Color.White.copy(alpha = 0.90f),
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
                         fontSize = 10.sp,
                     )
                 }
@@ -580,7 +437,7 @@ private fun PopularGamesRow(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  6. Section C — Explore More Games (Aurora Ivory Card Grid)
+//  6. Section C — Explore More Games (Celestial Card Grid)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun AuroraGameGridCard(
@@ -595,11 +452,11 @@ private fun AuroraGameGridCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(112.dp)
+            .height(116.dp)
             .shadow(2.dp, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
-            .background(AuroraSurface)
-            .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
+            .background(AuroraGradients.celestialCard)
+            .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.30f), RoundedCornerShape(18.dp))
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
             .padding(12.dp),
     ) {
@@ -613,7 +470,8 @@ private fun AuroraGameGridCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(accentColor.copy(alpha = 0.15f))
+                        .background(accentColor.copy(alpha = 0.20f))
+                        .border(0.6.dp, accentColor, RoundedCornerShape(4.dp))
                         .padding(horizontal = 5.dp, vertical = 2.dp),
                 ) {
                     Text(badgeText, color = accentColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
@@ -623,7 +481,7 @@ private fun AuroraGameGridCard(
 
             Text(
                 text = title,
-                color = AuroraTextPrimary,
+                color = com.sundram.weplay.ui.theme.CloudWhite,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -634,7 +492,7 @@ private fun AuroraGameGridCard(
 
             Text(
                 text = genre,
-                color = AuroraTextSecondary,
+                color = com.sundram.weplay.ui.theme.DreamLavender,
                 fontSize = 10.sp,
                 maxLines = 1,
             )
@@ -647,7 +505,7 @@ private fun AuroraGameGridCard(
                     .size(66.dp)
                     .shadow(1.dp, RoundedCornerShape(14.dp))
                     .clip(RoundedCornerShape(14.dp))
-                    .border(1.dp, AuroraBorder, RoundedCornerShape(14.dp)),
+                    .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(14.dp)),
             ) {
                 Image(
                     painter = painterResource(illustrationRes),
@@ -817,15 +675,14 @@ private fun ExploreFeedItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(18.dp))
+            .shadow(2.dp, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
-            .background(AuroraSurface)
-            .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
+            .background(AuroraGradients.celestialCard)
+            .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.28f), RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Avatar with Equipped Animated Profile Frame from FrameTier
         Box(
             modifier = Modifier.bounceClick(onClick = onClick),
             contentAlignment = Alignment.Center,
@@ -846,7 +703,7 @@ private fun ExploreFeedItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = user.name,
-                    color = AuroraTextPrimary,
+                    color = com.sundram.weplay.ui.theme.CloudWhite,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -856,28 +713,26 @@ private fun ExploreFeedItem(
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = if (user.gender == "F") "♀" else "♂",
-                    color = if (user.gender == "F") AuroraRose else AuroraCyan,
+                    color = if (user.gender == "F") com.sundram.weplay.ui.theme.SunsetRose else com.sundram.weplay.ui.theme.CrystalBlue,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.width(6.dp))
 
-                // Level Badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(AuroraGold)
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
                         .padding(horizontal = 4.dp, vertical = 1.dp),
                 ) {
                     Text(
                         text = "Lv.${user.level}",
-                        color = Color.Black,
+                        color = com.sundram.weplay.ui.theme.DeepInk,
                         fontSize = 8.sp,
                         fontWeight = FontWeight.ExtraBold,
                     )
                 }
 
-                // Verified Online Green Dot ONLY when confirmed online
                 if (user.isOnline) {
                     Spacer(Modifier.width(6.dp))
                     Box(
@@ -893,7 +748,7 @@ private fun ExploreFeedItem(
 
             Text(
                 text = user.bio,
-                color = AuroraTextSecondary,
+                color = com.sundram.weplay.ui.theme.DreamLavender,
                 fontSize = 11.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -901,17 +756,16 @@ private fun ExploreFeedItem(
 
             Spacer(Modifier.height(4.dp))
 
-            // Status Chip
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (user.isOnline) Color(0xFFE8F5E9) else AuroraBackground)
-                    .border(0.5.dp, if (user.isOnline) Color(0xFFC8E6C9) else AuroraBorder, RoundedCornerShape(6.dp))
+                    .background(if (user.isOnline) Color(0xFF133420) else com.sundram.weplay.ui.theme.DeepInk)
+                    .border(0.6.dp, if (user.isOnline) Color(0xFF00E676) else com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
                 Text(
                     text = user.statusText,
-                    color = if (user.isOnline) Color(0xFF2E7D32) else AuroraTextSecondary,
+                    color = if (user.isOnline) Color(0xFF69F0AE) else com.sundram.weplay.ui.theme.DreamLavender,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -920,36 +774,33 @@ private fun ExploreFeedItem(
 
         Spacer(Modifier.width(8.dp))
 
-        // Interaction Actions: Follow / Chat
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            // Follow Button
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(if (isFollowed) AuroraBackground else AuroraOrchid)
-                    .border(1.dp, if (isFollowed) AuroraBorder else Color.Transparent, RoundedCornerShape(12.dp))
+                    .background(if (isFollowed) com.sundram.weplay.ui.theme.DeepInk else com.sundram.weplay.ui.theme.RoyalViolet)
+                    .border(1.dp, if (isFollowed) com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.4f) else Color.Transparent, RoundedCornerShape(12.dp))
                     .clickable { isFollowed = !isFollowed }
                     .padding(horizontal = 11.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = if (isFollowed) "Following" else "Follow",
-                    color = if (isFollowed) AuroraTextSecondary else Color.White,
+                    color = if (isFollowed) com.sundram.weplay.ui.theme.DreamLavender else Color.White,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
 
-            // Message Button
             Box(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(AuroraBackground)
-                    .border(1.dp, AuroraBorder, CircleShape)
+                    .background(com.sundram.weplay.ui.theme.DeepInk)
+                    .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f), CircleShape)
                     .clickable(onClick = onMessageClick),
                 contentAlignment = Alignment.Center,
             ) {
@@ -1256,7 +1107,18 @@ fun GamesHomeScreen(
                     }
                 }
 
-                // ── Section 8: B5: Community Players with Animated Frames & Real Profiles ──
+                // ── Section 8: Premium 3D Gift Pack Treasure Chest ──
+                item {
+                    com.sundram.weplay.ui.theme.PremiumGiftPack(
+                        countdownText = "47:59:12",
+                        offerTitle = "Royal Starter Chest",
+                        rewardAmount = "5,000",
+                        priceText = "$0.99 ›",
+                        onBuyClick = { showGiftPackSheet = true },
+                    )
+                }
+
+                // ── Section 9: Community Players with Animated Frames & Real Profiles ──
                 item {
                     Spacer(Modifier.height(6.dp))
                     Column(modifier = Modifier.padding(horizontal = 2.dp)) {

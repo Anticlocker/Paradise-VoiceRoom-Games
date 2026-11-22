@@ -1156,9 +1156,9 @@ private fun AuroraHostSeat(
                 )
             }
 
-            // Royal Golden Host Frame Overlay
+            // Royal Golden Host Seat Ring Overlay (Aurora 3.0)
             Image(
-                painter = painterResource(R.drawable.vb_vr_frame_host),
+                painter = painterResource(R.drawable.aurora3_seat_gold),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit,
@@ -1467,9 +1467,15 @@ private fun AuroraSeatView(
                 }
             } else {
                 // Distinct Empty / Locked Seat Graphic with Seat Number & Joining Indicator
+                Image(
+                    painter = painterResource(if (seatIndex % 2 == 0) R.drawable.aurora3_seat_violet else R.drawable.aurora3_seat_cyan),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                )
                 Box(
                     modifier = Modifier
-                        .size((size.value * 0.78f).dp)
+                        .size((size.value * 0.74f).dp)
                         .clip(CircleShape)
                         .background(Color(0x33281E48))
                         .border(

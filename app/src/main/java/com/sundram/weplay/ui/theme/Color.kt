@@ -194,7 +194,7 @@ val VyboraBorder        = Color(0xFFEAE6F3)
 val Midnight       = androidx.compose.ui.graphics.Color(0xFF0B0920)
 val DeepPurple     = androidx.compose.ui.graphics.Color(0xFF17112F)
 val SurfacePurple  = androidx.compose.ui.graphics.Color(0xFF241A45)
-val RoyalViolet    = androidx.compose.ui.graphics.Color(0xFF8257FF)
+// RoyalViolet is defined in AuroraParadise.kt for the Aurora Paradise 3.0 theme
 val ElectricPurple = androidx.compose.ui.graphics.Color(0xFFA56CFF)
 val SoftLavender   = androidx.compose.ui.graphics.Color(0xFFD9C5FF)
 val PremiumGold    = androidx.compose.ui.graphics.Color(0xFFFFD27D)

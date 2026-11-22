@@ -1,0 +1,17 @@
+{
+  "palette": {
+    "navy": "#11134A",
+    "violet": "#5423B7",
+    "mystic": "#7435D9",
+    "lavender": "#B89BFF",
+    "cyan": "#54CFFF",
+    "rose": "#FF78C4",
+    "gold": "#FFD36B",
+    "white": "#F8F1FF"
+  },
+  "cornerRadiusDp": {
+    "card": 22,
+    "pill": 40
+  },
+  "note": "Artwork is an original generated concept pack; tune contrast and performance on devices."
+}

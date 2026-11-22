@@ -10,6 +10,15 @@ import com.sundram.weplay.ui.theme.DeepMidnight
 import com.sundram.weplay.ui.theme.DreamLavender
 import com.sundram.weplay.ui.theme.PearlWhite
 import com.sundram.weplay.ui.theme.SoftPeach
+import com.sundram.weplay.ui.theme.CelestialNavy
+import com.sundram.weplay.ui.theme.RoyalViolet
+import com.sundram.weplay.ui.theme.MysticPurple
+import com.sundram.weplay.ui.theme.CrystalBlue
+import com.sundram.weplay.ui.theme.SunsetRose
+import com.sundram.weplay.ui.theme.RoyalGold
+import com.sundram.weplay.ui.theme.SoftGold
+import com.sundram.weplay.ui.theme.CloudWhite
+import com.sundram.weplay.ui.theme.DeepInk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -17,14 +26,24 @@ import org.junit.Test
 class AuroraParadise2UnitTest {
 
     @Test
+    fun testAuroraParadise3ColorPaletteValues() {
+        assertEquals("Celestial Navy must be #11134A", Color(0xFF11134A), CelestialNavy)
+        assertEquals("Royal Violet must be #5423B7", Color(0xFF5423B7), RoyalViolet)
+        assertEquals("Mystic Purple must be #7435D9", Color(0xFF7435D9), MysticPurple)
+        assertEquals("Dream Lavender must be #B89BFF", Color(0xFFB89BFF), DreamLavender)
+        assertEquals("Crystal Blue must be #54CFFF", Color(0xFF54CFFF), CrystalBlue)
+        assertEquals("Sunset Rose must be #FF78C4", Color(0xFFFF78C4), SunsetRose)
+        assertEquals("Royal Gold must be #FFD36B", Color(0xFFFFD36B), RoyalGold)
+        assertEquals("Soft Gold must be #FFF0B6", Color(0xFFFFF0B6), SoftGold)
+        assertEquals("Cloud White must be #F8F1FF", Color(0xFFF8F1FF), CloudWhite)
+        assertEquals("Deep Ink must be #211448", Color(0xFF211448), DeepInk)
+    }
+
+    @Test
     fun testAuroraParadise2ColorPaletteValues() {
-        assertEquals("Celestial Violet must be #7042D9", Color(0xFF7042D9), CelestialViolet)
-        assertEquals("Deep Midnight must be #17143D", Color(0xFF17143D), DeepMidnight)
-        assertEquals("Aurora Turquoise must be #23D5D1", Color(0xFF23D5D1), AuroraTurquoise)
-        assertEquals("Dream Lavender must be #BBA4FA", Color(0xFFBBA4FA), DreamLavender)
-        assertEquals("Soft Peach must be #FFB9A4", Color(0xFFFFB9A4), SoftPeach)
-        assertEquals("Champagne Gold must be #F4C76A", Color(0xFFF4C76A), ChampagneGold)
-        assertEquals("Pearl White must be #FFF9FF", Color(0xFFFFF9FF), PearlWhite)
+        assertEquals("Deep Midnight must be #11134A (mapped to CelestialNavy)", CelestialNavy, DeepMidnight)
+        assertEquals("Aurora Turquoise must be #54CFFF (mapped to CrystalBlue)", CrystalBlue, AuroraTurquoise)
+        assertEquals("Pearl White must be #F8F1FF (mapped to CloudWhite)", CloudWhite, PearlWhite)
     }
 
     @Test
