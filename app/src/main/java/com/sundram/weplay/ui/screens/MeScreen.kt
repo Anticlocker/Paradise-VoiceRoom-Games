@@ -59,6 +59,8 @@ import com.sundram.weplay.data.GiftPackRotationManager
 import com.sundram.weplay.data.FrameTier
 import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.ui.components.AvatarWithFrame
+import com.sundram.weplay.ui.components.PhoenixAvatarFrame
+import com.sundram.weplay.ui.components.PhoenixFramePreview
 import com.sundram.weplay.ui.components.UserAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.nav.Routes
@@ -657,20 +659,34 @@ private fun CleanProfileHeader(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // 84dp Rounded-Square Avatar
+                // 84dp Rounded-Square Avatar with Phoenix Rebirth Support
                 Box(
                     modifier = Modifier
                         .size(84.dp)
                         .bounceClick(scaleDown = 0.94f, onClick = onAvatarClick),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    AvatarWithFrame(
-                        name = profile.name,
-                        photoPath = profile.photoPath,
-                        size = 80.dp,
-                        frameTier = FrameTier.fromId(profile.frame),
-                        animated = true,
-                        showCrown = profile.level >= 20,
-                    )
+                    val isPhoenix = profile.frame.equals("phoenix", ignoreCase = true) ||
+                            profile.frame.equals("PHOENIX_REBIRTH", ignoreCase = true)
+
+                    if (isPhoenix) {
+                        PhoenixAvatarFrame(
+                            name = profile.name,
+                            photoPath = profile.photoPath,
+                            size = 84.dp,
+                            animate = true,
+                            contentDescription = "Phoenix Rebirth Avatar Frame",
+                        )
+                    } else {
+                        AvatarWithFrame(
+                            name = profile.name,
+                            photoPath = profile.photoPath,
+                            size = 80.dp,
+                            frameTier = FrameTier.fromId(profile.frame),
+                            animated = true,
+                            showCrown = profile.level >= 20,
+                        )
+                    }
 
                     // Camera Action Badge
                     Box(
@@ -1247,6 +1263,10 @@ private fun CleanAvatarStudioBottomSheet(
     )
 
     var selectedIndex by remember { mutableIntStateOf(0) }
+    var equipPhoenixFrame by remember {
+        mutableStateOf(currentProfile.frame.equals("phoenix", ignoreCase = true))
+    }
+    var showMultiSizePreview by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -1272,20 +1292,29 @@ private fun CleanAvatarStudioBottomSheet(
 
         Spacer(Modifier.height(16.dp))
 
-        // Selected Preview
-        Box(
-            modifier = Modifier
-                .size(92.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .border(2.dp, CleanCyan, RoundedCornerShape(24.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                painter = painterResource(demoAvatars[selectedIndex]),
-                contentDescription = "Selected Avatar Preview",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
+        // Selected Preview (shows Phoenix Rebirth frame when equipPhoenixFrame is enabled)
+        if (equipPhoenixFrame) {
+            PhoenixAvatarFrame(
+                avatarResId = demoAvatars[selectedIndex],
+                size = 104.dp,
+                animate = true,
+                contentDescription = "Equipped Phoenix Rebirth Frame",
             )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(92.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .border(2.dp, CleanCyan, RoundedCornerShape(24.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    painter = painterResource(demoAvatars[selectedIndex]),
+                    contentDescription = "Selected Avatar Preview",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            }
         }
 
         Spacer(Modifier.height(16.dp))
@@ -1320,7 +1349,95 @@ private fun CleanAvatarStudioBottomSheet(
             }
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
+
+        // Phoenix Rebirth V2 Frame Equip Toggle Card
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(if (equipPhoenixFrame) Color(0xFF231B45) else CleanCanvas)
+                .border(
+                    1.dp,
+                    if (equipPhoenixFrame) Color(0xFFFFD36A) else CleanHairline,
+                    RoundedCornerShape(14.dp),
+                )
+                .clickable { equipPhoenixFrame = !equipPhoenixFrame }
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    PhoenixAvatarFrame(
+                        avatarResId = demoAvatars[selectedIndex],
+                        size = 38.dp,
+                        animate = equipPhoenixFrame,
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Phoenix Rebirth V2",
+                                color = if (equipPhoenixFrame) Color(0xFFFFD36A) else CleanInk,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color(0xFFFF7A00))
+                                    .padding(horizontal = 5.dp, vertical = 2.dp),
+                            ) {
+                                Text("MYTHIC", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        Text(
+                            if (equipPhoenixFrame) "Equipped & Animated" else "Tap to equip Phoenix frame",
+                            color = if (equipPhoenixFrame) Color(0xFFBBA4FA) else CleanSecondary,
+                            fontSize = 11.sp,
+                        )
+                    }
+                }
+
+                Switch(
+                    checked = equipPhoenixFrame,
+                    onCheckedChange = { equipPhoenixFrame = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color(0xFFFFD36A),
+                        checkedTrackColor = Color(0xFFFF7A00),
+                    ),
+                )
+            }
+        }
+
+        // Multi-Size Frame Preview (64dp, 96dp, 128dp) Toggle
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showMultiSizePreview = !showMultiSizePreview }
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                if (showMultiSizePreview) "Hide Multi-Size Preview ▲" else "View Multi-Size Frame Preview (64/96/128dp) ▼",
+                color = CleanCyan,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+
+        if (showMultiSizePreview) {
+            Spacer(Modifier.height(8.dp))
+            PhoenixFramePreview()
+        }
+
+        Spacer(Modifier.height(16.dp))
 
         Box(
             modifier = Modifier
@@ -1329,15 +1446,16 @@ private fun CleanAvatarStudioBottomSheet(
                 .clip(RoundedCornerShape(23.dp))
                 .background(CleanCyan)
                 .bounceClick {
-                    // Update user profile avatar ID
+                    // Update user profile avatar ID and equipped frame
                     val updated = currentProfile.copy(
-                        avatarId = "clean_demo_${selectedIndex + 1}"
+                        avatarId = "clean_demo_${selectedIndex + 1}",
+                        frame = if (equipPhoenixFrame) "phoenix" else if (currentProfile.frame.equals("phoenix", ignoreCase = true)) null else currentProfile.frame,
                     )
                     onSave(updated)
                 },
             contentAlignment = Alignment.Center,
         ) {
-            Text("Apply Avatar Preset", color = CleanWhite, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text("Apply Avatar & Frame", color = CleanWhite, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }
 
         Spacer(Modifier.height(16.dp))
