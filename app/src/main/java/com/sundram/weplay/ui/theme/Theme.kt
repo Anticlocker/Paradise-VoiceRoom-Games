@@ -10,22 +10,22 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 private val LightPalette = WePlayPalette(
-    page = Color(0xFFFFFFFF),
-    bgSoft = Color(0xFFF6F9FF),
-    bgSection = Color(0xFFF3F5F9),
-    chipBg = Color(0xFFF4F5F9),
-    card = Color(0xFFFFFFFF),
-    divider = Color(0xFFEEF0F5),
-    stroke = Color(0xFFE7EAF2),
-    textMain = Color(0xFF252A46),
-    textBody = Color(0xFF4A5068),
-    textMuted = Color(0xFF9AA3B7),
-    overlaySoft = Color(0xB3F4F6FB),
-    authSky = Color(0xFFE4F7FF),
-    wallBlue = Color(0xFFEDF5FF),
+    page = AuroraBackground,
+    bgSoft = Color(0xFFF9F5FF),
+    bgSection = Color(0xFFF6F2FC),
+    chipBg = Color(0xFFF3EEFA),
+    card = AuroraSurface,
+    divider = AuroraDivider,
+    stroke = AuroraBorder,
+    textMain = AuroraTextPrimary,
+    textBody = Color(0xFF4A4462),
+    textMuted = AuroraTextSecondary,
+    overlaySoft = Color(0xB3F9F5FF),
+    authSky = Color(0xFFF0ECFF),
+    wallBlue = Color(0xFFF2EFFF),
     wallPurple = Color(0xFFF6EDFF),
     wallMint = Color(0xFFE8FAF2),
-    accentInk = Color(0xFF007E9E),
+    accentInk = AuroraOrchid,
 )
 
 private val DarkPalette = WePlayPalette(
@@ -102,6 +102,7 @@ fun WePlayTheme(
 ) {
     CompositionLocalProvider(
         LocalWePlayPalette provides if (darkTheme) DarkPalette else LightPalette,
+        LocalAuroraColors provides AuroraColors(),
     ) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkScheme else LightScheme,

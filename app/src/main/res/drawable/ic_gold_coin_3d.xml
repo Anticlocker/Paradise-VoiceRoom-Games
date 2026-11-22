@@ -1,0 +1,76 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    
+    <!-- Outer Soft Shadow -->
+    <path
+        android:pathData="M24,4C12.95,4 4,12.95 4,24s8.95,20 20,20 20,-8.95 20,-20S35.05,4 24,4z"
+        android:fillColor="#15000000" />
+
+    <!-- Outer Gold Coin Base Rim -->
+    <path
+        android:pathData="M24,5C13.51,5 5,13.51 5,24s8.51,19 19,19 19,-8.51 19,-19S34.49,5 24,5z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="5"
+                android:startY="5"
+                android:endX="43"
+                android:endY="43"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFE88B" />
+                <item android:offset="0.4" android:color="#F6C66E" />
+                <item android:offset="1.0" android:color="#C97F0C" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Inner Coin Facet -->
+    <path
+        android:pathData="M24,8C15.16,8 8,15.16 8,24s7.16,16 16,16 16,-7.16 16,-16S32.84,8 24,8z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="8"
+                android:startY="8"
+                android:endX="40"
+                android:endY="40"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFF9D2" />
+                <item android:offset="0.3" android:color="#FFD470" />
+                <item android:offset="0.8" android:color="#E59E1A" />
+                <item android:offset="1.0" android:color="#BF7804" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Subtle Inner Rim Ring -->
+    <path
+        android:pathData="M24,11C16.82,11 11,16.82 11,24s5.82,13 13,13 13,-5.82 13,-13S31.18,11 24,11z"
+        android:strokeWidth="1"
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.45" />
+
+    <!-- Embossed 5-Point Star / Emblem in Center -->
+    <path
+        android:pathData="M24,14l3.09,6.26 6.91,1 -5,4.87 1.18,6.88L24,29.77 17.82,33.01 19,26.13 14,21.26l6.91,-1z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="14"
+                android:startY="14"
+                android:endX="34"
+                android:endY="34"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFFFFF" />
+                <item android:offset="0.5" android:color="#FFF1B0" />
+                <item android:offset="1.0" android:color="#DF9510" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Top-Left Radial Sheen Highlight -->
+    <path
+        android:pathData="M14,10a14,14 0 0,0 -4,14c0,2.5 0.7,4.8 1.9,6.8C10.6,28 10,24.5 10.5,21 11.2,16 14.5,12 18.5,10.5A14,14 0 0,0 14,10z"
+        android:fillColor="#80FFFFFF" />
+</vector>

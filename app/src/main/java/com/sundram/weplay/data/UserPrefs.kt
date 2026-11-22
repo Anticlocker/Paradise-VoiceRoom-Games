@@ -135,6 +135,35 @@ class UserPrefs(context: Context) {
         prefs.edit().clear().apply()
     }
 
+    fun recordRoomVisit(roomId: String) {
+        val current = prefs.getString("recent_visited_rooms", "") ?: ""
+        val now = System.currentTimeMillis()
+        val list = current.split(";")
+            .filter { it.isNotBlank() }
+            .mapNotNull { entry ->
+                val parts = entry.split(":")
+                if (parts.size == 2) parts[0] to (parts[1].toLongOrNull() ?: 0L) else null
+            }
+            .filter { it.first != roomId }
+            .toMutableList()
+        list.add(0, roomId to now)
+        val serialized = list.take(20).joinToString(";") { "${it.first}:${it.second}" }
+        prefs.edit().putString("recent_visited_rooms", serialized).apply()
+    }
+
+    fun getRecentVisitedRooms(): List<Pair<String, Long>> {
+        val current = prefs.getString("recent_visited_rooms", "") ?: ""
+        return current.split(";")
+            .filter { it.isNotBlank() }
+            .mapNotNull { entry ->
+                val parts = entry.split(":")
+                if (parts.size == 2) {
+                    val timestamp = parts[1].toLongOrNull() ?: 0L
+                    parts[0] to timestamp
+                } else null
+            }
+    }
+
     private fun dayStamp(): String =
         SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 }

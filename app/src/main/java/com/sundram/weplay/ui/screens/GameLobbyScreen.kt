@@ -7,19 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -30,11 +18,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -62,228 +48,108 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
+import com.sundram.weplay.data.FrameTier
 import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.data.getAvatarById
 import com.sundram.weplay.ui.components.AnimatedAvatar
+import com.sundram.weplay.ui.components.AvatarWithFrame
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.components.navigateSafe
 import com.sundram.weplay.ui.nav.Routes
-import com.sundram.weplay.ui.theme.VyboraBg
-import com.sundram.weplay.ui.theme.VyboraBorder
-import com.sundram.weplay.ui.theme.VyboraGold
-import com.sundram.weplay.ui.theme.VyboraLavender
-import com.sundram.weplay.ui.theme.VyboraPurple
-import com.sundram.weplay.ui.theme.VyboraSurface
-import com.sundram.weplay.ui.theme.VyboraTextPrimary
-import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraBackground
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraCoral
+import com.sundram.weplay.ui.theme.AuroraCyan
+import com.sundram.weplay.ui.theme.AuroraGamesBackground
+import com.sundram.weplay.ui.theme.AuroraGold
+import com.sundram.weplay.ui.theme.AuroraGradients
+import com.sundram.weplay.ui.theme.AuroraLavender
+import com.sundram.weplay.ui.theme.AuroraOrchid
+import com.sundram.weplay.ui.theme.AuroraRose
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.AuroraTextPrimary
+import com.sundram.weplay.ui.theme.AuroraTextSecondary
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  1. Distinctive Branded Header (Greeting + Avatar + Wallet + Actions)
+//  1. Distinctive Aurora Paradise 3.0 Header with Premium Coins & Diamond Crystals
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun VyboraHomeHeader(nav: NavHostController, profile: UserProfile) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        // User Profile Avatar with subtle glow ring and spring touch feedback
-        AnimatedAvatar(
-            avatar = getAvatarById(profile.avatarId),
-            size = 48.dp,
-            animate = true,
-            onClick = { nav.navigateSafe(Routes.ME) },
-        )
-
-        Spacer(Modifier.width(10.dp))
-
-        // Personalized Welcome Greeting
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Welcome back 👋",
-                color = VyboraTextSecondary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-            )
-            Text(
-                text = profile.name,
-                color = VyboraTextPrimary,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-
-        Spacer(Modifier.width(8.dp))
-
-        // Compact Coin Balance Pill: [ 🪙 80 + ]
-        Row(
-            modifier = Modifier
-                .height(34.dp)
-                .shadow(1.dp, RoundedCornerShape(17.dp))
-                .clip(RoundedCornerShape(17.dp))
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, RoundedCornerShape(17.dp))
-                .bounceClick { nav.navigateSafe(Routes.TOPUP) }
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.vb_coin),
-                contentDescription = "Coins",
-                modifier = Modifier.size(19.dp),
-            )
-            Spacer(Modifier.width(5.dp))
-            Text(
-                text = "${profile.coins}",
-                color = VyboraTextPrimary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.width(6.dp))
-            Image(
-                painter = painterResource(R.drawable.vb_plus),
-                contentDescription = "Add coins",
-                modifier = Modifier.size(14.dp),
-            )
-        }
-
-        Spacer(Modifier.width(8.dp))
-
-        // Notifications Shortcut Button
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .shadow(1.dp, CircleShape)
-                .clip(CircleShape)
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, CircleShape)
-                .bounceClick { nav.navigateSafe(Routes.NOTIFICATIONS) },
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_bell),
-                contentDescription = "Notifications",
-                tint = VyboraTextPrimary,
-                modifier = Modifier.size(17.dp),
-            )
-        }
-
-        Spacer(Modifier.width(6.dp))
-
-        // Events Shortcut Button
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .shadow(1.dp, CircleShape)
-                .clip(CircleShape)
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, CircleShape)
-                .bounceClick { nav.navigateSafe(Routes.DISCOVER) },
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.vb_shortcut_events),
-                contentDescription = "Events",
-                modifier = Modifier.size(24.dp),
-                contentScale = ContentScale.Fit,
-            )
-        }
-    }
+private fun AuroraHomeHeader(nav: NavHostController, profile: UserProfile) {
+    com.sundram.weplay.ui.theme.CelestialHeader(
+        avatarRes = getAvatarById(profile.avatarId).drawableRes,
+        userName = profile.name,
+        userLevel = profile.level,
+        coins = profile.coins,
+        crystals = null, // Verified wallet balance: crystals safely omitted until supported by backend wallet
+        onAvatarClick = { nav.navigateSafe(Routes.ME) },
+        onCoinsClick = { nav.navigateSafe(Routes.WALLET_SETTINGS) },
+        onCrystalsClick = { nav.navigateSafe(Routes.TOPUP) },
+        onEventsClick = { nav.navigateSafe(Routes.EVENT_CENTER) },
+        onNotificationsClick = { nav.navigateSafe(Routes.NOTIFICATIONS) },
+    )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  2. Redesigned Quick Shortcuts (Modern Action Cards Row)
+//  2. Rebalanced Quick Shortcuts with Celestial 3D Styling
 // ─────────────────────────────────────────────────────────────────────────────
-private data class VyboraShortcutItem(
+private data class AuroraShortcutItem(
     val title: String,
     val subtitle: String,
     val iconRes: Int,
-    val tintBg: Color,
     val route: String,
+    val badge: String? = null,
 )
 
 @Composable
-private fun VyboraShortcutsRow(nav: NavHostController) {
+private fun AuroraShortcutsRow(nav: NavHostController) {
     val shortcuts = listOf(
-        VyboraShortcutItem("Ranks", "Leaderboard", R.drawable.vb_shortcut_ranking, Color(0xFFF3E8FF), Routes.RANKING),
-        VyboraShortcutItem("Tasks", "Missions", R.drawable.vb_shortcut_tasks, Color(0xFFE0F2FE), Routes.TASKS),
-        VyboraShortcutItem("Friends", "Social Hub", R.drawable.vb_shortcut_friends, Color(0xFFDCFCE7), Routes.MSG),
-        VyboraShortcutItem("Lounge", "VIP Club", R.drawable.vb_shortcut_jungle_king, Color(0xFFFEF3C7), Routes.ROOM),
+        AuroraShortcutItem("Ranks", "Leaderboard", R.drawable.ap_ic_trophy, Routes.RANKING),
+        AuroraShortcutItem("Tasks", "Daily", R.drawable.ap_ic_shield, Routes.TASKS),
+        AuroraShortcutItem("Social", "Chats", R.drawable.ap_ic_chat, Routes.MSG),
+        AuroraShortcutItem("Events", "Festival", R.drawable.aurora3_ic_nav_star, Routes.EVENT_CENTER, "HOT"),
     )
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         shortcuts.forEach { item ->
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .shadow(2.dp, RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(VyboraSurface)
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(16.dp))
-                    .bounceClick { nav.navigateSafe(item.route) }
-                    .padding(vertical = 10.dp, horizontal = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(item.tintBg),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        painter = painterResource(item.iconRes),
-                        contentDescription = item.title,
-                        modifier = Modifier.size(28.dp),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = item.title,
-                    color = VyboraTextPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = item.subtitle,
-                    color = VyboraTextSecondary,
-                    fontSize = 9.sp,
-                    maxLines = 1,
-                )
-            }
+            com.sundram.weplay.ui.theme.PremiumShortcut(
+                title = item.title,
+                subtitle = item.subtitle,
+                iconRes = item.iconRes,
+                badgeText = item.badge,
+                onClick = { nav.navigateSafe(item.route) },
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  3. Game Rooms Access Bar
+//  3. Compact Glossy Game Rooms Banner
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun VyboraGameRoomsBanner(nav: NavHostController) {
+private fun AuroraGameRoomsBanner(nav: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
+            .height(52.dp)
+            .shadow(2.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.horizontalGradient(
                     listOf(
-                        Color(0xFFEDE5FF),
-                        Color(0xFFE0FAFB),
+                        Color(0xFF2B165C),
+                        Color(0xFF1B1242),
                     )
                 )
             )
-            .border(1.dp, VyboraBorder, RoundedCornerShape(16.dp))
+            .border(1.2.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
             .bounceClick { nav.navigateSafe(Routes.GAME_ROOMS) }
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
@@ -295,141 +161,253 @@ private fun VyboraGameRoomsBanner(nav: NavHostController) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Multiplayer Game Rooms",
-                color = VyboraTextPrimary,
-                fontSize = 14.sp,
+                color = com.sundram.weplay.ui.theme.CloudWhite,
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Join custom matches, lobbies & voice parties",
-                color = VyboraTextSecondary,
-                fontSize = 11.sp,
+                text = "Custom lobbies, voice parties & competitions",
+                color = com.sundram.weplay.ui.theme.DreamLavender,
+                fontSize = 10.sp,
             )
         }
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(VyboraPurple)
-                .padding(horizontal = 10.dp, vertical = 4.dp),
+                .background(AuroraGradients.sunsetFantasy)
+                .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .padding(horizontal = 12.dp, vertical = 5.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "Browse ›",
                 color = Color.White,
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Black,
             )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  4. Section A — Hero Featured Game Card (Original Anti-Aliased Composition)
+//  4. Section A — Hero Featured Game & Festival Carousel
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun HeroFeaturedGameCard(
     onPlayClick: () -> Unit,
+    onFestivalClick: () -> Unit,
 ) {
+    var activeSlide by rememberSaveable { mutableStateOf(0) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(148.dp)
-            .shadow(4.dp, RoundedCornerShape(22.dp))
+            .height(156.dp)
+            .shadow(6.dp, RoundedCornerShape(22.dp))
             .clip(RoundedCornerShape(22.dp))
             .background(
-                Brush.linearGradient(
+                Brush.horizontalGradient(
                     listOf(
-                        Color(0xFF5B22D4),
-                        Color(0xFF7A42F4),
-                        Color(0xFF27D2DC),
+                        Color(0xFF381568),
+                        Color(0xFF5A22A8),
+                        Color(0xFF24104B),
                     )
                 )
             )
-            // Anti-aliasing stroke along smooth rounded corner curve
-            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(22.dp))
-            .bounceClick(scaleDown = 0.98f, onClick = onPlayClick),
+            .border(1.2.dp, com.sundram.weplay.ui.theme.RoyalGold.copy(alpha = 0.65f), RoundedCornerShape(22.dp))
+            .bounceClick(scaleDown = 0.98f, onClick = {
+                if (activeSlide == 0) onPlayClick() else onFestivalClick()
+            }),
     ) {
-        // Decorative radial highlight
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(160.dp)
-                .background(Color.White.copy(alpha = 0.08f), CircleShape),
-        )
-
-        // Left Content: Tag + Title + Subtitle + Action Button
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 18.dp, top = 14.dp, bottom = 14.dp)
-                .fillMaxWidth(0.58f),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            // Featured Tag
+        if (activeSlide == 0) {
+            // Slide 0: Petrol Pump Simulator
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(VyboraGold)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-            ) {
-                Text(
-                    text = "⚡ FEATURED GAME",
-                    color = Color(0xFF4A3200),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.5.sp,
-                )
-            }
+                    .align(Alignment.TopEnd)
+                    .size(160.dp)
+                    .background(
+                        Brush.radialGradient(
+                            listOf(com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.20f), Color.Transparent)
+                        ),
+                        CircleShape
+                    ),
+            )
 
-            Column {
-                Text(
-                    text = "Petrol Pump Simulator",
-                    color = Color.White,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    lineHeight = 21.sp,
-                )
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    text = "Refuel, manage & upgrade your speed station",
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp,
-                    maxLines = 2,
-                )
-            }
-
-            // Play Action Pill
-            Row(
+            Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White)
-                    .padding(horizontal = 12.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .align(Alignment.CenterStart)
+                    .padding(start = 18.dp, top = 14.dp, bottom = 14.dp)
+                    .fillMaxWidth(0.58f),
+                verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = "▶ Play Now",
-                    color = VyboraPurple,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = "⚡ FEATURED GAME",
+                        color = com.sundram.weplay.ui.theme.DeepInk,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp,
+                    )
+                }
+
+                Column {
+                    Text(
+                        text = "Petrol Pump Simulator",
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        lineHeight = 21.sp,
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "Refuel, manage & upgrade your speed station",
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 2,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "▶ Play Now",
+                        color = com.sundram.weplay.ui.theme.DeepInk,
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
+            }
+
+            Image(
+                painter = painterResource(R.drawable.vb_character_petrol_pump),
+                contentDescription = "Petrol Pump Simulator",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(138.dp)
+                    .padding(end = 6.dp, bottom = 4.dp),
+                contentScale = ContentScale.Fit,
+            )
+        } else {
+            // Slide 1: Featured Celestial Festival Banner (ap3r_banner_home_festival)
+            Image(
+                painter = painterResource(R.drawable.ap3r_banner_home_festival),
+                contentDescription = "Festival Gala",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                com.sundram.weplay.ui.theme.CelestialNavy.copy(alpha = 0.85f),
+                                Color.Transparent,
+                            )
+                        )
+                    )
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 18.dp, top = 14.dp, bottom = 14.dp)
+                    .fillMaxWidth(0.60f),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(com.sundram.weplay.ui.theme.SunsetRose)
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = "✨ CELESTIAL FESTIVAL",
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp,
+                    )
+                }
+
+                Column {
+                    Text(
+                        text = "Starlight & Dice Gala",
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        lineHeight = 21.sp,
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "Celebrate starlight week with royal dice challenges",
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 2,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.sunsetFantasy)
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "★ Join Gala",
+                        color = Color.White,
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
             }
         }
 
-        // Right Illustration with pristine proportions and safe transparent margins
-        Image(
-            painter = painterResource(R.drawable.vb_character_petrol_pump),
-            contentDescription = "Petrol Pump Simulator",
+        // Carousel dots at bottom-center
+        Row(
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .size(136.dp)
-                .padding(end = 6.dp, bottom = 4.dp),
-            contentScale = ContentScale.Fit,
-        )
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(if (activeSlide == 0) 16.dp else 6.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(if (activeSlide == 0) com.sundram.weplay.ui.theme.RoyalGold else Color.White.copy(alpha = 0.35f))
+                    .clickable { activeSlide = 0 }
+            )
+            Box(
+                modifier = Modifier
+                    .width(if (activeSlide == 1) 16.dp else 6.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(if (activeSlide == 1) com.sundram.weplay.ui.theme.RoyalGold else Color.White.copy(alpha = 0.35f))
+                    .clickable { activeSlide = 1 }
+            )
+        }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  5. Section B — Popular Games (Balanced 2-Card Row with Smooth Rounded Edges)
+//  5. Section B — Popular Games (Deep Celestial Violet & Rose Cards)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun PopularGamesRow(
@@ -444,19 +422,18 @@ private fun PopularGamesRow(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(132.dp)
+                .height(134.dp)
                 .shadow(3.dp, RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            Color(0xFF0277BD),
-                            Color(0xFF00ACC1),
+                            Color(0xFF142252),
+                            Color(0xFF2C1E62),
                         )
                     )
                 )
-                // Smooth anti-aliased edge outline
-                .border(1.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(20.dp))
+                .border(1.dp, com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onSpyClick),
         ) {
             Column(
@@ -468,23 +445,24 @@ private fun PopularGamesRow(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color.White.copy(alpha = 0.25f))
+                        .background(com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.25f))
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.CrystalBlue, RoundedCornerShape(6.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text("🔍 Mystery", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("🔍 Mystery", color = com.sundram.weplay.ui.theme.CrystalBlue, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Column(modifier = Modifier.fillMaxWidth(0.62f)) {
                     Text(
                         text = "Who's the Spy",
-                        color = Color.White,
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         lineHeight = 17.sp,
                     )
                     Text(
                         text = "Pass & play",
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
                         fontSize = 10.sp,
                     )
                 }
@@ -495,7 +473,7 @@ private fun PopularGamesRow(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .size(76.dp)
+                    .size(78.dp)
                     .padding(end = 4.dp, bottom = 4.dp),
                 contentScale = ContentScale.Fit,
             )
@@ -505,19 +483,18 @@ private fun PopularGamesRow(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(132.dp)
+                .height(134.dp)
                 .shadow(3.dp, RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            Color(0xFFE65100),
-                            Color(0xFFFF8F00),
+                            Color(0xFF45144A),
+                            Color(0xFF22113F),
                         )
                     )
                 )
-                // Smooth anti-aliased edge outline
-                .border(1.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(20.dp))
+                .border(1.dp, com.sundram.weplay.ui.theme.SunsetRose.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onPaintClick),
         ) {
             Column(
@@ -529,23 +506,24 @@ private fun PopularGamesRow(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(VyboraGold)
+                        .background(com.sundram.weplay.ui.theme.SunsetRose.copy(alpha = 0.25f))
+                        .border(0.8.dp, com.sundram.weplay.ui.theme.SunsetRose, RoundedCornerShape(6.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text("🎨 New", color = Color(0xFF4A3200), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("🎨 New", color = com.sundram.weplay.ui.theme.SunsetRose, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Column(modifier = Modifier.fillMaxWidth(0.62f)) {
                     Text(
                         text = "Paint to Hide",
-                        color = Color.White,
+                        color = com.sundram.weplay.ui.theme.CloudWhite,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         lineHeight = 17.sp,
                     )
                     Text(
                         text = "Graffiti party",
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = com.sundram.weplay.ui.theme.DreamLavender,
                         fontSize = 10.sp,
                     )
                 }
@@ -556,7 +534,7 @@ private fun PopularGamesRow(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .size(76.dp)
+                    .size(78.dp)
                     .padding(end = 4.dp, bottom = 4.dp),
                 contentScale = ContentScale.Fit,
             )
@@ -565,10 +543,10 @@ private fun PopularGamesRow(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  6. Section C — Explore More Games (Smooth 2-Column Grid Card)
+//  6. Section C — Explore More Games (Celestial Card Grid)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun VyboraGameGridCard(
+private fun AuroraGameGridCard(
     title: String,
     genre: String,
     accentColor: Color,
@@ -580,11 +558,11 @@ private fun VyboraGameGridCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(112.dp)
+            .height(116.dp)
             .shadow(2.dp, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
-            .background(VyboraSurface)
-            .border(1.dp, VyboraBorder, RoundedCornerShape(18.dp))
+            .background(AuroraGradients.celestialCard)
+            .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.30f), RoundedCornerShape(18.dp))
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
             .padding(12.dp),
     ) {
@@ -598,7 +576,8 @@ private fun VyboraGameGridCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(accentColor.copy(alpha = 0.15f))
+                        .background(accentColor.copy(alpha = 0.20f))
+                        .border(0.6.dp, accentColor, RoundedCornerShape(4.dp))
                         .padding(horizontal = 5.dp, vertical = 2.dp),
                 ) {
                     Text(badgeText, color = accentColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
@@ -608,7 +587,7 @@ private fun VyboraGameGridCard(
 
             Text(
                 text = title,
-                color = VyboraTextPrimary,
+                color = com.sundram.weplay.ui.theme.CloudWhite,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -619,21 +598,20 @@ private fun VyboraGameGridCard(
 
             Text(
                 text = genre,
-                color = VyboraTextSecondary,
+                color = com.sundram.weplay.ui.theme.DreamLavender,
                 fontSize = 10.sp,
                 maxLines = 1,
             )
         }
 
         if (isSceneCover) {
-            // Rounded thumbnail container for square scene covers (e.g. Billiards)
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .size(66.dp)
                     .shadow(1.dp, RoundedCornerShape(14.dp))
                     .clip(RoundedCornerShape(14.dp))
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(14.dp)),
+                    .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(14.dp)),
             ) {
                 Image(
                     painter = painterResource(illustrationRes),
@@ -643,7 +621,6 @@ private fun VyboraGameGridCard(
                 )
             }
         } else {
-            // Transparent character cutout
             Image(
                 painter = painterResource(illustrationRes),
                 contentDescription = title,
@@ -657,7 +634,7 @@ private fun VyboraGameGridCard(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  7. Dedicated Game Search Bar Component (Phase 3 Requirement)
+//  7. Dedicated Game Search Bar Component
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun GameSearchBar(
@@ -677,8 +654,8 @@ private fun GameSearchBar(
                 .weight(1f)
                 .height(40.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, RoundedCornerShape(20.dp))
+                .background(AuroraSurface)
+                .border(1.dp, AuroraBorder, RoundedCornerShape(20.dp))
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
@@ -686,7 +663,7 @@ private fun GameSearchBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = null,
-                    tint = VyboraTextSecondary,
+                    tint = AuroraTextSecondary,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.width(8.dp))
@@ -694,14 +671,14 @@ private fun GameSearchBar(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
-                    textStyle = TextStyle(color = VyboraTextPrimary, fontSize = 13.sp),
-                    cursorBrush = SolidColor(VyboraPurple),
+                    textStyle = TextStyle(color = AuroraTextPrimary, fontSize = 13.sp),
+                    cursorBrush = SolidColor(AuroraOrchid),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                     modifier = Modifier.weight(1f),
                     decorationBox = { inner ->
                         if (query.isEmpty()) {
-                            Text("Search games (e.g. Spy, Ludo, Cafe)...", color = VyboraTextSecondary, fontSize = 13.sp)
+                            Text("Search games (e.g. Spy, Ludo, Cafe)...", color = AuroraTextSecondary, fontSize = 13.sp)
                         }
                         inner()
                     },
@@ -710,7 +687,7 @@ private fun GameSearchBar(
                     Icon(
                         painter = painterResource(R.drawable.ic_close),
                         contentDescription = "Clear search",
-                        tint = VyboraTextSecondary,
+                        tint = AuroraTextSecondary,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { onQueryChange("") },
@@ -723,7 +700,7 @@ private fun GameSearchBar(
 
         Text(
             text = "Cancel",
-            color = VyboraPurple,
+            color = AuroraOrchid,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.clickable {
@@ -735,9 +712,9 @@ private fun GameSearchBar(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  8. Game Definition Model for Home Screen Filtering
+//  8. Game Definition Model
 // ─────────────────────────────────────────────────────────────────────────────
-private data class VyboraGameItem(
+private data class AuroraGameItem(
     val id: String,
     val title: String,
     val genre: String,
@@ -749,19 +726,19 @@ private data class VyboraGameItem(
 )
 
 private val allHomeGames = listOf(
-    VyboraGameItem("1", "Petrol Pump Simulator", "Speed Station Simulator", Color(0xFF8258EE), R.drawable.vb_character_petrol_pump, "Featured"),
-    VyboraGameItem("2", "Who's the Spy", "Mystery Deduction", Color(0xFF00ACC1), R.drawable.vb_character_whos_the_spy, "Party", route = Routes.SPY),
-    VyboraGameItem("3", "Paint to Hide", "Graffiti Prop Party", Color(0xFFFF8F00), R.drawable.vb_character_paint_to_hide, "New"),
-    VyboraGameItem("4", "Trickster's Cafe", "Card Bluffing", Color(0xFF8D6E63), R.drawable.vb_character_tricksters_cafe, "Hot"),
-    VyboraGameItem("5", "Hide And Seek", "Prop Hunt", Color(0xFF00796B), R.drawable.vb_character_hide_and_seek, "Party"),
-    VyboraGameItem("6", "Space Werewolf", "Sci-Fi Impostor", Color(0xFF5E35B1), R.drawable.vb_character_space_werewolf),
-    VyboraGameItem("7", "Oh My Card", "Card Matching", Color(0xFF2E7D32), R.drawable.vb_character_oh_my_card),
-    VyboraGameItem("8", "Ludo Classic", "Royal Board Game", Color(0xFFC62828), R.drawable.vb_character_royal_dice, "Live", route = Routes.LUDO),
-    VyboraGameItem("9", "Billiards Lounge", "8-Ball Pool", Color(0xFF0288D1), R.drawable.vb_room_cover_billiards_lounge, isSceneCover = true),
+    AuroraGameItem("1", "Petrol Pump Simulator", "Speed Station Simulator", Color(0xFF8258EE), R.drawable.vb_character_petrol_pump, "Featured"),
+    AuroraGameItem("2", "Who's the Spy", "Mystery Deduction", Color(0xFF00ACC1), R.drawable.vb_character_whos_the_spy, "Party", route = Routes.SPY),
+    AuroraGameItem("3", "Paint to Hide", "Graffiti Prop Party", Color(0xFFFF8F00), R.drawable.vb_character_paint_to_hide, "New"),
+    AuroraGameItem("4", "Trickster's Cafe", "Card Bluffing", Color(0xFF8D6E63), R.drawable.vb_character_tricksters_cafe, "Hot"),
+    AuroraGameItem("5", "Hide And Seek", "Prop Hunt", Color(0xFF00796B), R.drawable.vb_character_hide_and_seek, "Party"),
+    AuroraGameItem("6", "Space Werewolf", "Sci-Fi Impostor", Color(0xFF5E35B1), R.drawable.vb_character_space_werewolf),
+    AuroraGameItem("7", "Oh My Card", "Card Matching", Color(0xFF2E7D32), R.drawable.vb_character_oh_my_card),
+    AuroraGameItem("8", "Ludo Classic", "Royal Board Game", Color(0xFFC62828), R.drawable.vb_character_royal_dice, "Live", route = Routes.LUDO),
+    AuroraGameItem("9", "Billiards Lounge", "8-Ball Pool", Color(0xFF0288D1), R.drawable.vb_room_cover_billiards_lounge, isSceneCover = true),
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  9. Explore Feed Model & Item (Preserved for social discovery)
+//  9. B5: Redesigned Community Players Model & Card with Equipped Frames
 // ─────────────────────────────────────────────────────────────────────────────
 data class ExploreUser(
     val id: String,
@@ -775,21 +752,22 @@ data class ExploreUser(
     val isGameRoom: Boolean = false,
     val bio: String,
     val isFollowed: Boolean = false,
+    val frameTier: FrameTier = FrameTier.COMMON,
 )
 
 private val exploreUsers = listOf(
-    ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Vybora explorer seeking great conversations!"),
-    ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Always up for a quick casual Ludo match!"),
-    ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music lover & trivia enthusiast 🎵"),
-    ExploreUser("4", "Siddhi", "F", "avatar_lunar_artist", 42, false, "", "Offline", false, "Artist & midnight listener in celestial lounges"),
-    ExploreUser("5", "K O H L I", "M", "avatar_diamond_crown", 48, true, "", "Playing Spy", false, "Master of Who's the Spy. Can you guess?"),
-    ExploreUser("6", "T!wariji", "M", "avatar_neon_musician", 16, true, "", "In Voice Room", false, "DJ in the house! Playing chill lo-fi beats"),
-    ExploreUser("7", "K!RAN", "F", "avatar_star_captain", 33, false, "", "Offline", false, "Silence is the best answer. Good vibes only."),
-    ExploreUser("8", "Aanya", "F", "avatar_royal_dreamer", 29, true, "< 85km", "In Voice Room", false, "Royal lounge regular & friendly host"),
-    ExploreUser("9", "Rohan", "M", "avatar_celestial_wanderer", 21, true, "< 140km", "Playing Ludo", false, "Rolling sixes and taking over the board!"),
-    ExploreUser("10", "Meera", "F", "avatar_crystal_guardian", 25, true, "< 60km", "In Voice Room", false, "Spreading peace and positivity in voice rooms ✨"),
-    ExploreUser("11", "Simran", "F", "avatar_cosmic_bunny", 14, false, "", "Offline", false, "New to VYBORA! Say hi 👋"),
-    ExploreUser("12", "Aryan", "M", "avatar_galaxy_dj", 37, true, "< 95km", "Playing Spy", false, "Catching the imposter every single round 🕵️"),
+    ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Aurora explorer seeking great conversations!", frameTier = FrameTier.EPIC),
+    ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Always up for a quick casual Ludo match!", frameTier = FrameTier.LEGENDARY),
+    ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music lover & trivia enthusiast 🎵", frameTier = FrameTier.RARE),
+    ExploreUser("4", "Siddhi", "F", "avatar_lunar_artist", 42, false, "", "Offline", false, "Artist & midnight listener in celestial lounges", frameTier = FrameTier.MYTHIC),
+    ExploreUser("5", "K O H L I", "M", "avatar_diamond_crown", 48, true, "", "Playing Spy", false, "Master of Who's the Spy. Can you guess?", frameTier = FrameTier.CELESTIAL),
+    ExploreUser("6", "T!wariji", "M", "avatar_neon_musician", 16, true, "", "In Voice Room", false, "DJ in the house! Playing chill lo-fi beats", frameTier = FrameTier.COMMON),
+    ExploreUser("7", "K!RAN", "F", "avatar_star_captain", 33, false, "", "Offline", false, "Silence is the best answer. Good vibes only.", frameTier = FrameTier.COMMON),
+    ExploreUser("8", "Aanya", "F", "avatar_royal_dreamer", 29, true, "< 85km", "In Voice Room", false, "Royal lounge regular & friendly host", frameTier = FrameTier.EPIC),
+    ExploreUser("9", "Rohan", "M", "avatar_celestial_wanderer", 21, true, "< 140km", "Playing Ludo", false, "Rolling sixes and taking over the board!", frameTier = FrameTier.RARE),
+    ExploreUser("10", "Meera", "F", "avatar_crystal_guardian", 25, true, "< 60km", "In Voice Room", false, "Spreading peace and positivity in voice rooms ✨", frameTier = FrameTier.LEGENDARY),
+    ExploreUser("11", "Simran", "F", "avatar_cosmic_bunny", 14, false, "", "Offline", false, "New to the community! Say hi 👋", frameTier = FrameTier.COMMON),
+    ExploreUser("12", "Aryan", "M", "avatar_galaxy_dj", 37, true, "< 95km", "Playing Spy", false, "Catching the imposter every single round 🕵️", frameTier = FrameTier.MYTHIC),
 )
 
 @Composable
@@ -803,21 +781,27 @@ private fun ExploreFeedItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(VyboraSurface)
-            .border(1.dp, VyboraBorder, RoundedCornerShape(16.dp))
+            .shadow(2.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(AuroraGradients.celestialCard)
+            .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.28f), RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Animated 2.5D Character Avatar with Shimmer Glow Frame
-        AnimatedAvatar(
-            avatar = getAvatarById(user.avatarId),
-            size = 46.dp,
-            animate = true,
-            onClick = onClick,
-        )
+        Box(
+            modifier = Modifier.bounceClick(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            AvatarWithFrame(
+                name = user.name,
+                photoPath = null,
+                size = 52.dp,
+                frameTier = user.frameTier,
+                animated = user.isOnline,
+                showCrown = user.level >= 40,
+            )
+        }
 
         Spacer(Modifier.width(12.dp))
 
@@ -825,35 +809,36 @@ private fun ExploreFeedItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = user.name,
-                    color = VyboraTextPrimary,
+                    color = com.sundram.weplay.ui.theme.CloudWhite,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = if (user.gender == "F") "♀" else "♂",
-                    color = if (user.gender == "F") Color(0xFFE91E63) else Color(0xFF1E88E5),
-                    fontSize = 12.sp,
+                    color = if (user.gender == "F") com.sundram.weplay.ui.theme.SunsetRose else com.sundram.weplay.ui.theme.CrystalBlue,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.width(6.dp))
 
-                // Level Badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(VyboraGold)
+                        .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
                         .padding(horizontal = 4.dp, vertical = 1.dp),
                 ) {
                     Text(
                         text = "Lv.${user.level}",
-                        color = Color.Black,
+                        color = com.sundram.weplay.ui.theme.DeepInk,
                         fontSize = 8.sp,
                         fontWeight = FontWeight.ExtraBold,
                     )
                 }
 
-                // Verified Online Green Dot
                 if (user.isOnline) {
                     Spacer(Modifier.width(6.dp))
                     Box(
@@ -863,22 +848,13 @@ private fun ExploreFeedItem(
                             .background(Color(0xFF00E676)),
                     )
                 }
-
-                if (user.distance.isNotEmpty()) {
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = user.distance,
-                        color = VyboraTextSecondary,
-                        fontSize = 10.sp,
-                    )
-                }
             }
 
             Spacer(Modifier.height(3.dp))
 
             Text(
                 text = user.bio,
-                color = VyboraTextSecondary,
+                color = com.sundram.weplay.ui.theme.DreamLavender,
                 fontSize = 11.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -886,16 +862,16 @@ private fun ExploreFeedItem(
 
             Spacer(Modifier.height(4.dp))
 
-            // Status Chip
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (user.isOnline) Color(0xFFE8F5E9) else Color(0xFFF5F5F5))
+                    .background(if (user.isOnline) Color(0xFF133420) else com.sundram.weplay.ui.theme.DeepInk)
+                    .border(0.6.dp, if (user.isOnline) Color(0xFF00E676) else com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
                 Text(
                     text = user.statusText,
-                    color = if (user.isOnline) Color(0xFF2E7D32) else VyboraTextSecondary,
+                    color = if (user.isOnline) Color(0xFF69F0AE) else com.sundram.weplay.ui.theme.DreamLavender,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -904,36 +880,33 @@ private fun ExploreFeedItem(
 
         Spacer(Modifier.width(8.dp))
 
-        // Action Buttons Row: Follow + Message
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            // Follow Button
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isFollowed) VyboraBg else VyboraPurple)
-                    .border(1.dp, if (isFollowed) VyboraBorder else Color.Transparent, RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (isFollowed) com.sundram.weplay.ui.theme.DeepInk else com.sundram.weplay.ui.theme.RoyalViolet)
+                    .border(1.dp, if (isFollowed) com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.4f) else Color.Transparent, RoundedCornerShape(12.dp))
                     .clickable { isFollowed = !isFollowed }
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .padding(horizontal = 11.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = if (isFollowed) "Following" else "Follow",
-                    color = if (isFollowed) VyboraTextSecondary else Color.White,
+                    color = if (isFollowed) com.sundram.weplay.ui.theme.DreamLavender else Color.White,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
 
-            // Message Button
             Box(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(VyboraBg)
-                    .border(1.dp, VyboraBorder, CircleShape)
+                    .background(com.sundram.weplay.ui.theme.DeepInk)
+                    .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f), CircleShape)
                     .clickable(onClick = onMessageClick),
                 contentAlignment = Alignment.Center,
             ) {
@@ -944,130 +917,7 @@ private fun ExploreFeedItem(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  10. Gaming Gift Pack Modal Bottom Sheet (Phase 7 Requirement)
-// ─────────────────────────────────────────────────────────────────────────────
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HomeGiftPackSheet(
-    onDismiss: () -> Unit,
-    onBrowseGifts: () -> Unit,
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.vb_gift_pack),
-                contentDescription = null,
-                modifier = Modifier.size(68.dp),
-            )
-
-            Spacer(Modifier.height(10.dp))
-
-            Text(
-                text = "Gaming Hub Gift Pack",
-                color = VyboraTextPrimary,
-                fontSize = 19.sp,
-                fontWeight = FontWeight.Bold,
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            Text(
-                text = "Unlock game bonuses, dice skins, spy badges & coin perks",
-                color = VyboraTextSecondary,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            val perks = listOf(
-                "🎲 Exclusive Royal Gold Dice Skin for Ludo",
-                "🕵️ 3x Free Spy Clue Hints & Magnifier Frame",
-                "⚡ 20% Faster XP Gain in Multiplayer Rooms",
-                "🪙 200 Welcome Bonus Game Chips",
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(VyboraBg)
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(14.dp))
-                    .padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                perks.forEach { perk ->
-                    Text(text = perk, color = VyboraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                }
-            }
-
-            Spacer(Modifier.height(14.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFFFF3E0))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-            ) {
-                Text(
-                    text = "⚡ PREVIEW MODE: Live billing & payment gateway are currently disconnected. No real charges will occur.",
-                    color = Color(0xFFE65100),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(46.dp)
-                    .clip(RoundedCornerShape(23.dp))
-                    .background(VyboraPurple)
-                    .bounceClick(scaleDown = 0.98f, onClick = onDismiss),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "Got it",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = "Browse Full Gifts Collection ›",
-                color = VyboraPurple,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .clickable(onClick = onBrowseGifts)
-                    .padding(vertical = 6.dp),
-            )
-
-            Spacer(Modifier.height(16.dp))
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  11. Complete Games Home Screen (VYBORA Redesign + Audit Polished)
+//  10. Games Home Screen 3.0
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 fun GamesHomeScreen(
@@ -1092,7 +942,6 @@ fun GamesHomeScreen(
         }
     }
 
-    // Filtered games when search is active
     val searchResults = remember(searchQuery) {
         if (searchQuery.isBlank()) {
             emptyList()
@@ -1105,10 +954,8 @@ fun GamesHomeScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(VyboraBg),
+    AuroraGamesBackground(
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
@@ -1123,14 +970,14 @@ fun GamesHomeScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // ── Section 1: Distinctive Home Header ──
-            item { VyboraHomeHeader(nav = nav, profile = profile) }
+            // ── Section 1: Distinctive Home Header with Wallet & Star Event Icon ──
+            item { AuroraHomeHeader(nav = nav, profile = profile) }
 
-            // ── Section 2: Quick Action Tiles (Ranks, Tasks, Friends, VIP) ──
-            item { VyboraShortcutsRow(nav = nav) }
+            // ── Section 2: Rebalanced 3-Action Shortcuts (Ranks, Tasks, Friends) ──
+            item { AuroraShortcutsRow(nav = nav) }
 
-            // ── Section 3: Game Rooms Access Banner ──
-            item { VyboraGameRoomsBanner(nav = nav) }
+            // ── Section 3: B4: Compact Game Rooms Banner ──
+            item { AuroraGameRoomsBanner(nav = nav) }
 
             // ── Section 4: Games Discovery Header + Search Toggle ──
             item {
@@ -1142,7 +989,7 @@ fun GamesHomeScreen(
                 ) {
                     Text(
                         text = "Gaming Hub",
-                        color = VyboraTextPrimary,
+                        color = AuroraTextPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.ExtraBold,
                     )
@@ -1155,8 +1002,8 @@ fun GamesHomeScreen(
                             .size(32.dp)
                             .shadow(1.dp, CircleShape)
                             .clip(CircleShape)
-                            .background(VyboraSurface)
-                            .border(1.dp, VyboraBorder, CircleShape)
+                            .background(AuroraSurface)
+                            .border(1.dp, AuroraBorder, CircleShape)
                             .bounceClick {
                                 isSearchActive = !isSearchActive
                                 if (!isSearchActive) searchQuery = ""
@@ -1166,7 +1013,7 @@ fun GamesHomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_search),
                             contentDescription = "Search games",
-                            tint = if (isSearchActive) VyboraPurple else VyboraTextPrimary,
+                            tint = if (isSearchActive) AuroraOrchid else AuroraTextPrimary,
                             modifier = Modifier.size(16.dp),
                         )
                     }
@@ -1175,7 +1022,7 @@ fun GamesHomeScreen(
 
                     Text(
                         text = "All Games ›",
-                        color = VyboraPurple,
+                        color = AuroraOrchid,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
@@ -1211,23 +1058,22 @@ fun GamesHomeScreen(
                         ) {
                             Text(
                                 text = "No games found matching \"$searchQuery\"",
-                                color = VyboraTextSecondary,
+                                color = AuroraTextSecondary,
                                 fontSize = 14.sp,
                             )
                             Spacer(Modifier.height(10.dp))
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(VyboraLavender)
+                                    .background(AuroraLavender)
                                     .bounceClick { searchQuery = "" }
                                     .padding(horizontal = 14.dp, vertical = 6.dp),
                             ) {
-                                Text("Clear search", color = VyboraPurple, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("Clear search", color = AuroraOrchid, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 } else {
-                    // Responsive 2-column grid of search results
                     items(searchResults.chunked(2)) { pair ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1235,7 +1081,7 @@ fun GamesHomeScreen(
                         ) {
                             Box(Modifier.weight(1f)) {
                                 val game = pair[0]
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = game.title,
                                     genre = game.genre,
                                     accentColor = game.accentColor,
@@ -1251,7 +1097,7 @@ fun GamesHomeScreen(
                             if (pair.size > 1) {
                                 Box(Modifier.weight(1f)) {
                                     val game = pair[1]
-                                    VyboraGameGridCard(
+                                    AuroraGameGridCard(
                                         title = game.title,
                                         genre = game.genre,
                                         accentColor = game.accentColor,
@@ -1271,14 +1117,15 @@ fun GamesHomeScreen(
                     }
                 }
             } else {
-                // ── Section 5: Section A — Prominent Hero Featured Game ──
+                // ── Section 5: Section A — Hero Featured Game & Festival ──
                 item {
                     HeroFeaturedGameCard(
-                        onPlayClick = { comingSoon("Petrol Pump Simulator") }
+                        onPlayClick = { comingSoon("Petrol Pump Simulator") },
+                        onFestivalClick = { nav.navigateSafe(Routes.EVENT_CENTER) },
                     )
                 }
 
-                // ── Section 6: Section B — Popular Games Row (Who's the Spy & Paint to Hide) ──
+                // ── Section 6: Section B — Popular Games Row ──
                 item {
                     PopularGamesRow(
                         onSpyClick = { nav.navigateSafe(Routes.SPY) },
@@ -1286,16 +1133,15 @@ fun GamesHomeScreen(
                     )
                 }
 
-                // ── Section 7: Section C — Explore More Games (2-Column Grid) ──
+                // ── Section 7: Section C — Explore More Games ──
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        // Row 1: Trickster's Cafe & Hide and Seek
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Trickster's Cafe",
                                     genre = "Card Bluffing",
                                     accentColor = Color(0xFF8D6E63),
@@ -1305,7 +1151,7 @@ fun GamesHomeScreen(
                                 )
                             }
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Hide And Seek",
                                     genre = "Prop Hunt",
                                     accentColor = Color(0xFF00796B),
@@ -1316,13 +1162,12 @@ fun GamesHomeScreen(
                             }
                         }
 
-                        // Row 2: Space Werewolf & Oh My Card
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Space Werewolf",
                                     genre = "Sci-Fi Impostor",
                                     accentColor = Color(0xFF5E35B1),
@@ -1331,7 +1176,7 @@ fun GamesHomeScreen(
                                 )
                             }
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Oh My Card",
                                     genre = "Card Matching",
                                     accentColor = Color(0xFF2E7D32),
@@ -1341,13 +1186,12 @@ fun GamesHomeScreen(
                             }
                         }
 
-                        // Row 3: Ludo & Billiards
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Ludo Classic",
                                     genre = "Royal Board Game",
                                     accentColor = Color(0xFFC62828),
@@ -1357,7 +1201,7 @@ fun GamesHomeScreen(
                                 )
                             }
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Billiards Lounge",
                                     genre = "8-Ball Pool",
                                     accentColor = Color(0xFF0288D1),
@@ -1370,52 +1214,80 @@ fun GamesHomeScreen(
                     }
                 }
 
-                // ── Section 8: Community Players ──
+                // ── Section 8: Premium 3D Gift Pack Treasure Chest ──
+                item {
+                    com.sundram.weplay.ui.theme.PremiumGiftPack(
+                        countdownText = "47:59:12",
+                        offerTitle = "Royal Starter Chest",
+                        rewardAmount = "5,000",
+                        priceText = "$0.99 ›",
+                        onBuyClick = { showGiftPackSheet = true },
+                    )
+                }
+
+                // ── Section 9: Community Players with Animated Frames & Real Profiles ──
                 item {
                     Spacer(Modifier.height(6.dp))
                     Column(modifier = Modifier.padding(horizontal = 2.dp)) {
                         Text(
                             text = "Community Players",
-                            color = VyboraTextPrimary,
+                            color = AuroraTextPrimary,
                             fontSize = 19.sp,
                             fontWeight = FontWeight.ExtraBold,
                         )
                         Text(
                             text = "Meet people who share your vibe",
-                            color = VyboraTextSecondary,
+                            color = AuroraTextSecondary,
                             fontSize = 12.sp,
                         )
                     }
                 }
 
-                items(exploreUsers, key = { it.id }) { user ->
-                    ExploreFeedItem(
-                        user = user,
-                        onClick = { nav.navigateSafe(Routes.ROOM) },
-                        onMessageClick = { nav.navigateSafe(Routes.chatRoute(user.id)) },
-                    )
+                if (exploreUsers.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = "No players nearby right now",
+                                color = AuroraTextSecondary,
+                                fontSize = 14.sp,
+                            )
+                        }
+                    }
+                } else {
+                    items(exploreUsers, key = { it.id }) { user ->
+                        ExploreFeedItem(
+                            user = user,
+                            onClick = { nav.navigateSafe(Routes.userDetailRoute(user.id)) },
+                            onMessageClick = { nav.navigateSafe(Routes.chatRoute(user.id)) },
+                        )
+                    }
                 }
             }
         }
 
-        // ── Floating Gift Pack Widget (Bottom-Right, opens ModalBottomSheet) ──
+        // ── B7: Floating 3D Gift Pack Widget (Bottom-Right, opens Celebration Sheet) ──
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 14.dp, bottom = pad.calculateBottomPadding() + 8.dp)
-                .shadow(6.dp, RoundedCornerShape(18.dp))
+                .shadow(4.dp, RoundedCornerShape(18.dp))
                 .clip(RoundedCornerShape(18.dp))
-                .background(VyboraSurface)
-                .border(1.5.dp, VyboraGold, RoundedCornerShape(18.dp))
+                .background(AuroraSurface)
+                .border(1.5.dp, AuroraGold, RoundedCornerShape(18.dp))
                 .bounceClick { showGiftPackSheet = true }
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(R.drawable.vb_gift_pack),
-                    contentDescription = "Gift Pack",
-                    modifier = Modifier.size(28.dp),
+                    painter = painterResource(R.drawable.ic_gift_box_3d),
+                    contentDescription = "3D Gift Pack",
+                    modifier = Modifier.size(30.dp),
                 )
                 Text(
                     text = "Gift Pack",
@@ -1426,7 +1298,7 @@ fun GamesHomeScreen(
             }
         }
 
-        // ── Gift Pack Offers Modal Bottom Sheet ──
+        // ── 3D Gift Pack Offers Modal Bottom Sheet ──
         if (showGiftPackSheet) {
             com.sundram.weplay.ui.components.GiftPackOffersSheet(
                 userId = profile.id,
@@ -1451,9 +1323,9 @@ fun GamesHomeScreen(
                 modifier = Modifier
                     .shadow(3.dp, CircleShape)
                     .clip(CircleShape)
-                    .background(VyboraPurple)
+                    .background(AuroraGradients.sunsetFantasy)
                     .bounceClick { scope.launch { listState.animateScrollToItem(0) } }
-                    .padding(horizontal = 12.dp, vertical = 7.dp),
+                    .padding(horizontal = 14.dp, vertical = 7.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

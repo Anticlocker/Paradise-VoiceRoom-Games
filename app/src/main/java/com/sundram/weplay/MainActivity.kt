@@ -198,7 +198,11 @@ private fun WePlayApp(
                 )
             }
             composable(Routes.RANKING) {
-                RankingScreen(nav = nav)
+                RankingScreen(
+                    nav = nav,
+                    profile = profile,
+                    onSaveProfile = onSaveProfile,
+                )
             }
             composable(Routes.TASKS) {
                 com.sundram.weplay.ui.screens.TaskCenterScreen(
@@ -214,7 +218,7 @@ private fun WePlayApp(
                 CreateVoiceRoomScreen(nav = nav)
             }
             composable(Routes.ME) {
-                MeScreen(nav, pad, profile, onLogout)
+                MeScreen(nav, pad, profile, onLogout, onSaveProfile)
             }
             composable(Routes.LUDO) {
                 LudoScreen(nav)
@@ -290,6 +294,15 @@ private fun WePlayApp(
             }
             composable(Routes.GAME_ROOMS) {
                 GameRoomsScreen(nav)
+            }
+            composable(Routes.EVENT_CENTER) {
+                com.sundram.weplay.ui.screens.EventCenterScreen(nav = nav)
+            }
+            composable(Routes.EVENT_DETAIL) { entry ->
+                com.sundram.weplay.ui.screens.EventDetailScreen(
+                    eventId = entry.arguments?.getString("eventId") ?: "",
+                    nav = nav,
+                )
             }
         }
     }

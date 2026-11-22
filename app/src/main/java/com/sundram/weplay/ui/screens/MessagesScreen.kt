@@ -83,6 +83,7 @@ import com.sundram.weplay.ui.nav.Routes
 import com.sundram.weplay.ui.theme.KtvRed
 import com.sundram.weplay.ui.theme.LiveRed
 import com.sundram.weplay.ui.theme.MintGreen
+import com.sundram.weplay.ui.theme.AuroraChatBackground
 import com.sundram.weplay.ui.theme.VyboraBg
 import com.sundram.weplay.ui.theme.VyboraBorder
 import com.sundram.weplay.ui.theme.VyboraCyan
@@ -205,10 +206,9 @@ fun MessagesScreen(
     }
 
     // ── Root layout ──────────────────────────────────────────────────────────
-    Box(
+    AuroraChatBackground(
         modifier = Modifier
             .fillMaxSize()
-            .background(VyboraBg)
             .padding(pad),
     ) {
         LazyColumn(

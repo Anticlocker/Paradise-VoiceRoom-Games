@@ -1,0 +1,405 @@
+{
+  "count": 50,
+  "assets": [
+    {
+      "name": "me_clean_vip",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_shop",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_avatar",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_home",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_moments",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_stats",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_visitors",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_invite",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_badges",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_contributions",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_language",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_parental",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_help",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_security",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_settings",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_wallet",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_gifts",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_backpack",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_family",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_friends",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_followers",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_following",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_profile",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_logout",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_about",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_privacy",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_notification",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_history",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_camera",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_frame",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_crown",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_level",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_share",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_verify",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_giftpack",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_visitor_private",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_report",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_blocked",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_devices",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_subscription",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_myspace",
+      "kind": "icon",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "name": "me_clean_demo_avatar_01",
+      "kind": "fictional_avatar",
+      "size": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_clean_demo_avatar_02",
+      "kind": "fictional_avatar",
+      "size": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_clean_demo_avatar_03",
+      "kind": "fictional_avatar",
+      "size": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_clean_demo_avatar_04",
+      "kind": "fictional_avatar",
+      "size": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_clean_demo_avatar_05",
+      "kind": "fictional_avatar",
+      "size": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_clean_demo_avatar_06",
+      "kind": "fictional_avatar",
+      "size": [
+        384,
+        384
+      ]
+    },
+    {
+      "name": "me_clean_header_warm",
+      "kind": "background",
+      "size": [
+        1080,
+        460
+      ]
+    },
+    {
+      "name": "me_clean_header_cool",
+      "kind": "background",
+      "size": [
+        1080,
+        460
+      ]
+    },
+    {
+      "name": "me_clean_header_rose",
+      "kind": "background",
+      "size": [
+        1080,
+        460
+      ]
+    }
+  ]
+}

@@ -103,6 +103,8 @@ val STARTER_ACHIEVEMENTS: List<TaskDefinition> = listOf(
     TaskDefinition("ach_07", "Community Star", "Receive 10 messages from friends", TaskCategory.ACHIEVEMENT, "⭐", 200, 200, 10, Routes.MSG, "Chats"),
 )
 
+val ALL_TASKS: List<TaskDefinition> = STARTER_DAILY_MISSIONS + STARTER_WEEKLY_CHALLENGES + STARTER_NEW_PLAYER_MISSIONS + STARTER_ACHIEVEMENTS
+
 /**
  * Task Engine Repository that manages progression, check-in streaks and rewards.
  */

@@ -82,14 +82,42 @@ object Routes {
     const val SEARCH = "search"
     const val GAME_ROOMS = "game/rooms"
     const val TASKS = "hub/tasks"
+    const val EVENT_CENTER = "events"
+    const val EVENT_DETAIL = "event/{eventId}"
+    const val GAMES = HUB
+    const val ROOMS = ROOM
+    const val SETTINGS_EDIT = PROFILE_EDIT
+    const val SUPPORT = SUPPORT_SETTINGS
+    const val FEEDBACK = "settings/feedback"
+    const val ROOM_CREATE = CREATE_ROOM
+    const val VIP = TOPUP
+    const val SHOP = GIFTS
+    const val FAMILY_DISCOVERY = "family/discovery"
+    const val FAMILY_CREATION = "family/creation"
+    const val FAMILY_DETAIL = "family/detail"
+    const val FAMILY_CHAT = "family/chat"
+    const val FAMILY_VOICE_ROOM = "family/voiceroom"
+    const val FAMILY_MANAGEMENT = "family/management"
+    const val FAMILY_LEADERBOARD = "family/leaderboard"
+    const val FAMILY_SHOP = "family/shop"
+    const val FAMILY_ROSTER = "family/roster"
+    const val FAMILY_QUESTS = "family/quests"
+    const val FRIENDS = MSG
+    const val ROOM_ROUTE = ROOM_DETAIL
+    const val SPLASH = "splash"
+    const val AUTH = "auth"
+    const val ONBOARDING = "onboarding"
 
     fun chatRoute(id: String) = "chat/$id"
     fun userRoute(id: String) = "user/$id"
     fun userDetailRoute(id: String) = "profile/detail/$id"
     fun roomRoute(id: String) = "room/$id"
+    fun roomDetail(roomId: String) = "room/$roomId"
+    fun eventDetailRoute(id: String) = "event/$id"
     fun notificationsRoute() = NOTIFICATIONS
     fun searchRoute() = SEARCH
     fun tasksRoute() = TASKS
+    fun eventCenterRoute() = EVENT_CENTER
 
     val tabs = setOf(HUB, ROOM, DISCOVER, MSG, ME)
 }
@@ -121,96 +149,10 @@ internal fun switchTab(controller: NavHostController, route: String) {
 
 @Composable
 fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0) {
-    val navBarBg = VyboraSurface
-    val inactiveColor = VyboraTextSecondary
-    val activeLabelColor = VyboraPurple
-    val badgeRed = Color(0xFFFF4D4F)
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = navBarBg,
-        tonalElevation = 0.dp,
-    ) {
-        Column(Modifier.navigationBarsPadding()) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(VyboraBorder),
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                tabsDual.forEach { tab ->
-                    val selected = current == tab.route
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(60.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                            ) {
-                                if (current != tab.route) {
-                                    switchTab(nav, tab.route)
-                                }
-                            },
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                painter = painterResource(if (selected) tab.iconOn else tab.iconOff),
-                                contentDescription = tab.label,
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(26.dp),
-                            )
-                            // Chats badge with count
-                            if (tab.route == Routes.MSG) {
-                                val badgeCount = msgBadge
-                                if (badgeCount > 0) {
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .offset(x = 10.dp, y = (-4).dp)
-                                            .size(16.dp)
-                                            .background(badgeRed, CircleShape),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Text(
-                                            text = "$badgeCount",
-                                            color = Color.White,
-                                            fontSize = 9.sp,
-                                            fontWeight = FontWeight.Bold,
-                                        )
-                                    }
-                                }
-                            }
-                            // Discover and Me red dot badges
-                            if (tab.route == Routes.DISCOVER || tab.route == Routes.ME) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .offset(x = 4.dp, y = (-2).dp)
-                                        .size(7.dp)
-                                        .background(badgeRed, CircleShape),
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(3.dp))
-                        Text(
-                            text = tab.label,
-                            color = if (selected) activeLabelColor else inactiveColor,
-                            fontSize = 11.sp,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                        )
-                    }
-                }
-            }
-        }
-    }
+    com.sundram.weplay.ui.theme.AuroraNavigationDock(
+        currentRoute = current,
+        onTabSelected = { route -> switchTab(nav, route) },
+        msgBadgeCount = msgBadge,
+        modifier = Modifier.navigationBarsPadding(),
+    )
 }

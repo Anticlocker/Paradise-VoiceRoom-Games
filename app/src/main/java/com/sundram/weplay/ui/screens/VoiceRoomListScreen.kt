@@ -7,20 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -48,6 +35,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -61,40 +49,130 @@ import androidx.navigation.NavHostController
 import com.sundram.weplay.R
 import com.sundram.weplay.data.Demo
 import com.sundram.weplay.data.RoomCard
+import com.sundram.weplay.data.UserPrefs
+import com.sundram.weplay.ui.components.InitialsAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.components.navigateSafe
 import com.sundram.weplay.ui.components.tagColors
 import com.sundram.weplay.ui.nav.Routes
-import com.sundram.weplay.ui.theme.VyboraBg
-import com.sundram.weplay.ui.theme.VyboraBorder
-import com.sundram.weplay.ui.theme.VyboraGold
-import com.sundram.weplay.ui.theme.VyboraLavender
-import com.sundram.weplay.ui.theme.VyboraPurple
-import com.sundram.weplay.ui.theme.VyboraSurface
-import com.sundram.weplay.ui.theme.VyboraTextPrimary
-import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraBackground
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraCoral
+import com.sundram.weplay.ui.theme.AuroraCyan
+import com.sundram.weplay.ui.theme.AuroraVoiceRoomBackground
+import com.sundram.weplay.ui.theme.AuroraGold
+import com.sundram.weplay.ui.theme.AuroraGradients
+import com.sundram.weplay.ui.theme.AuroraLavender
+import com.sundram.weplay.ui.theme.AuroraOrchid
+import com.sundram.weplay.ui.theme.AuroraRose
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.AuroraTextPrimary
+import com.sundram.weplay.ui.theme.AuroraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraTurquoise
+import com.sundram.weplay.ui.theme.CelestialViolet
+import com.sundram.weplay.ui.theme.ChampagneGold
+import com.sundram.weplay.ui.theme.DeepMidnight
+import com.sundram.weplay.ui.theme.DreamLavender
+import com.sundram.weplay.ui.theme.SoftPeach
 
-private val LoungeTabs = listOf("Discover", "Trending", "Following")
+private val LoungeTabs = listOf("Recent", "All", "Popular", "Related", "Following")
 private val CategoryPills = listOf("All", "Friends", "PK", "Music", "Video", "Game", "Chats")
+
+private fun formatVisitedAgo(timestamp: Long): String {
+    val diff = (System.currentTimeMillis() - timestamp).coerceAtLeast(0)
+    val mins = diff / (1000 * 60)
+    return when {
+        mins < 1 -> "Just now"
+        mins < 60 -> "${mins}m ago"
+        mins < 1440 -> "${mins / 60}h ago"
+        else -> "${mins / 1440}d ago"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
-    var selectedLoungeTab by rememberSaveable { mutableStateOf("Discover") }
+    val context = LocalContext.current
+    val prefs = remember { UserPrefs(context) }
+    var visitRefresh by remember { mutableStateOf(0) }
+
+    var selectedLoungeTab by rememberSaveable { mutableStateOf("All") }
     var selectedCategory by rememberSaveable { mutableStateOf("All") }
     var isSearchActive by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showGiftPackSheet by rememberSaveable { mutableStateOf(false) }
 
-    // Multi-criteria room filtering & sorting
-    val filteredRooms = remember(selectedLoungeTab, selectedCategory, searchQuery) {
-        if (selectedLoungeTab == "Following") {
-            // Following has honest empty state when no hosts are followed yet
-            emptyList<RoomCard>()
-        } else {
-            Demo.rooms
-                .filter { room ->
-                    // Category filter
+    // Multi-criteria room filtering & sorting (supporting Recent, All, Popular, Related, Following)
+    val filteredRooms = remember(selectedLoungeTab, selectedCategory, searchQuery, visitRefresh) {
+        when (selectedLoungeTab) {
+            "Following" -> {
+                emptyList<RoomCard>()
+            }
+            "Recent" -> {
+                val visitedPairs = prefs.getRecentVisitedRooms().ifEmpty {
+                    // Seed initial recent visited rooms if none recorded yet
+                    listOf(
+                        "r1" to (System.currentTimeMillis() - 15 * 60 * 1000L),
+                        "r6" to (System.currentTimeMillis() - 90 * 60 * 1000L),
+                    )
+                }
+                visitedPairs.mapNotNull { (roomId, timestamp) ->
+                    val found = Demo.rooms.find { it.id == roomId }
+                    if (found != null) {
+                        found.copy(activityText = "Visited ${formatVisitedAgo(timestamp)} • ${found.activityText ?: ""}")
+                    } else {
+                        RoomCard(
+                            id = roomId,
+                            title = "Past Session ($roomId)",
+                            host = "Host",
+                            members = 0,
+                            tag = "Casual",
+                            live = false,
+                            coverRes = R.drawable.vb_room_cover_moonlight,
+                            activityText = "Ended • Visited ${formatVisitedAgo(timestamp)}",
+                        )
+                    }
+                }.filter { room ->
+                    if (searchQuery.isBlank()) true else {
+                        room.title.contains(searchQuery, ignoreCase = true) ||
+                                room.host.contains(searchQuery, ignoreCase = true)
+                    }
+                }
+            }
+            "Popular" -> {
+                Demo.rooms
+                    .filter { room ->
+                        val matchesCategory = when (selectedCategory) {
+                            "All" -> true
+                            "Friends" -> room.tag == "Friends" || room.tag == "Casual"
+                            "PK" -> room.tag == "PK" || room.tag == "Deduction"
+                            "Music" -> room.tag == "Music" || room.tag == "KTV"
+                            "Video" -> room.tag == "Video"
+                            "Game" -> room.tag == "Game" || room.tag == "Games"
+                            "Chats" -> room.tag == "Chats" || room.tag == "Casual"
+                            else -> room.tag.equals(selectedCategory, ignoreCase = true)
+                        }
+                        val matchesQuery = if (searchQuery.isBlank()) true else {
+                            room.title.contains(searchQuery, ignoreCase = true) ||
+                                    room.host.contains(searchQuery, ignoreCase = true) ||
+                                    room.tag.contains(searchQuery, ignoreCase = true)
+                        }
+                        matchesCategory && matchesQuery
+                    }
+                    .sortedByDescending { it.members }
+            }
+            "Related" -> {
+                Demo.rooms.filter { room ->
+                    room.tag in listOf("Friends", "Music", "PK", "Game")
+                }.filter { room ->
+                    if (searchQuery.isBlank()) true else {
+                        room.title.contains(searchQuery, ignoreCase = true) ||
+                                room.host.contains(searchQuery, ignoreCase = true)
+                    }
+                }
+            }
+            else -> { // "All"
+                Demo.rooms.filter { room ->
                     val matchesCategory = when (selectedCategory) {
                         "All" -> true
                         "Friends" -> room.tag == "Friends" || room.tag == "Casual"
@@ -105,7 +183,6 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                         "Chats" -> room.tag == "Chats" || room.tag == "Casual"
                         else -> room.tag.equals(selectedCategory, ignoreCase = true)
                     }
-                    // Search query filter
                     val matchesQuery = if (searchQuery.isBlank()) true else {
                         room.title.contains(searchQuery, ignoreCase = true) ||
                                 room.host.contains(searchQuery, ignoreCase = true) ||
@@ -114,20 +191,13 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                     }
                     matchesCategory && matchesQuery
                 }
-                .let { list ->
-                    // Discovery tab sorting
-                    when (selectedLoungeTab) {
-                        "Trending" -> list.sortedByDescending { it.members }
-                        else -> list
-                    }
-                }
+            }
         }
     }
 
-    Box(
+    AuroraVoiceRoomBackground(
         modifier = Modifier
             .fillMaxSize()
-            .background(VyboraBg)
             .statusBarsPadding()
             .padding(pad),
     ) {
@@ -166,7 +236,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                     )
                 }
 
-                // ── Section 3: Tonight's Spotlight (Original Featured Card) ──
+                // ── Section 3: Tonight's Spotlight (Royal Midnight Featured Card) ──
                 item {
                     TonightsSpotlightCard(
                         onExploreClick = { nav.navigateSafe(Routes.RANKING) },
@@ -184,7 +254,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                 // ── Section 5: Room Cards List ──
                 if (selectedLoungeTab == "Following") {
                     item {
-                        FollowingEmptyState(onExploreClick = { selectedLoungeTab = "Discover" })
+                        FollowingEmptyState(onExploreClick = { selectedLoungeTab = "All" })
                     }
                 } else if (filteredRooms.isEmpty()) {
                     item {
@@ -198,9 +268,13 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                     }
                 } else {
                     items(filteredRooms, key = { it.id }) { room ->
-                        VyboraRoomCard(
+                        AuroraRoomCard(
                             room = room,
-                            onClick = { nav.navigateSafe(Routes.roomRoute(room.id)) }
+                            onClick = {
+                                prefs.recordRoomVisit(room.id)
+                                visitRefresh++
+                                nav.navigateSafe(Routes.roomRoute(room.id))
+                            }
                         )
                     }
                 }
@@ -241,7 +315,7 @@ private fun VoiceLoungeHeader(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Voice Lounge",
-                color = VyboraTextPrimary,
+                color = AuroraTextPrimary,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = (-0.5).sp,
@@ -249,7 +323,7 @@ private fun VoiceLoungeHeader(
             Spacer(Modifier.height(1.dp))
             Text(
                 text = "Find your people. Join the vibe.",
-                color = VyboraTextSecondary,
+                color = AuroraTextSecondary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
             )
@@ -261,28 +335,28 @@ private fun VoiceLoungeHeader(
                 .size(36.dp)
                 .shadow(1.dp, CircleShape)
                 .clip(CircleShape)
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, CircleShape)
+                .background(AuroraSurface)
+                .border(1.dp, AuroraBorder, CircleShape)
                 .bounceClick(onClick = onToggleSearch),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_search),
                 contentDescription = "Search rooms",
-                tint = if (isSearchActive) VyboraPurple else VyboraTextPrimary,
+                tint = if (isSearchActive) AuroraOrchid else AuroraTextPrimary,
                 modifier = Modifier.size(18.dp),
             )
         }
 
         Spacer(Modifier.width(10.dp))
 
-        // Create Room Button (+ Circular Action)
+        // Create Room Button (Sunset Fantasy Action)
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .shadow(2.dp, CircleShape)
                 .clip(CircleShape)
-                .background(VyboraPurple)
+                .background(AuroraGradients.sunsetFantasy)
                 .bounceClick { nav.navigateSafe(Routes.CREATE_ROOM) },
             contentAlignment = Alignment.Center,
         ) {
@@ -317,8 +391,8 @@ private fun VoiceSearchBar(
                 .weight(1f)
                 .height(40.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, RoundedCornerShape(20.dp))
+                .background(AuroraSurface)
+                .border(1.dp, AuroraBorder, RoundedCornerShape(20.dp))
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
@@ -326,7 +400,7 @@ private fun VoiceSearchBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = null,
-                    tint = VyboraTextSecondary,
+                    tint = AuroraTextSecondary,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.width(8.dp))
@@ -334,14 +408,14 @@ private fun VoiceSearchBar(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
-                    textStyle = TextStyle(color = VyboraTextPrimary, fontSize = 13.sp),
-                    cursorBrush = SolidColor(VyboraPurple),
+                    textStyle = TextStyle(color = AuroraTextPrimary, fontSize = 13.sp),
+                    cursorBrush = SolidColor(AuroraOrchid),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                     modifier = Modifier.weight(1f),
                     decorationBox = { inner ->
                         if (query.isEmpty()) {
-                            Text("Search rooms, hosts or tags...", color = VyboraTextSecondary, fontSize = 13.sp)
+                            Text("Search rooms, hosts or tags...", color = AuroraTextSecondary, fontSize = 13.sp)
                         }
                         inner()
                     },
@@ -350,7 +424,7 @@ private fun VoiceSearchBar(
                     Icon(
                         painter = painterResource(R.drawable.ic_close),
                         contentDescription = "Clear search",
-                        tint = VyboraTextSecondary,
+                        tint = AuroraTextSecondary,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { onQueryChange("") },
@@ -363,7 +437,7 @@ private fun VoiceSearchBar(
 
         Text(
             text = "Cancel",
-            color = VyboraPurple,
+            color = AuroraOrchid,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.clickable {
@@ -391,19 +465,19 @@ private fun LoungeNavPills(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(18.dp))
-                    .background(if (active) VyboraPurple else VyboraSurface)
+                    .background(if (active) AuroraGradients.sunsetFantasy else Brush.linearGradient(listOf(AuroraSurface, AuroraSurface)))
                     .border(
                         1.dp,
-                        if (active) VyboraPurple else VyboraBorder,
+                        if (active) Color.Transparent else AuroraBorder,
                         RoundedCornerShape(18.dp)
                     )
                     .bounceClick { onSelect(tab) }
-                    .padding(horizontal = 14.dp, vertical = 7.dp),
+                    .padding(horizontal = 16.dp, vertical = 7.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = tab,
-                    color = if (active) Color.White else VyboraTextSecondary,
+                    color = if (active) Color.White else AuroraTextSecondary,
                     fontSize = 13.sp,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
                 )
@@ -413,7 +487,7 @@ private fun LoungeNavPills(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  4. Tonight's Spotlight Card (Original Anti-Aliased Featured Section)
+//  4. Tonight's Spotlight Card (Royal Midnight & Cyan Sheen)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun TonightsSpotlightCard(
@@ -422,29 +496,37 @@ private fun TonightsSpotlightCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(138.dp)
+            .height(140.dp)
             .shadow(4.dp, RoundedCornerShape(22.dp))
             .clip(RoundedCornerShape(22.dp))
             .background(
                 Brush.linearGradient(
                     listOf(
-                        Color(0xFF5B22D4),
-                        Color(0xFF7A42F4),
-                        Color(0xFF27D2DC),
+                        Color(0xFF1B1438), // Royal Midnight
+                        Color(0xFF2E1C5E), // Deep Violet
+                        Color(0xFF1E284A), // Indigo Night
                     )
                 )
             )
-            // Anti-aliasing stroke along smooth rounded corner curve
-            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(22.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(22.dp))
             .bounceClick(scaleDown = 0.98f, onClick = onExploreClick)
             .padding(16.dp),
     ) {
+        // Voice Discovery Backdrop Banner (ap3r_banner_voice_rooms)
+        Image(
+            painter = painterResource(R.drawable.ap3r_banner_voice_rooms),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.32f,
+        )
+
         // Decorative radial overlay
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .size(150.dp)
-                .background(Color.White.copy(alpha = 0.08f), CircleShape),
+                .background(AuroraCyan.copy(alpha = 0.08f), CircleShape),
         )
 
         // Left Content: Tag + Headline + Subtitle + Action Button
@@ -465,7 +547,7 @@ private fun TonightsSpotlightCard(
                 Spacer(Modifier.width(5.dp))
                 Text(
                     text = "TONIGHT'S SPOTLIGHT",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = AuroraCyan,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.6.sp,
@@ -496,19 +578,19 @@ private fun TonightsSpotlightCard(
                 modifier = Modifier
                     .clip(RoundedCornerShape(14.dp))
                     .background(Color.White)
-                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "Explore Spotlight ›",
-                    color = VyboraPurple,
+                    color = AuroraOrchid,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
         }
 
-        // Right Overlapping Room Collage (Moonlight & Pop Star with anti-aliased borders)
+        // Right Overlapping Room Collage (Moonlight & Pop Star with glowing borders)
         Row(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -557,10 +639,10 @@ private fun CategoryChipRow(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
-                    .background(if (active) VyboraLavender else VyboraSurface)
+                    .background(if (active) AuroraGradients.sunsetFantasy else Brush.linearGradient(listOf(AuroraSurface, AuroraSurface)))
                     .border(
                         1.dp,
-                        if (active) VyboraPurple else VyboraBorder,
+                        if (active) Color.Transparent else AuroraBorder,
                         RoundedCornerShape(16.dp)
                     )
                     .bounceClick { onSelect(label) }
@@ -569,7 +651,7 @@ private fun CategoryChipRow(
             ) {
                 Text(
                     text = label,
-                    color = if (active) VyboraPurple else VyboraTextSecondary,
+                    color = if (active) Color.White else AuroraTextSecondary,
                     fontSize = 12.sp,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
                 )
@@ -579,10 +661,10 @@ private fun CategoryChipRow(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  6. Anti-Aliased Vybora Room Card Layout (Light Surface Card, Left Cover, Join Button)
+//  6. Aurora Room Card Layout (Light Ivory Surface, Left Cover, Gradient Join Button)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun VyboraRoomCard(
+private fun AuroraRoomCard(
     room: RoomCard,
     onClick: () -> Unit,
 ) {
@@ -591,21 +673,21 @@ private fun VyboraRoomCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(18.dp))
-            .clip(RoundedCornerShape(18.dp))
-            .background(VyboraSurface)
-            .border(1.dp, VyboraBorder, RoundedCornerShape(18.dp))
+            .shadow(2.dp, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(20.dp))
+            .background(AuroraSurface)
+            .border(1.dp, AuroraBorder, RoundedCornerShape(20.dp))
             .bounceClick(scaleDown = 0.98f, onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // LEFT: Illustrated Square Room Cover (80dp x 80dp with smooth corners)
+        // LEFT: Illustrated Square Room Cover (82dp x 82dp with smooth corners)
         Box(
             modifier = Modifier
-                .size(80.dp)
+                .size(82.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(VyboraBg)
-                .border(1.dp, VyboraBorder.copy(alpha = 0.6f), RoundedCornerShape(16.dp)),
+                .background(AuroraBackground)
+                .border(1.dp, AuroraBorder.copy(alpha = 0.6f), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center,
         ) {
             val coverDrawable = room.coverRes ?: R.drawable.vb_room_cover_moonlight
@@ -616,56 +698,131 @@ private fun VyboraRoomCard(
                 contentScale = ContentScale.Crop,
             )
 
-            // Live Indicator badge on top-left of cover
+            // Top-left: LIVE vs ENDED status indicator badge
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(6.dp)
+                    .padding(5.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xCC000000))
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                    .background(Color(0xD9000000))
+                    .padding(horizontal = 5.dp, vertical = 2.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(5.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF00E676)),
+                            .background(if (room.live) Color(0xFF00E676) else Color(0xFF9E9E9E)),
                     )
                     Spacer(Modifier.width(3.dp))
-                    Text("LIVE", color = Color.White, fontSize = 7.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = if (room.live) "LIVE" else "OFFLINE",
+                        color = Color.White,
+                        fontSize = 7.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            // Top-right: PK Active Badge (if PK active)
+            if (room.isPkActive) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(5.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(Color(0xFFFF5252), Color(0xFFFF4081))
+                            )
+                        )
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = "⚡ PK",
+                        color = Color.White,
+                        fontSize = 7.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
                 }
             }
         }
 
         Spacer(Modifier.width(12.dp))
 
-        // CENTER: Title + Category Pill + User Count + Host/Activity
+        // CENTER: Title + Host details (Level + Room Crest) + Category Pill + User Count
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             Text(
                 text = room.title,
-                color = VyboraTextPrimary,
+                color = DeepMidnight,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            val subtitle = room.activityText ?: "Host ${room.host}"
+            // Host Identity with Host Level & Room Crest
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                InitialsAvatar(name = room.host, size = 16.dp)
+                Text(
+                    text = room.host,
+                    color = AuroraTextSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                // Host level pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(SoftPeach.copy(alpha = 0.35f))
+                        .padding(horizontal = 4.dp, vertical = 1.dp),
+                ) {
+                    Text(
+                        text = "Lv.${room.hostLevel}",
+                        color = Color(0xFFC75D35),
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+                // Room Crest pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(DreamLavender.copy(alpha = 0.35f))
+                        .padding(horizontal = 4.dp, vertical = 1.dp),
+                ) {
+                    Text(
+                        text = "👑 Crest Lv.${room.roomLevel}",
+                        color = CelestialViolet,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            // Activity text / visited time
+            val subtitle = room.activityText ?: "Casual conversation & music"
             Text(
                 text = subtitle,
-                color = VyboraTextSecondary,
-                fontSize = 11.sp,
+                color = AuroraTextSecondary,
+                fontSize = 10.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(Modifier.height(2.dp))
+            Spacer(Modifier.height(1.dp))
 
-            // Metadata row: Category Tag + Users count
+            // Metadata row: Category Tag + Users count + Listeners
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = room.tag,
@@ -683,15 +840,23 @@ private fun VyboraRoomCard(
                 Icon(
                     painter = painterResource(R.drawable.ic_users),
                     contentDescription = null,
-                    tint = VyboraTextSecondary,
+                    tint = AuroraTurquoise,
                     modifier = Modifier.size(12.dp),
                 )
                 Spacer(Modifier.width(3.dp))
                 Text(
                     text = "${room.members}",
-                    color = VyboraTextSecondary,
+                    color = DeepMidnight,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Text(
+                    text = "(${room.listeners} listening)",
+                    color = AuroraTextSecondary,
+                    fontSize = 10.sp,
                 )
             }
         }
@@ -712,16 +877,16 @@ private fun VyboraRoomCard(
                 )
             }
 
-            // Compact Join Button Pill
+            // Compact Join Button Pill (Sunset Fantasy)
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(14.dp))
-                    .background(VyboraPurple)
-                    .padding(horizontal = 12.dp, vertical = 5.dp),
+                    .background(if (room.live) AuroraGradients.sunsetFantasy else Brush.linearGradient(listOf(Color(0xFFBBB6C8), Color(0xFFCCC8D6))))
+                    .padding(horizontal = 14.dp, vertical = 5.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Join",
+                    text = if (room.live) "Join" else "Revisit",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -741,8 +906,8 @@ private fun CompactGiftPackWidget(onClick: () -> Unit) {
             .size(50.dp)
             .shadow(4.dp, CircleShape)
             .clip(CircleShape)
-            .background(VyboraSurface)
-            .border(1.5.dp, VyboraGold, CircleShape)
+            .background(AuroraSurface)
+            .border(1.5.dp, AuroraGold, CircleShape)
             .bounceClick(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -766,7 +931,7 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VyboraSurface,
+        containerColor = AuroraSurface,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
         Column(
@@ -785,7 +950,7 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
 
             Text(
                 text = "Voice Lounge Gift Pack",
-                color = VyboraTextPrimary,
+                color = AuroraTextPrimary,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -794,7 +959,7 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
 
             Text(
                 text = "Exclusive perks, animated badges & voice flair",
-                color = VyboraTextSecondary,
+                color = AuroraTextSecondary,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center,
             )
@@ -811,13 +976,13 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(VyboraBg)
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(14.dp))
+                    .background(AuroraBackground)
+                    .border(1.dp, AuroraBorder, RoundedCornerShape(14.dp))
                     .padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 perks.forEach { perk ->
-                    Text(text = perk, color = VyboraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text(text = perk, color = AuroraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 }
             }
 
@@ -846,7 +1011,7 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
                     .fillMaxWidth()
                     .height(46.dp)
                     .clip(RoundedCornerShape(23.dp))
-                    .background(VyboraPurple)
+                    .background(AuroraGradients.sunsetFantasy)
                     .bounceClick(scaleDown = 0.98f, onClick = onDismiss),
                 contentAlignment = Alignment.Center,
             ) {
@@ -878,33 +1043,33 @@ private fun FollowingEmptyState(onExploreClick: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_users),
             contentDescription = null,
-            tint = VyboraTextSecondary.copy(alpha = 0.4f),
+            tint = AuroraTextSecondary.copy(alpha = 0.4f),
             modifier = Modifier.size(46.dp),
         )
         Spacer(Modifier.height(10.dp))
         Text(
             text = "No followed hosts are live",
-            color = VyboraTextPrimary,
+            color = AuroraTextPrimary,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Follow active room hosts to see them live here.",
-            color = VyboraTextSecondary,
+            color = AuroraTextSecondary,
             fontSize = 12.sp,
         )
         Spacer(Modifier.height(14.dp))
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(VyboraLavender)
+                .background(AuroraLavender)
                 .bounceClick(onClick = onExploreClick)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "Explore Live Rooms",
-                color = VyboraPurple,
+                color = AuroraOrchid,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -924,33 +1089,33 @@ private fun LoungeEmptyRoomsState(onReset: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_users),
             contentDescription = null,
-            tint = VyboraTextSecondary.copy(alpha = 0.4f),
+            tint = AuroraTextSecondary.copy(alpha = 0.4f),
             modifier = Modifier.size(46.dp),
         )
         Spacer(Modifier.height(10.dp))
         Text(
             text = "No voice rooms found",
-            color = VyboraTextPrimary,
+            color = AuroraTextPrimary,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Try clearing search or switching categories",
-            color = VyboraTextSecondary,
+            color = AuroraTextSecondary,
             fontSize = 12.sp,
         )
         Spacer(Modifier.height(14.dp))
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(VyboraLavender)
+                .background(AuroraLavender)
                 .bounceClick(onClick = onReset)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "Reset filters",
-                color = VyboraPurple,
+                color = AuroraOrchid,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
             )
