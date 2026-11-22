@@ -86,15 +86,15 @@ object Demo {
     )
 
     val rooms = listOf(
-        RoomCard("r1", "Tea Time Talks", "Priya", 7, "Friends", coverRes = R.drawable.vb_room_cover_moonlight, badges = listOf(R.drawable.vb_room_badge_gold, R.drawable.vb_room_badge_sapphire), activityText = "Chit-chat & Tea", hostLevel = 22, roomLevel = 6),
-        RoomCard("r2", "Werewolf Night", "Raj", 10, "PK", coverRes = R.drawable.vb_room_cover_werewolf_night, badges = listOf(R.drawable.vb_room_badge_ruby, R.drawable.vb_room_badge_shield), activityText = "Social Deduction", hostLevel = 35, roomLevel = 9, isPkActive = true),
-        RoomCard("r3", "Music & Chill", "Ankit", 4, "Music", coverRes = R.drawable.vb_room_cover_karaoke_stage, badges = listOf(R.drawable.vb_room_badge_music, R.drawable.vb_room_badge_star), activityText = "Live Acoustic", hostLevel = 19, roomLevel = 4),
-        RoomCard("r4", "Desi Gamers", "Sam", 6, "Game", coverRes = R.drawable.vb_room_cover_beast_wars, badges = listOf(R.drawable.vb_room_badge_flame, R.drawable.vb_room_badge_diamond), activityText = "Ranked Match", hostLevel = 28, roomLevel = 7, isPkActive = true),
-        RoomCard("r5", "Late Night Vibes", "Sneha", 2, "Chats", coverRes = R.drawable.vb_room_cover_beach_party, badges = listOf(R.drawable.vb_room_badge_emerald, R.drawable.vb_room_badge_gold), activityText = "Chillout Lounge", hostLevel = 15, roomLevel = 3),
-        RoomCard("r6", "Sing-Along Stage", "Kavya", 9, "Music", coverRes = R.drawable.vb_room_cover_pop_star, badges = listOf(R.drawable.vb_room_badge_royal, R.drawable.vb_room_badge_music), activityText = "Karaoke Contest", hostLevel = 31, roomLevel = 8),
-        RoomCard("r7", "Royal High Stakes", "Vikram", 14, "Game", coverRes = R.drawable.vb_room_cover_royal_casino, badges = listOf(R.drawable.vb_room_badge_royal, R.drawable.vb_room_badge_gold), activityText = "VIP Cards", hostLevel = 45, roomLevel = 12, isPkActive = true),
-        RoomCard("r8", "8-Ball Billiards Lounge", "Arjun", 8, "Game", coverRes = R.drawable.vb_room_cover_billiards_lounge, badges = listOf(R.drawable.vb_room_badge_diamond, R.drawable.vb_room_badge_ice), activityText = "Tournament", hostLevel = 26, roomLevel = 7),
-        RoomCard("r9", "Crown VIP Cinema", "Natasha", 18, "Video", coverRes = R.drawable.vb_room_cover_royal_crown, badges = listOf(R.drawable.vb_room_badge_royal, R.drawable.vb_room_badge_ruby, R.drawable.vb_room_badge_sapphire), activityText = "Movie Night", hostLevel = 50, roomLevel = 15),
+        RoomCard("r1", "Tea Time Talks ☕", "Priya", 7, "Friends", coverRes = R.drawable.ap_voice_cover_moon, badges = listOf(R.drawable.ap_voice_crest_royal), activityText = "Chit-chat & Tea", hostLevel = 22, roomLevel = 6, listeners = 21),
+        RoomCard("r2", "Werewolf Night", "Raj", 10, "PK", coverRes = R.drawable.ap_voice_cover_werewolf, badges = listOf(R.drawable.ap_voice_crest_pk), activityText = "Social Deduction · PK Battle", hostLevel = 35, roomLevel = 9, isPkActive = true, listeners = 30),
+        RoomCard("r3", "Music & Chill 🎵", "Ankit", 16, "Music", coverRes = R.drawable.ap_voice_cover_music, badges = listOf(R.drawable.ap_voice_crest_music), activityText = "Live Acoustic · Song Requests", hostLevel = 19, roomLevel = 4, listeners = 48),
+        RoomCard("r4", "Ludo Friends Club 🎲", "Neha", 12, "Game", coverRes = R.drawable.ap_voice_cover_dice, badges = listOf(R.drawable.ap_voice_crest_game), activityText = "Ludo · Games · Fun Chat", hostLevel = 28, roomLevel = 7, listeners = 36),
+        RoomCard("r5", "Late Night Vibes ✨", "Sneha", 5, "Chats", coverRes = R.drawable.ap_voice_cover_moon, badges = listOf(R.drawable.ap_voice_crest_royal), activityText = "Chillout Lounge & Stories", hostLevel = 15, roomLevel = 3, listeners = 15),
+        RoomCard("r6", "Sing-Along Stage 🎤", "Kavya", 9, "Music", coverRes = R.drawable.ap_voice_cover_music, badges = listOf(R.drawable.ap_voice_crest_music), activityText = "Karaoke Contest & Open Mic", hostLevel = 31, roomLevel = 8, listeners = 27),
+        RoomCard("r7", "Royal High Stakes 👑", "Vikram", 14, "Game", coverRes = R.drawable.ap_voice_cover_dice, badges = listOf(R.drawable.ap_voice_crest_game), activityText = "VIP Cards & Tournaments", hostLevel = 45, roomLevel = 12, isPkActive = true, listeners = 42),
+        RoomCard("r8", "8-Ball Billiards Lounge 🎱", "Arjun", 8, "Game", coverRes = R.drawable.ap_voice_cover_dice, badges = listOf(R.drawable.ap_voice_crest_game), activityText = "Casual Matches & Chat", hostLevel = 26, roomLevel = 7, listeners = 24),
+        RoomCard("r9", "Crown VIP Cinema 🎬", "Natasha", 18, "Video", coverRes = R.drawable.ap_voice_cover_moon, badges = listOf(R.drawable.ap_voice_crest_royal), activityText = "Movie Night Watch Party", hostLevel = 50, roomLevel = 15, listeners = 54),
     )
 
     val chats = listOf(
