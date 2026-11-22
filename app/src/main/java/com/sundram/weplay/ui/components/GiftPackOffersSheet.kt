@@ -1,8 +1,17 @@
 package com.sundram.weplay.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,7 +32,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -35,8 +44,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -50,15 +63,21 @@ import com.sundram.weplay.data.ALL_GIFT_PACK_OFFERS
 import com.sundram.weplay.data.FeaturedOfferState
 import com.sundram.weplay.data.GiftPackOffer
 import com.sundram.weplay.data.GiftPackRotationManager
-import com.sundram.weplay.ui.theme.VyboraBg
-import com.sundram.weplay.ui.theme.VyboraBorder
-import com.sundram.weplay.ui.theme.VyboraGold
-import com.sundram.weplay.ui.theme.VyboraLavender
-import com.sundram.weplay.ui.theme.VyboraPurple
-import com.sundram.weplay.ui.theme.VyboraSurface
-import com.sundram.weplay.ui.theme.VyboraTextPrimary
-import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraBackground
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraCoral
+import com.sundram.weplay.ui.theme.AuroraCyan
+import com.sundram.weplay.ui.theme.AuroraGold
+import com.sundram.weplay.ui.theme.AuroraGradients
+import com.sundram.weplay.ui.theme.AuroraLavender
+import com.sundram.weplay.ui.theme.AuroraOrchid
+import com.sundram.weplay.ui.theme.AuroraRose
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.AuroraTextPrimary
+import com.sundram.weplay.ui.theme.AuroraTextSecondary
 import kotlinx.coroutines.delay
+import kotlin.math.cos
+import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,213 +99,276 @@ fun GiftPackOffersSheet(
     }
 
     val featuredState = remember(currentTime) { rotationManager.getFeaturedOffer(currentTime) }
-    var selectedTab by remember { mutableStateOf(0) } // 0: Featured, 1: All 10 Packs
-    var selectedPackForDetail by remember { mutableStateOf<GiftPackOffer?>(null) }
+    var selectedTab by remember { mutableStateOf(0) } // 0: Featured 48h, 1: All 10 Packs
     var showPreviewConfirmation by remember { mutableStateOf(false) }
+
+    // ── Celebration Opening Animation Values ──
+    val boxScale = remember { Animatable(0.82f) }
+    val lidOffset = remember { Animatable(0f) }
+    val lidRotation = remember { Animatable(0f) }
+    val particlesProgress = remember { Animatable(0f) }
+    val contentAlpha = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        // Step 1: Box scales up slightly with bounce
+        boxScale.animateTo(1.08f, tween(260, easing = FastOutSlowInEasing))
+        boxScale.animateTo(1.0f, tween(160, easing = FastOutSlowInEasing))
+
+        // Step 2: Lid opens & sparkles emerge
+        lidOffset.animateTo(-16f, tween(220, easing = FastOutSlowInEasing))
+        lidRotation.animateTo(-14f, tween(220, easing = FastOutSlowInEasing))
+        particlesProgress.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
+
+        // Step 3: Offer content smoothly fades in
+        contentAlpha.animateTo(1f, tween(300, easing = LinearEasing))
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = AuroraSurface,
+        shape = RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
+                .padding(horizontal = 20.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Sheet Header with Gift Box Artwork
+            // ── Top Header with Dismiss Button ──
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Image(
-                    painter = painterResource(R.drawable.vb_gift_pack),
-                    contentDescription = null,
-                    modifier = Modifier.size(44.dp),
+                Text(
+                    text = "Promotional Gift Pack",
+                    color = AuroraTextPrimary,
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.weight(1f),
                 )
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = "Gift Pack Offers",
-                        color = VyboraTextPrimary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                    )
-                    Text(
-                        text = "Curated bonus packages & room flairs",
-                        color = VyboraTextSecondary,
-                        fontSize = 12.sp,
-                    )
-                }
-                // Dismiss 'X' Button
+                // Dismiss '✕' Button
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(VyboraBg)
+                        .background(AuroraBackground)
+                        .border(1.dp, AuroraBorder, CircleShape)
                         .clickable(onClick = onDismiss),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("✕", color = VyboraTextSecondary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text("✕", color = AuroraTextSecondary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(8.dp))
 
-            // 48-Hour Rotating Timer Banner
+            // ── Celebration 3D Gift Box Animation Container ──
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(Color(0xFFEDE7F6), Color(0xFFE0F7FA))
-                        )
-                    )
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(12.dp))
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                    .size(110.dp)
+                    .scale(boxScale.value),
+                contentAlignment = Alignment.Center,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("⏳", fontSize = 13.sp)
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = "Featured 48h Offer:",
-                            color = VyboraPurple,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
+                // Golden Radiant Aura behind box
+                Canvas(modifier = Modifier.size(110.dp)) {
+                    val progress = particlesProgress.value
+                    if (progress > 0f) {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                listOf(
+                                    Color(0x66F6C66E),
+                                    Color(0x22FF9C86),
+                                    Color.Transparent,
+                                )
+                            ),
+                            radius = size.minDimension / 2f * (0.8f + progress * 0.4f),
+                            alpha = (1f - progress * 0.5f),
                         )
+                        // Burst particles
+                        val particleCount = 8
+                        for (i in 0 until particleCount) {
+                            val angle = (i * (360f / particleCount) + 20f) * (Math.PI / 180.0)
+                            val dist = (size.minDimension / 2.3f) * progress
+                            val px = center.x + (cos(angle) * dist).toFloat()
+                            val py = center.y + (sin(angle) * dist).toFloat()
+                            drawCircle(
+                                color = if (i % 2 == 0) AuroraGold else AuroraCoral,
+                                radius = 3.5f * (1f - progress * 0.3f),
+                                center = Offset(px, py),
+                                alpha = (1f - progress * 0.4f),
+                            )
+                        }
                     }
-                    Text(
-                        text = featuredState.formattedTimeRemaining,
-                        color = Color(0xFFD81B60),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                }
+
+                // Main 3D Gift Box Body with Animated Lid
+                Box(contentAlignment = Alignment.Center) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_gift_box_3d),
+                        contentDescription = "3D Gift Box",
+                        modifier = Modifier
+                            .size(76.dp)
+                            .offset(y = (lidOffset.value * 0.3f).dp)
+                            .rotate(lidRotation.value * 0.2f),
                     )
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
-
-            // Toggle Tabs: [ Featured Offer ] | [ Browse 10 Packs ]
-            Row(
+            // ── Animated Content Container ──
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(VyboraBg)
-                    .padding(3.dp),
+                    .alpha(contentAlpha.value),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 0) VyboraSurface else Color.Transparent)
-                        .clickable { selectedTab = 0 }
-                        .padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "⭐ Your Featured Pack",
-                        color = if (selectedTab == 0) VyboraPurple else VyboraTextSecondary,
-                        fontSize = 12.sp,
-                        fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium,
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 1) VyboraSurface else Color.Transparent)
-                        .clickable { selectedTab = 1 }
-                        .padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "🎁 All 10 Packs (${ALL_GIFT_PACK_OFFERS.size})",
-                        color = if (selectedTab == 1) VyboraPurple else VyboraTextSecondary,
-                        fontSize = 12.sp,
-                        fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Tab Content
-            if (selectedTab == 0) {
-                // Featured Offer Card
-                FeaturedPackView(
-                    featuredState = featuredState,
-                    onPreviewClaim = { showPreviewConfirmation = true },
-                    onOpenTopUp = onOpenTopUp,
-                )
-            } else {
-                // All 10 Packs Catalog
-                AllPacksCatalogView(
-                    offers = ALL_GIFT_PACK_OFFERS,
-                    featuredId = featuredState.offer.id,
-                    onSelectPack = { pack ->
-                        selectedPackForDetail = pack
-                        showPreviewConfirmation = true
-                    },
-                )
-            }
-
-            // Preview Info Modal / Toast simulation
-            if (showPreviewConfirmation) {
-                Spacer(Modifier.height(10.dp))
+                // 48-Hour Rotating Timer Banner
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFFFF9C4))
-                        .border(1.dp, Color(0xFFFBC02D), RoundedCornerShape(12.dp))
-                        .padding(12.dp),
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(Color(0xFFFFECE5), Color(0xFFF0ECFF))
+                            )
+                        )
+                        .border(1.dp, AuroraBorder, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 7.dp),
                 ) {
-                    Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("⏳", fontSize = 13.sp)
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "Rotating 48h Offer:",
+                                color = AuroraTextPrimary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                         Text(
-                            text = "ℹ️ Store Preview Mode",
-                            color = Color(0xFFF57F17),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            text = "Real Google Play store billing is not connected. Package contents and ₹ pricing are demonstrated for UI preview without charging real money.",
-                            color = Color(0xFF5D4037),
-                            fontSize = 11.sp,
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            text = "Dismiss Notice",
-                            color = VyboraPurple,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .clickable { showPreviewConfirmation = false }
-                                .padding(2.dp),
+                            text = featuredState.formattedTimeRemaining,
+                            color = AuroraRose,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
                         )
                     }
                 }
-            }
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(10.dp))
+
+                // Toggle Tabs: [ Featured Offer ] | [ Browse 10 Packs ]
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(AuroraBackground)
+                        .border(1.dp, AuroraBorder, RoundedCornerShape(14.dp))
+                        .padding(3.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(if (selectedTab == 0) AuroraSurface else Color.Transparent)
+                            .clickable { selectedTab = 0 }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "⭐ Active Offer",
+                            color = if (selectedTab == 0) AuroraOrchid else AuroraTextSecondary,
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium,
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(if (selectedTab == 1) AuroraSurface else Color.Transparent)
+                            .clickable { selectedTab = 1 }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "🎁 All Packs (${ALL_GIFT_PACK_OFFERS.size})",
+                            color = if (selectedTab == 1) AuroraOrchid else AuroraTextSecondary,
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium,
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Tab Content
+                if (selectedTab == 0) {
+                    FeaturedPackCard(
+                        featuredState = featuredState,
+                        onClaimPreview = { showPreviewConfirmation = true },
+                        onOpenTopUp = onOpenTopUp,
+                    )
+                } else {
+                    AllPacksList(
+                        offers = ALL_GIFT_PACK_OFFERS,
+                        featuredId = featuredState.offer.id,
+                        onSelectPack = { showPreviewConfirmation = true },
+                    )
+                }
+
+                // Billing / Preview Notice
+                if (showPreviewConfirmation) {
+                    Spacer(Modifier.height(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFFFF9E6))
+                            .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(12.dp))
+                            .padding(10.dp),
+                    ) {
+                        Column {
+                            Text(
+                                text = "⚡ Billing Verification Notice",
+                                color = Color(0xFFE65100),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = "Real Google Play store billing is not connected. Package contents and ₹ pricing are demonstrated for UI preview without charging real money.",
+                                color = Color(0xFF5D4037),
+                                fontSize = 10.sp,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "Dismiss",
+                                color = AuroraOrchid,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.clickable { showPreviewConfirmation = false },
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+            }
         }
     }
 }
 
 @Composable
-private fun FeaturedPackView(
+private fun FeaturedPackCard(
     featuredState: FeaturedOfferState,
-    onPreviewClaim: () -> Unit,
+    onClaimPreview: () -> Unit,
     onOpenTopUp: () -> Unit,
 ) {
     val offer = featuredState.offer
@@ -296,21 +378,21 @@ private fun FeaturedPackView(
             .fillMaxWidth()
             .shadow(2.dp, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
-            .background(VyboraBg)
-            .border(1.5.dp, VyboraGold, RoundedCornerShape(18.dp))
-            .padding(16.dp),
+            .background(AuroraSurface)
+            .border(1.5.dp, AuroraGold, RoundedCornerShape(18.dp))
+            .padding(14.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 offer.badge?.let { badge ->
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(VyboraGold)
+                            .background(AuroraGold)
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
                         Text(badge, color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
@@ -319,50 +401,51 @@ private fun FeaturedPackView(
                 }
                 Text(
                     text = offer.title,
-                    color = VyboraTextPrimary,
-                    fontSize = 18.sp,
+                    color = AuroraTextPrimary,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = offer.description,
-                    color = VyboraTextSecondary,
-                    fontSize = 12.sp,
+                    color = AuroraTextSecondary,
+                    fontSize = 11.sp,
                 )
             }
 
-            // Price Tag
+            // Price Pill
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = "₹${offer.demoPriceRupees}",
-                    color = Color(0xFFD81B60),
-                    fontSize = 22.sp,
+                    color = AuroraCoral,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
                 )
                 Text(
-                    text = "[Demo Price]",
-                    color = VyboraTextSecondary,
-                    fontSize = 10.sp,
+                    text = "Configured Price",
+                    color = AuroraTextSecondary,
+                    fontSize = 9.sp,
                 )
             }
         }
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
-            text = "Guaranteed Package Contents:",
-            color = VyboraTextPrimary,
+            text = "Package Items & Perks:",
+            color = AuroraTextPrimary,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
 
-        // Included Items Grid / List
+        // Included Items Grid
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             offer.items.forEach { item ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                        .background(VyboraSurface)
+                        .background(AuroraBackground)
+                        .border(0.5.dp, AuroraBorder, RoundedCornerShape(10.dp))
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -374,8 +457,8 @@ private fun FeaturedPackView(
                     Spacer(Modifier.width(10.dp))
                     Text(
                         text = "${item.name} x${item.count}",
-                        color = VyboraTextPrimary,
-                        fontSize = 13.sp,
+                        color = AuroraTextPrimary,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.weight(1f),
                     )
@@ -383,10 +466,10 @@ private fun FeaturedPackView(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(VyboraLavender)
+                                .background(AuroraLavender)
                                 .padding(horizontal = 6.dp, vertical = 2.dp),
                         ) {
-                            Text(dur, color = VyboraPurple, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(dur, color = AuroraOrchid, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -400,33 +483,31 @@ private fun FeaturedPackView(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            // Claim / Preview Button
+            // Purchase / Claim Preview Button (Sunset Fantasy)
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(42.dp)
+                    .height(44.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        Brush.horizontalGradient(listOf(Color(0xFFEC407A), Color(0xFF8E24AA)))
-                    )
-                    .clickable(onClick = onPreviewClaim),
+                    .background(AuroraGradients.sunsetFantasy)
+                    .clickable(onClick = onClaimPreview),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Claim Preview (${offer.title})",
+                    text = "Claim Offer (₹${offer.demoPriceRupees})",
                     color = Color.White,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
 
-            // Add Coins (Top Up) Shortcut
+            // Top Up Shortcut
             Box(
                 modifier = Modifier
-                    .height(42.dp)
+                    .height(44.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(VyboraSurface)
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(12.dp))
+                    .background(AuroraSurface)
+                    .border(1.dp, AuroraBorder, RoundedCornerShape(12.dp))
                     .clickable(onClick = onOpenTopUp)
                     .padding(horizontal = 14.dp),
                 contentAlignment = Alignment.Center,
@@ -438,7 +519,7 @@ private fun FeaturedPackView(
                         modifier = Modifier.size(16.dp),
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text("Top Up", color = VyboraTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Wallet", color = AuroraTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -446,7 +527,7 @@ private fun FeaturedPackView(
 }
 
 @Composable
-private fun AllPacksCatalogView(
+private fun AllPacksList(
     offers: List<GiftPackOffer>,
     featuredId: String,
     onSelectPack: (GiftPackOffer) -> Unit,
@@ -454,7 +535,7 @@ private fun AllPacksCatalogView(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .height(320.dp),
+            .height(300.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(offers, key = { it.id }) { pack ->
@@ -464,26 +545,25 @@ private fun AllPacksCatalogView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(if (isFeatured) Color(0xFFF3E5F5) else VyboraBg)
+                    .background(if (isFeatured) Color(0xFFF3E5F5) else AuroraSurface)
                     .border(
                         1.dp,
-                        if (isFeatured) VyboraPurple else VyboraBorder,
+                        if (isFeatured) AuroraOrchid else AuroraBorder,
                         RoundedCornerShape(14.dp)
                     )
                     .clickable { onSelectPack(pack) }
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Pack Icon
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
-                        .background(VyboraSurface),
+                        .background(AuroraBackground),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
-                        painter = painterResource(pack.items.firstOrNull()?.iconRes ?: R.drawable.vb_gift_pack),
+                        painter = painterResource(pack.items.firstOrNull()?.iconRes ?: R.drawable.ic_gift_box_3d),
                         contentDescription = pack.title,
                         modifier = Modifier.size(24.dp),
                     )
@@ -495,8 +575,8 @@ private fun AllPacksCatalogView(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = pack.title,
-                            color = VyboraTextPrimary,
-                            fontSize = 14.sp,
+                            color = AuroraTextPrimary,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                         )
                         if (isFeatured) {
@@ -504,35 +584,34 @@ private fun AllPacksCatalogView(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
-                                    .background(VyboraPurple)
+                                    .background(AuroraOrchid)
                                     .padding(horizontal = 4.dp, vertical = 1.dp),
                             ) {
-                                Text("ACTIVE 48H", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                Text("48H ACTIVE", color = Color.White, fontSize = 7.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                     Text(
                         text = pack.items.joinToString(", ") { "${it.name} x${it.count}" },
-                        color = VyboraTextSecondary,
-                        fontSize = 11.sp,
+                        color = AuroraTextSecondary,
+                        fontSize = 10.sp,
                         maxLines = 1,
                     )
                 }
 
                 Spacer(Modifier.width(8.dp))
 
-                // Price Pill
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(VyboraSurface)
-                        .border(1.dp, VyboraBorder, RoundedCornerShape(8.dp))
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        .background(AuroraBackground)
+                        .border(1.dp, AuroraBorder, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
                 ) {
                     Text(
                         text = "₹${pack.demoPriceRupees}",
-                        color = VyboraPurple,
-                        fontSize = 13.sp,
+                        color = AuroraOrchid,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                     )
                 }

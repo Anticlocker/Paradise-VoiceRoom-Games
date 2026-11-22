@@ -55,9 +55,11 @@ class NavigationRoutesUnitTest {
             Routes.SEARCH,
             Routes.GAME_ROOMS,
             Routes.TASKS,
+            Routes.EVENT_CENTER,
+            Routes.EVENT_DETAIL,
         )
 
-        assertEquals("Must have exactly 38 declared routes", 38, allRoutes.size)
+        assertEquals("Must have exactly 40 declared routes", 40, allRoutes.size)
 
         // All routes must be non-blank
         for (route in allRoutes) {
@@ -67,7 +69,7 @@ class NavigationRoutesUnitTest {
 
         // All routes must be unique
         val uniqueRoutes = allRoutes.toSet()
-        assertEquals("All 38 routes must have unique paths", 38, uniqueRoutes.size)
+        assertEquals("All 40 routes must have unique paths", 40, uniqueRoutes.size)
     }
 
     @Test
@@ -95,6 +97,8 @@ class NavigationRoutesUnitTest {
         assertEquals(Routes.NOTIFICATIONS, Routes.notificationsRoute())
         assertEquals(Routes.SEARCH, Routes.searchRoute())
         assertEquals(Routes.TASKS, Routes.tasksRoute())
+        assertEquals("event/evt_123", Routes.eventDetailRoute("evt_123"))
+        assertEquals(Routes.EVENT_CENTER, Routes.eventCenterRoute())
     }
 
     @Test
@@ -109,6 +113,7 @@ class NavigationRoutesUnitTest {
             Routes.PAYMENT_METHODS, Routes.HOST_EARNINGS, Routes.SUPPORT_SETTINGS,
             Routes.TOPUP, Routes.RANKING, Routes.ME_SETTINGS, Routes.CREATE_ROOM,
             Routes.NOTIFICATIONS, Routes.SEARCH, Routes.GAME_ROOMS, Routes.TASKS,
+            Routes.EVENT_CENTER, Routes.EVENT_DETAIL,
         )
 
         for (task in ALL_TASKS) {

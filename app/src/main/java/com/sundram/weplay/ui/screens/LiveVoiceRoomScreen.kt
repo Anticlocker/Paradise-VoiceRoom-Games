@@ -105,7 +105,14 @@ import com.sundram.weplay.ui.components.InitialsAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.components.navigateSafe
 import com.sundram.weplay.ui.nav.Routes
+import com.sundram.weplay.ui.theme.AuroraTurquoise
+import com.sundram.weplay.ui.theme.CelestialViolet
+import com.sundram.weplay.ui.theme.CelestialVoiceRoomBackground
+import com.sundram.weplay.ui.theme.ChampagneGold
 import com.sundram.weplay.ui.theme.CyanBrand
+import com.sundram.weplay.ui.theme.DeepMidnight
+import com.sundram.weplay.ui.theme.DreamLavender
+import com.sundram.weplay.ui.theme.SoftPeach
 import com.sundram.weplay.ui.theme.VyboraBorder
 import com.sundram.weplay.ui.theme.VyboraCyan
 import com.sundram.weplay.ui.theme.VyboraGold
@@ -129,13 +136,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Color Palette — AURORA LOUNGE 2.0 (Deep Nighttime Atmosphere)
+//  Color Palette — AURORA PARADISE 2.0 (Celestial Lounge Atmosphere)
 // ─────────────────────────────────────────────────────────────────────────────
-private val RoomBgColor       = Color(0xFF17142F)
+private val RoomBgColor       = DeepMidnight
 private val RoomSurfaceColor  = Color(0xFF261A42)
 private val RoomSurfaceSubtle = Color(0xFF1C1333)
-private val GlowCyan          = Color(0xFF39D5DC)
-private val GlowPurple        = Color(0xFF8058E9)
+private val GlowCyan          = AuroraTurquoise
+private val GlowPurple        = CelestialViolet
+private val VyboraGold        = ChampagneGold
 private val ChatPanelBg       = Color(0x66100826)
 private val InputBarBg        = Color(0xDD120C24)
 private val LiveRedBadge      = Color(0xFFFF334B)
@@ -244,34 +252,19 @@ fun LiveVoiceRoomScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(RoomBgColor),
+    CelestialVoiceRoomBackground(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        // ── 1. Full-Screen Ambient Aurora / Celestial Backdrop ──
-        val bgDrawable = if (state.selectedTheme == "celestial") {
-            R.drawable.vb_vr_bg_celestial
-        } else {
-            R.drawable.vb_vr_bg_aurora
-        }
-        Image(
-            painter = painterResource(bgDrawable),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
-
-        // ── 2. Atmospheric Pulsing Glow Overlay ──
+        // ── Atmospheric Pulsing Glow Overlay ──
         RoomAtmosphereOverlay()
 
-        // ── 3. Main Screen Architecture ──
+        // ── Main Screen Architecture ──
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding(),
         ) {
-            // A. Compact Header
+            // A. Compact Header with Room Crest
             AuroraRoomHeader(
                 roomTitle = room.title,
                 roomId = id,
@@ -283,7 +276,7 @@ fun LiveVoiceRoomScreen(
                 onShareClick = {
                     val sendIntent: Intent = Intent().apply {
                         action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, "Join me in VYBORA Aurora Lounge: ${room.title} (ID: $id)!")
+                        putExtra(Intent.EXTRA_TEXT, "Join me in Aurora Lounge: ${room.title} (ID: $id)!")
                         type = "text/plain"
                     }
                     val shareIntent = Intent.createChooser(sendIntent, "Share Room")
@@ -731,7 +724,7 @@ private fun AuroraRoomHeader(
 
         Spacer(Modifier.width(8.dp))
 
-        // Title + ID with copy shortcut
+        // Title + Room Crest + ID with copy shortcut
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = roomTitle,
@@ -743,24 +736,49 @@ private fun AuroraRoomHeader(
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("Room ID", roomId))
-                    Toast.makeText(context, "Room ID copied: $roomId", Toast.LENGTH_SHORT).show()
-                },
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(
-                    text = "ID: ${roomId.take(6).uppercase()}",
-                    color = Color(0xFFC0B8DC),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                )
-                Spacer(Modifier.width(4.dp))
-                Image(
-                    painter = painterResource(R.drawable.vb_vr_ic_copy),
-                    contentDescription = "Copy ID",
-                    modifier = Modifier.size(12.dp),
-                )
+                // Room Level Crest Badge
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(ChampagneGold.copy(alpha = 0.35f), CelestialViolet.copy(alpha = 0.40f))
+                            )
+                        )
+                        .border(0.5.dp, ChampagneGold.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 4.dp, vertical = 1.dp),
+                ) {
+                    Text(
+                        text = "👑 Crest Lv.9",
+                        color = ChampagneGold,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Room ID", roomId))
+                        Toast.makeText(context, "Room ID copied: $roomId", Toast.LENGTH_SHORT).show()
+                    },
+                ) {
+                    Text(
+                        text = "ID: ${roomId.take(6).uppercase()}",
+                        color = Color(0xFFC0B8DC),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Spacer(Modifier.width(3.dp))
+                    Image(
+                        painter = painterResource(R.drawable.vb_vr_ic_copy),
+                        contentDescription = "Copy ID",
+                        modifier = Modifier.size(10.dp),
+                    )
+                }
             }
         }
 
@@ -1101,32 +1119,49 @@ private fun AuroraHostSeat(
         modifier = Modifier.bounceClick(scaleDown = 0.98f, onClick = onClick),
     ) {
         Box(
-            modifier = Modifier.size(92.dp),
+            modifier = Modifier.size(94.dp),
             contentAlignment = Alignment.Center,
         ) {
-            // Animated Speaking Glow Ring
+            // Multi-layered Glowing Speaking Aura
             if (member?.speaking == true) {
                 Box(
                     modifier = Modifier
-                        .size((92 * pulseScale).dp)
+                        .size((96 * pulseScale).dp)
                         .clip(CircleShape)
-                        .background(GlowCyan.copy(alpha = 0.25f)),
+                        .background(
+                            Brush.radialGradient(
+                                listOf(
+                                    ChampagneGold.copy(alpha = 0.40f),
+                                    AuroraTurquoise.copy(alpha = 0.20f),
+                                    Color.Transparent,
+                                )
+                            )
+                        )
+                        .border(1.5.dp, ChampagneGold.copy(alpha = 0.75f), CircleShape),
                 )
             }
 
-            // Avatar or Empty Graphic
+            // Avatar or Empty Graphic with golden host base ring
             if (member != null) {
-                if (member.avatarRes != null) {
-                    Image(
-                        painter = painterResource(member.avatarRes),
-                        contentDescription = member.name,
-                        modifier = Modifier
-                            .size(66.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop,
-                    )
-                } else {
-                    InitialsAvatar(name = member.name, size = 66.dp)
+                Box(
+                    modifier = Modifier
+                        .size(68.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, Brush.sweepGradient(listOf(ChampagneGold, CelestialViolet, ChampagneGold)), CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (member.avatarRes != null) {
+                        Image(
+                            painter = painterResource(member.avatarRes),
+                            contentDescription = member.name,
+                            modifier = Modifier
+                                .size(66.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop,
+                        )
+                    } else {
+                        InitialsAvatar(name = member.name, size = 66.dp)
+                    }
                 }
             } else {
                 Image(
@@ -1358,13 +1393,22 @@ private fun AuroraSeatView(
             modifier = Modifier.size(size),
             contentAlignment = Alignment.Center,
         ) {
-            // Speaking indicator halo
+            // Multi-layer glowing active-speaker rings
             if (member?.speaking == true) {
                 Box(
                     modifier = Modifier
                         .size((size.value * pulseScale).dp)
                         .clip(CircleShape)
-                        .background(GlowCyan.copy(alpha = 0.3f)),
+                        .background(
+                            Brush.radialGradient(
+                                listOf(
+                                    AuroraTurquoise.copy(alpha = 0.40f),
+                                    CelestialViolet.copy(alpha = 0.15f),
+                                    Color.Transparent,
+                                )
+                            )
+                        )
+                        .border(1.5.dp, AuroraTurquoise.copy(alpha = 0.75f), CircleShape),
                 )
             }
 
@@ -1401,7 +1445,7 @@ private fun AuroraSeatView(
                     contentScale = ContentScale.Fit,
                 )
 
-                // Mic Off Badge
+                // Mic Status Badge (Muted or Live Speaking Wave)
                 if (!member.micOn) {
                     Box(
                         modifier = Modifier
@@ -1418,16 +1462,64 @@ private fun AuroraSeatView(
                             modifier = Modifier.size((size.value * 0.16f).dp),
                         )
                     }
+                } else if (member.speaking) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size((size.value * 0.26f).dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF00E676))
+                            .border(1.dp, Color.White, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size((size.value * 0.12f).dp)
+                                .clip(CircleShape)
+                                .background(Color.White),
+                        )
+                    }
                 }
             } else {
-                // Empty / Locked Seat Graphic
-                val seatIcon = if (isLocked) R.drawable.vb_vr_seat_locked else R.drawable.vb_vr_seat_empty
-                Image(
-                    painter = painterResource(seatIcon),
-                    contentDescription = if (isLocked) "Locked Seat" else "Seat $seatIndex",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit,
-                )
+                // Distinct Empty / Locked Seat Graphic with Seat Number & Joining Indicator
+                Box(
+                    modifier = Modifier
+                        .size((size.value * 0.78f).dp)
+                        .clip(CircleShape)
+                        .background(Color(0x33281E48))
+                        .border(
+                            1.dp,
+                            if (isLocked) Color(0x66FF5252) else Color(0x66BBA4FA),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isLocked) {
+                        Image(
+                            painter = painterResource(R.drawable.vb_vr_seat_locked),
+                            contentDescription = "Locked Seat",
+                            modifier = Modifier.size((size.value * 0.44f).dp),
+                        )
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text(
+                                text = "+",
+                                color = AuroraTurquoise,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = "Seat $seatIndex",
+                                color = Color(0xFFC0B8DC),
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Medium,
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -2543,12 +2635,17 @@ private fun PkBattleSheet(
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = painterResource(R.drawable.vb_vr_ic_swords),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                )
-                Text("${secondsRemaining}s", color = VyboraGold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(ChampagneGold.copy(alpha = 0.2f))
+                        .border(1.dp, ChampagneGold.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                ) {
+                    Text("⚡ VS ⚡", color = ChampagneGold, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
+                }
+                Spacer(Modifier.height(4.dp))
+                Text("${secondsRemaining}s", color = ChampagneGold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
 
             Column(horizontalAlignment = Alignment.End) {
@@ -2559,7 +2656,7 @@ private fun PkBattleSheet(
 
         Spacer(Modifier.height(10.dp))
 
-        // Progress Bar
+        // Progress Bar with glowing neon gradients
         val total = (blueScore + pinkScore).coerceAtLeast(1)
         val blueFraction = blueScore.toFloat() / total
         Row(
@@ -2567,13 +2664,21 @@ private fun PkBattleSheet(
                 .fillMaxWidth()
                 .height(14.dp)
                 .clip(RoundedCornerShape(7.dp))
-                .background(Color(0xFFEC407A)),
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color(0xFFFF4081), Color(0xFFE91E63))
+                    )
+                ),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(blueFraction)
                     .height(14.dp)
-                    .background(Color(0xFF29B6F6)),
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF00B0FF), AuroraTurquoise)
+                        )
+                    ),
             )
         }
 

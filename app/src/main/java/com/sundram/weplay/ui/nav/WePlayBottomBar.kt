@@ -82,15 +82,42 @@ object Routes {
     const val SEARCH = "search"
     const val GAME_ROOMS = "game/rooms"
     const val TASKS = "hub/tasks"
+    const val EVENT_CENTER = "events"
+    const val EVENT_DETAIL = "event/{eventId}"
+    const val GAMES = HUB
+    const val ROOMS = ROOM
+    const val SETTINGS_EDIT = PROFILE_EDIT
+    const val SUPPORT = SUPPORT_SETTINGS
+    const val FEEDBACK = "settings/feedback"
+    const val ROOM_CREATE = CREATE_ROOM
+    const val VIP = TOPUP
+    const val SHOP = GIFTS
+    const val FAMILY_DISCOVERY = "family/discovery"
+    const val FAMILY_CREATION = "family/creation"
+    const val FAMILY_DETAIL = "family/detail"
+    const val FAMILY_CHAT = "family/chat"
+    const val FAMILY_VOICE_ROOM = "family/voiceroom"
+    const val FAMILY_MANAGEMENT = "family/management"
+    const val FAMILY_LEADERBOARD = "family/leaderboard"
+    const val FAMILY_SHOP = "family/shop"
+    const val FAMILY_ROSTER = "family/roster"
+    const val FAMILY_QUESTS = "family/quests"
+    const val FRIENDS = MSG
+    const val ROOM_ROUTE = ROOM_DETAIL
+    const val SPLASH = "splash"
+    const val AUTH = "auth"
+    const val ONBOARDING = "onboarding"
 
     fun chatRoute(id: String) = "chat/$id"
     fun userRoute(id: String) = "user/$id"
     fun userDetailRoute(id: String) = "profile/detail/$id"
     fun roomRoute(id: String) = "room/$id"
     fun roomDetail(roomId: String) = "room/$roomId"
+    fun eventDetailRoute(id: String) = "event/$id"
     fun notificationsRoute() = NOTIFICATIONS
     fun searchRoute() = SEARCH
     fun tasksRoute() = TASKS
+    fun eventCenterRoute() = EVENT_CENTER
 
     val tabs = setOf(HUB, ROOM, DISCOVER, MSG, ME)
 }
@@ -122,10 +149,10 @@ internal fun switchTab(controller: NavHostController, route: String) {
 
 @Composable
 fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0) {
-    val navBarBg = VyboraSurface
-    val inactiveColor = VyboraTextSecondary
-    val activeLabelColor = VyboraPurple
-    val badgeRed = Color(0xFFFF4D4F)
+    val navBarBg = com.sundram.weplay.ui.theme.AuroraSurface
+    val inactiveColor = com.sundram.weplay.ui.theme.AuroraTextSecondary
+    val activeLabelColor = com.sundram.weplay.ui.theme.AuroraOrchid
+    val badgeRed = com.sundram.weplay.ui.theme.AuroraCoral
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -137,7 +164,7 @@ fun WePlayBottomBar(nav: NavHostController, current: String?, msgBadge: Int = 0)
                 Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(VyboraBorder),
+                    .background(com.sundram.weplay.ui.theme.AuroraDivider),
             )
             Row(
                 modifier = Modifier

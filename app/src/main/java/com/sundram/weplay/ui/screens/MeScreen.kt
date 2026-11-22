@@ -74,21 +74,31 @@ import com.sundram.weplay.ui.components.AvatarWithFrame
 import com.sundram.weplay.ui.components.UserAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.nav.Routes
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraError
+import com.sundram.weplay.ui.theme.AuroraProfileBackground
+import com.sundram.weplay.ui.theme.AuroraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraTurquoise
+import com.sundram.weplay.ui.theme.ChampagneGold
+import com.sundram.weplay.ui.theme.DeepMidnight
+import com.sundram.weplay.ui.theme.DreamLavender
+import com.sundram.weplay.ui.theme.PearlWhite
+import com.sundram.weplay.ui.theme.SoftPeach
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Color Palette — ME PAGE 3.0 / CLEAN PREMIUM EDITION
+//  Color Palette — ME PAGE AURORA PARADISE 2.0 EDITION
 //  Bright, warm, eye-comfortable, consistent with Games & Voice Room
 // ─────────────────────────────────────────────────────────────────────────────
-private val CleanCanvas      = Color(0xFFFAF9FF)
+private val CleanCanvas      = PearlWhite
 private val CleanWhite       = Color(0xFFFFFFFF)
-private val CleanInk         = Color(0xFF26233C)
-private val CleanSecondary   = Color(0xFF8D8AA3)
-private val CleanLavender    = Color(0xFFEFE9FF)
-private val CleanCyan        = Color(0xFF31CAD9)
-private val CleanPeach       = Color(0xFFFFE7D2)
-private val CleanGold        = Color(0xFFF5BD62)
-private val CleanHairline    = Color(0xFFF0ECF9)
-private val CleanDanger      = Color(0xFFFF4D4F)
+private val CleanInk         = DeepMidnight
+private val CleanSecondary   = AuroraTextSecondary
+private val CleanLavender    = DreamLavender.copy(alpha = 0.35f)
+private val CleanCyan        = AuroraTurquoise
+private val CleanPeach       = SoftPeach
+private val CleanGold        = ChampagneGold
+private val CleanHairline    = AuroraBorder
+private val CleanDanger      = AuroraError
 
 /**
  * MeScreen (ME Page 3.0 Clean Premium Edition)
@@ -154,10 +164,9 @@ fun MeScreen(
         }
     }
 
-    Box(
+    AuroraProfileBackground(
         modifier = Modifier
             .fillMaxSize()
-            .background(CleanCanvas)
             .padding(bottom = pad.calculateBottomPadding()),
     ) {
         LazyColumn(

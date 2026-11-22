@@ -30,11 +30,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -62,27 +60,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
+import com.sundram.weplay.data.FrameTier
 import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.data.getAvatarById
 import com.sundram.weplay.ui.components.AnimatedAvatar
+import com.sundram.weplay.ui.components.AvatarWithFrame
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.components.navigateSafe
 import com.sundram.weplay.ui.nav.Routes
-import com.sundram.weplay.ui.theme.VyboraBg
-import com.sundram.weplay.ui.theme.VyboraBorder
-import com.sundram.weplay.ui.theme.VyboraGold
-import com.sundram.weplay.ui.theme.VyboraLavender
-import com.sundram.weplay.ui.theme.VyboraPurple
-import com.sundram.weplay.ui.theme.VyboraSurface
-import com.sundram.weplay.ui.theme.VyboraTextPrimary
-import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraBackground
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraCoral
+import com.sundram.weplay.ui.theme.AuroraCyan
+import com.sundram.weplay.ui.theme.AuroraGamesBackground
+import com.sundram.weplay.ui.theme.AuroraGold
+import com.sundram.weplay.ui.theme.AuroraGradients
+import com.sundram.weplay.ui.theme.AuroraLavender
+import com.sundram.weplay.ui.theme.AuroraOrchid
+import com.sundram.weplay.ui.theme.AuroraRose
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.AuroraTextPrimary
+import com.sundram.weplay.ui.theme.AuroraTextSecondary
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  1. Distinctive Branded Header (Greeting + Avatar + Wallet + Actions)
+//  1. Distinctive Aurora Paradise Header with Premium Coin Wallet & Star Icon
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun VyboraHomeHeader(nav: NavHostController, profile: UserProfile) {
+private fun AuroraHomeHeader(nav: NavHostController, profile: UserProfile) {
+    val formattedCoins = remember(profile.coins) {
+        NumberFormat.getIntegerInstance().format(profile.coins)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -92,7 +102,7 @@ private fun VyboraHomeHeader(nav: NavHostController, profile: UserProfile) {
         // User Profile Avatar with subtle glow ring and spring touch feedback
         AnimatedAvatar(
             avatar = getAvatarById(profile.avatarId),
-            size = 48.dp,
+            size = 46.dp,
             animate = true,
             onClick = { nav.navigateSafe(Routes.ME) },
         )
@@ -103,55 +113,95 @@ private fun VyboraHomeHeader(nav: NavHostController, profile: UserProfile) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Welcome back 👋",
-                color = VyboraTextSecondary,
-                fontSize = 12.sp,
+                color = AuroraTextSecondary,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
             )
             Text(
                 text = profile.name,
-                color = VyboraTextPrimary,
-                fontSize = 17.sp,
+                color = AuroraTextPrimary,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
 
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(6.dp))
 
-        // Compact Coin Balance Pill: [ 🪙 80 + ]
+        // B6: Premium Coin Wallet Pill [ 🪙 1,250 + ]
         Row(
             modifier = Modifier
                 .height(34.dp)
                 .shadow(1.dp, RoundedCornerShape(17.dp))
                 .clip(RoundedCornerShape(17.dp))
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, RoundedCornerShape(17.dp))
-                .bounceClick { nav.navigateSafe(Routes.TOPUP) }
-                .padding(horizontal = 8.dp),
+                .background(Color(0xFFFFFDF8)) // Champagne / Pearl white
+                .border(1.dp, AuroraBorder, RoundedCornerShape(17.dp))
+                .padding(horizontal = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painterResource(R.drawable.vb_coin),
-                contentDescription = "Coins",
-                modifier = Modifier.size(19.dp),
-            )
-            Spacer(Modifier.width(5.dp))
-            Text(
-                text = "${profile.coins}",
-                color = VyboraTextPrimary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-            )
+            // Tap coin balance -> Wallet
+            Row(
+                modifier = Modifier
+                    .bounceClick { nav.navigateSafe(Routes.WALLET_SETTINGS) },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_gold_coin_3d),
+                    contentDescription = "Coins",
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    text = formattedCoins,
+                    color = AuroraTextPrimary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    maxLines = 1,
+                )
+            }
+
             Spacer(Modifier.width(6.dp))
-            Image(
-                painter = painterResource(R.drawable.vb_plus),
-                contentDescription = "Add coins",
-                modifier = Modifier.size(14.dp),
-            )
+
+            // Tap Plus -> Top Up
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(AuroraGradients.sunsetFantasy)
+                    .bounceClick { nav.navigateSafe(Routes.TOPUP) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "+",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
 
         Spacer(Modifier.width(8.dp))
+
+        // B2: Upper-Right Star Icon -> Event Center
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .shadow(1.dp, CircleShape)
+                .clip(CircleShape)
+                .background(AuroraSurface)
+                .border(1.dp, AuroraBorder, CircleShape)
+                .bounceClick { nav.navigateSafe(Routes.EVENT_CENTER) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_star_event),
+                contentDescription = "Event Center",
+                modifier = Modifier.size(18.dp),
+            )
+        }
+
+        Spacer(Modifier.width(6.dp))
 
         // Notifications Shortcut Button
         Box(
@@ -159,46 +209,25 @@ private fun VyboraHomeHeader(nav: NavHostController, profile: UserProfile) {
                 .size(34.dp)
                 .shadow(1.dp, CircleShape)
                 .clip(CircleShape)
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, CircleShape)
+                .background(AuroraSurface)
+                .border(1.dp, AuroraBorder, CircleShape)
                 .bounceClick { nav.navigateSafe(Routes.NOTIFICATIONS) },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_bell),
                 contentDescription = "Notifications",
-                tint = VyboraTextPrimary,
+                tint = AuroraTextPrimary,
                 modifier = Modifier.size(17.dp),
-            )
-        }
-
-        Spacer(Modifier.width(6.dp))
-
-        // Events Shortcut Button
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .shadow(1.dp, CircleShape)
-                .clip(CircleShape)
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, CircleShape)
-                .bounceClick { nav.navigateSafe(Routes.DISCOVER) },
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.vb_shortcut_events),
-                contentDescription = "Events",
-                modifier = Modifier.size(24.dp),
-                contentScale = ContentScale.Fit,
             )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  2. Redesigned Quick Shortcuts (Modern Action Cards Row)
+//  2. B1: Rebalanced 3-Action Quick Shortcuts (VIP Lounge removed from header)
 // ─────────────────────────────────────────────────────────────────────────────
-private data class VyboraShortcutItem(
+private data class AuroraShortcutItem(
     val title: String,
     val subtitle: String,
     val iconRes: Int,
@@ -207,12 +236,12 @@ private data class VyboraShortcutItem(
 )
 
 @Composable
-private fun VyboraShortcutsRow(nav: NavHostController) {
+private fun AuroraShortcutsRow(nav: NavHostController) {
+    // Exactly 3 balanced primary shortcuts (Ranks, Tasks, Friends)
     val shortcuts = listOf(
-        VyboraShortcutItem("Ranks", "Leaderboard", R.drawable.vb_shortcut_ranking, Color(0xFFF3E8FF), Routes.RANKING),
-        VyboraShortcutItem("Tasks", "Missions", R.drawable.vb_shortcut_tasks, Color(0xFFE0F2FE), Routes.TASKS),
-        VyboraShortcutItem("Friends", "Social Hub", R.drawable.vb_shortcut_friends, Color(0xFFDCFCE7), Routes.MSG),
-        VyboraShortcutItem("Lounge", "VIP Club", R.drawable.vb_shortcut_jungle_king, Color(0xFFFEF3C7), Routes.ROOM),
+        AuroraShortcutItem("Ranks", "Leaderboard", R.drawable.ap_ic_trophy, Color(0xFFF0ECFF), Routes.RANKING),
+        AuroraShortcutItem("Tasks", "Missions", R.drawable.ap_ic_shield, Color(0xFFE2F8FA), Routes.TASKS),
+        AuroraShortcutItem("Friends", "Social Hub", R.drawable.ap_ic_chat, Color(0xFFFFF0EC), Routes.MSG),
     )
 
     Row(
@@ -223,17 +252,17 @@ private fun VyboraShortcutsRow(nav: NavHostController) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .shadow(2.dp, RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(VyboraSurface)
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(16.dp))
+                    .shadow(2.dp, RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(AuroraSurface)
+                    .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
                     .bounceClick { nav.navigateSafe(item.route) }
-                    .padding(vertical = 10.dp, horizontal = 4.dp),
+                    .padding(vertical = 10.dp, horizontal = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(42.dp)
                         .clip(CircleShape)
                         .background(item.tintBg),
                     contentAlignment = Alignment.Center,
@@ -248,14 +277,14 @@ private fun VyboraShortcutsRow(nav: NavHostController) {
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = item.title,
-                    color = VyboraTextPrimary,
-                    fontSize = 12.sp,
+                    color = AuroraTextPrimary,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = item.subtitle,
-                    color = VyboraTextSecondary,
-                    fontSize = 9.sp,
+                    color = AuroraTextSecondary,
+                    fontSize = 10.sp,
                     maxLines = 1,
                 )
             }
@@ -264,58 +293,59 @@ private fun VyboraShortcutsRow(nav: NavHostController) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  3. Game Rooms Access Bar
+//  3. B4: Compact Multiple Game Rooms Action Bar
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun VyboraGameRoomsBanner(nav: NavHostController) {
+private fun AuroraGameRoomsBanner(nav: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .height(48.dp)
+            .shadow(1.dp, RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
             .background(
                 Brush.horizontalGradient(
                     listOf(
-                        Color(0xFFEDE5FF),
-                        Color(0xFFE0FAFB),
+                        Color(0xFFFFECE5),
+                        Color(0xFFF0ECFF),
                     )
                 )
             )
-            .border(1.dp, VyboraBorder, RoundedCornerShape(16.dp))
+            .border(1.dp, AuroraBorder, RoundedCornerShape(16.dp))
             .bounceClick { nav.navigateSafe(Routes.GAME_ROOMS) }
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
             painter = painterResource(R.drawable.vb_room_door),
             contentDescription = null,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(22.dp),
         )
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Multiplayer Game Rooms",
-                color = VyboraTextPrimary,
-                fontSize = 14.sp,
+                color = AuroraTextPrimary,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Join custom matches, lobbies & voice parties",
-                color = VyboraTextSecondary,
-                fontSize = 11.sp,
+                text = "Custom matches, lobbies & voice parties",
+                color = AuroraTextSecondary,
+                fontSize = 10.sp,
             )
         }
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(VyboraPurple)
-                .padding(horizontal = 10.dp, vertical = 4.dp),
+                .clip(RoundedCornerShape(11.dp))
+                .background(AuroraGradients.sunsetFantasy)
+                .padding(horizontal = 11.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "Browse ›",
                 color = Color.White,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -323,7 +353,7 @@ private fun VyboraGameRoomsBanner(nav: NavHostController) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  4. Section A — Hero Featured Game Card (Original Anti-Aliased Composition)
+//  4. Section A — Hero Featured Game Card (Sunset Fantasy + Aurora Cyan)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun HeroFeaturedGameCard(
@@ -332,20 +362,19 @@ private fun HeroFeaturedGameCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(148.dp)
+            .height(152.dp)
             .shadow(4.dp, RoundedCornerShape(22.dp))
             .clip(RoundedCornerShape(22.dp))
             .background(
                 Brush.linearGradient(
                     listOf(
-                        Color(0xFF5B22D4),
-                        Color(0xFF7A42F4),
-                        Color(0xFF27D2DC),
+                        Color(0xFFFF7A68),
+                        Color(0xFFA17BEB),
+                        Color(0xFF42CFD8),
                     )
                 )
             )
-            // Anti-aliasing stroke along smooth rounded corner curve
-            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(22.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(22.dp))
             .bounceClick(scaleDown = 0.98f, onClick = onPlayClick),
     ) {
         // Decorative radial highlight
@@ -353,7 +382,7 @@ private fun HeroFeaturedGameCard(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .size(160.dp)
-                .background(Color.White.copy(alpha = 0.08f), CircleShape),
+                .background(Color.White.copy(alpha = 0.10f), CircleShape),
         )
 
         // Left Content: Tag + Title + Subtitle + Action Button
@@ -368,7 +397,7 @@ private fun HeroFeaturedGameCard(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(VyboraGold)
+                    .background(AuroraGold)
                     .padding(horizontal = 8.dp, vertical = 2.dp),
             ) {
                 Text(
@@ -391,7 +420,7 @@ private fun HeroFeaturedGameCard(
                 Spacer(Modifier.height(3.dp))
                 Text(
                     text = "Refuel, manage & upgrade your speed station",
-                    color = Color.White.copy(alpha = 0.85f),
+                    color = Color.White.copy(alpha = 0.90f),
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     maxLines = 2,
@@ -408,20 +437,20 @@ private fun HeroFeaturedGameCard(
             ) {
                 Text(
                     text = "▶ Play Now",
-                    color = VyboraPurple,
+                    color = AuroraOrchid,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.ExtraBold,
                 )
             }
         }
 
-        // Right Illustration with pristine proportions and safe transparent margins
+        // Right Illustration
         Image(
             painter = painterResource(R.drawable.vb_character_petrol_pump),
             contentDescription = "Petrol Pump Simulator",
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .size(136.dp)
+                .size(138.dp)
                 .padding(end = 6.dp, bottom = 4.dp),
             contentScale = ContentScale.Fit,
         )
@@ -429,7 +458,7 @@ private fun HeroFeaturedGameCard(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  5. Section B — Popular Games (Balanced 2-Card Row with Smooth Rounded Edges)
+//  5. Section B — Popular Games (Dreamy Sky & Sunset Fantasy Cards)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun PopularGamesRow(
@@ -444,19 +473,18 @@ private fun PopularGamesRow(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(132.dp)
+                .height(134.dp)
                 .shadow(3.dp, RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            Color(0xFF0277BD),
-                            Color(0xFF00ACC1),
+                            Color(0xFF26B2C8),
+                            Color(0xFF6E74E5),
                         )
                     )
                 )
-                // Smooth anti-aliased edge outline
-                .border(1.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(20.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onSpyClick),
         ) {
             Column(
@@ -484,7 +512,7 @@ private fun PopularGamesRow(
                     )
                     Text(
                         text = "Pass & play",
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = Color.White.copy(alpha = 0.90f),
                         fontSize = 10.sp,
                     )
                 }
@@ -495,7 +523,7 @@ private fun PopularGamesRow(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .size(76.dp)
+                    .size(78.dp)
                     .padding(end = 4.dp, bottom = 4.dp),
                 contentScale = ContentScale.Fit,
             )
@@ -505,19 +533,18 @@ private fun PopularGamesRow(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(132.dp)
+                .height(134.dp)
                 .shadow(3.dp, RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            Color(0xFFE65100),
-                            Color(0xFFFF8F00),
+                            Color(0xFFFF7A68),
+                            Color(0xFFF477AC),
                         )
                     )
                 )
-                // Smooth anti-aliased edge outline
-                .border(1.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(20.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onPaintClick),
         ) {
             Column(
@@ -529,7 +556,7 @@ private fun PopularGamesRow(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(VyboraGold)
+                        .background(AuroraGold)
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
                     Text("🎨 New", color = Color(0xFF4A3200), fontSize = 9.sp, fontWeight = FontWeight.Bold)
@@ -545,7 +572,7 @@ private fun PopularGamesRow(
                     )
                     Text(
                         text = "Graffiti party",
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = Color.White.copy(alpha = 0.90f),
                         fontSize = 10.sp,
                     )
                 }
@@ -556,7 +583,7 @@ private fun PopularGamesRow(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .size(76.dp)
+                    .size(78.dp)
                     .padding(end = 4.dp, bottom = 4.dp),
                 contentScale = ContentScale.Fit,
             )
@@ -565,10 +592,10 @@ private fun PopularGamesRow(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  6. Section C — Explore More Games (Smooth 2-Column Grid Card)
+//  6. Section C — Explore More Games (Aurora Ivory Card Grid)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun VyboraGameGridCard(
+private fun AuroraGameGridCard(
     title: String,
     genre: String,
     accentColor: Color,
@@ -583,8 +610,8 @@ private fun VyboraGameGridCard(
             .height(112.dp)
             .shadow(2.dp, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
-            .background(VyboraSurface)
-            .border(1.dp, VyboraBorder, RoundedCornerShape(18.dp))
+            .background(AuroraSurface)
+            .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
             .padding(12.dp),
     ) {
@@ -608,7 +635,7 @@ private fun VyboraGameGridCard(
 
             Text(
                 text = title,
-                color = VyboraTextPrimary,
+                color = AuroraTextPrimary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -619,21 +646,20 @@ private fun VyboraGameGridCard(
 
             Text(
                 text = genre,
-                color = VyboraTextSecondary,
+                color = AuroraTextSecondary,
                 fontSize = 10.sp,
                 maxLines = 1,
             )
         }
 
         if (isSceneCover) {
-            // Rounded thumbnail container for square scene covers (e.g. Billiards)
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .size(66.dp)
                     .shadow(1.dp, RoundedCornerShape(14.dp))
                     .clip(RoundedCornerShape(14.dp))
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(14.dp)),
+                    .border(1.dp, AuroraBorder, RoundedCornerShape(14.dp)),
             ) {
                 Image(
                     painter = painterResource(illustrationRes),
@@ -643,7 +669,6 @@ private fun VyboraGameGridCard(
                 )
             }
         } else {
-            // Transparent character cutout
             Image(
                 painter = painterResource(illustrationRes),
                 contentDescription = title,
@@ -657,7 +682,7 @@ private fun VyboraGameGridCard(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  7. Dedicated Game Search Bar Component (Phase 3 Requirement)
+//  7. Dedicated Game Search Bar Component
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun GameSearchBar(
@@ -677,8 +702,8 @@ private fun GameSearchBar(
                 .weight(1f)
                 .height(40.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(VyboraSurface)
-                .border(1.dp, VyboraBorder, RoundedCornerShape(20.dp))
+                .background(AuroraSurface)
+                .border(1.dp, AuroraBorder, RoundedCornerShape(20.dp))
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
@@ -686,7 +711,7 @@ private fun GameSearchBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = null,
-                    tint = VyboraTextSecondary,
+                    tint = AuroraTextSecondary,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.width(8.dp))
@@ -694,14 +719,14 @@ private fun GameSearchBar(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
-                    textStyle = TextStyle(color = VyboraTextPrimary, fontSize = 13.sp),
-                    cursorBrush = SolidColor(VyboraPurple),
+                    textStyle = TextStyle(color = AuroraTextPrimary, fontSize = 13.sp),
+                    cursorBrush = SolidColor(AuroraOrchid),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                     modifier = Modifier.weight(1f),
                     decorationBox = { inner ->
                         if (query.isEmpty()) {
-                            Text("Search games (e.g. Spy, Ludo, Cafe)...", color = VyboraTextSecondary, fontSize = 13.sp)
+                            Text("Search games (e.g. Spy, Ludo, Cafe)...", color = AuroraTextSecondary, fontSize = 13.sp)
                         }
                         inner()
                     },
@@ -710,7 +735,7 @@ private fun GameSearchBar(
                     Icon(
                         painter = painterResource(R.drawable.ic_close),
                         contentDescription = "Clear search",
-                        tint = VyboraTextSecondary,
+                        tint = AuroraTextSecondary,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { onQueryChange("") },
@@ -723,7 +748,7 @@ private fun GameSearchBar(
 
         Text(
             text = "Cancel",
-            color = VyboraPurple,
+            color = AuroraOrchid,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.clickable {
@@ -735,9 +760,9 @@ private fun GameSearchBar(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  8. Game Definition Model for Home Screen Filtering
+//  8. Game Definition Model
 // ─────────────────────────────────────────────────────────────────────────────
-private data class VyboraGameItem(
+private data class AuroraGameItem(
     val id: String,
     val title: String,
     val genre: String,
@@ -749,19 +774,19 @@ private data class VyboraGameItem(
 )
 
 private val allHomeGames = listOf(
-    VyboraGameItem("1", "Petrol Pump Simulator", "Speed Station Simulator", Color(0xFF8258EE), R.drawable.vb_character_petrol_pump, "Featured"),
-    VyboraGameItem("2", "Who's the Spy", "Mystery Deduction", Color(0xFF00ACC1), R.drawable.vb_character_whos_the_spy, "Party", route = Routes.SPY),
-    VyboraGameItem("3", "Paint to Hide", "Graffiti Prop Party", Color(0xFFFF8F00), R.drawable.vb_character_paint_to_hide, "New"),
-    VyboraGameItem("4", "Trickster's Cafe", "Card Bluffing", Color(0xFF8D6E63), R.drawable.vb_character_tricksters_cafe, "Hot"),
-    VyboraGameItem("5", "Hide And Seek", "Prop Hunt", Color(0xFF00796B), R.drawable.vb_character_hide_and_seek, "Party"),
-    VyboraGameItem("6", "Space Werewolf", "Sci-Fi Impostor", Color(0xFF5E35B1), R.drawable.vb_character_space_werewolf),
-    VyboraGameItem("7", "Oh My Card", "Card Matching", Color(0xFF2E7D32), R.drawable.vb_character_oh_my_card),
-    VyboraGameItem("8", "Ludo Classic", "Royal Board Game", Color(0xFFC62828), R.drawable.vb_character_royal_dice, "Live", route = Routes.LUDO),
-    VyboraGameItem("9", "Billiards Lounge", "8-Ball Pool", Color(0xFF0288D1), R.drawable.vb_room_cover_billiards_lounge, isSceneCover = true),
+    AuroraGameItem("1", "Petrol Pump Simulator", "Speed Station Simulator", Color(0xFF8258EE), R.drawable.vb_character_petrol_pump, "Featured"),
+    AuroraGameItem("2", "Who's the Spy", "Mystery Deduction", Color(0xFF00ACC1), R.drawable.vb_character_whos_the_spy, "Party", route = Routes.SPY),
+    AuroraGameItem("3", "Paint to Hide", "Graffiti Prop Party", Color(0xFFFF8F00), R.drawable.vb_character_paint_to_hide, "New"),
+    AuroraGameItem("4", "Trickster's Cafe", "Card Bluffing", Color(0xFF8D6E63), R.drawable.vb_character_tricksters_cafe, "Hot"),
+    AuroraGameItem("5", "Hide And Seek", "Prop Hunt", Color(0xFF00796B), R.drawable.vb_character_hide_and_seek, "Party"),
+    AuroraGameItem("6", "Space Werewolf", "Sci-Fi Impostor", Color(0xFF5E35B1), R.drawable.vb_character_space_werewolf),
+    AuroraGameItem("7", "Oh My Card", "Card Matching", Color(0xFF2E7D32), R.drawable.vb_character_oh_my_card),
+    AuroraGameItem("8", "Ludo Classic", "Royal Board Game", Color(0xFFC62828), R.drawable.vb_character_royal_dice, "Live", route = Routes.LUDO),
+    AuroraGameItem("9", "Billiards Lounge", "8-Ball Pool", Color(0xFF0288D1), R.drawable.vb_room_cover_billiards_lounge, isSceneCover = true),
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  9. Explore Feed Model & Item (Preserved for social discovery)
+//  9. B5: Redesigned Community Players Model & Card with Equipped Frames
 // ─────────────────────────────────────────────────────────────────────────────
 data class ExploreUser(
     val id: String,
@@ -775,21 +800,22 @@ data class ExploreUser(
     val isGameRoom: Boolean = false,
     val bio: String,
     val isFollowed: Boolean = false,
+    val frameTier: FrameTier = FrameTier.COMMON,
 )
 
 private val exploreUsers = listOf(
-    ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Vybora explorer seeking great conversations!"),
-    ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Always up for a quick casual Ludo match!"),
-    ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music lover & trivia enthusiast 🎵"),
-    ExploreUser("4", "Siddhi", "F", "avatar_lunar_artist", 42, false, "", "Offline", false, "Artist & midnight listener in celestial lounges"),
-    ExploreUser("5", "K O H L I", "M", "avatar_diamond_crown", 48, true, "", "Playing Spy", false, "Master of Who's the Spy. Can you guess?"),
-    ExploreUser("6", "T!wariji", "M", "avatar_neon_musician", 16, true, "", "In Voice Room", false, "DJ in the house! Playing chill lo-fi beats"),
-    ExploreUser("7", "K!RAN", "F", "avatar_star_captain", 33, false, "", "Offline", false, "Silence is the best answer. Good vibes only."),
-    ExploreUser("8", "Aanya", "F", "avatar_royal_dreamer", 29, true, "< 85km", "In Voice Room", false, "Royal lounge regular & friendly host"),
-    ExploreUser("9", "Rohan", "M", "avatar_celestial_wanderer", 21, true, "< 140km", "Playing Ludo", false, "Rolling sixes and taking over the board!"),
-    ExploreUser("10", "Meera", "F", "avatar_crystal_guardian", 25, true, "< 60km", "In Voice Room", false, "Spreading peace and positivity in voice rooms ✨"),
-    ExploreUser("11", "Simran", "F", "avatar_cosmic_bunny", 14, false, "", "Offline", false, "New to VYBORA! Say hi 👋"),
-    ExploreUser("12", "Aryan", "M", "avatar_galaxy_dj", 37, true, "< 95km", "Playing Spy", false, "Catching the imposter every single round 🕵️"),
+    ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Aurora explorer seeking great conversations!", frameTier = FrameTier.EPIC),
+    ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Always up for a quick casual Ludo match!", frameTier = FrameTier.LEGENDARY),
+    ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music lover & trivia enthusiast 🎵", frameTier = FrameTier.RARE),
+    ExploreUser("4", "Siddhi", "F", "avatar_lunar_artist", 42, false, "", "Offline", false, "Artist & midnight listener in celestial lounges", frameTier = FrameTier.MYTHIC),
+    ExploreUser("5", "K O H L I", "M", "avatar_diamond_crown", 48, true, "", "Playing Spy", false, "Master of Who's the Spy. Can you guess?", frameTier = FrameTier.CELESTIAL),
+    ExploreUser("6", "T!wariji", "M", "avatar_neon_musician", 16, true, "", "In Voice Room", false, "DJ in the house! Playing chill lo-fi beats", frameTier = FrameTier.COMMON),
+    ExploreUser("7", "K!RAN", "F", "avatar_star_captain", 33, false, "", "Offline", false, "Silence is the best answer. Good vibes only.", frameTier = FrameTier.COMMON),
+    ExploreUser("8", "Aanya", "F", "avatar_royal_dreamer", 29, true, "< 85km", "In Voice Room", false, "Royal lounge regular & friendly host", frameTier = FrameTier.EPIC),
+    ExploreUser("9", "Rohan", "M", "avatar_celestial_wanderer", 21, true, "< 140km", "Playing Ludo", false, "Rolling sixes and taking over the board!", frameTier = FrameTier.RARE),
+    ExploreUser("10", "Meera", "F", "avatar_crystal_guardian", 25, true, "< 60km", "In Voice Room", false, "Spreading peace and positivity in voice rooms ✨", frameTier = FrameTier.LEGENDARY),
+    ExploreUser("11", "Simran", "F", "avatar_cosmic_bunny", 14, false, "", "Offline", false, "New to the community! Say hi 👋", frameTier = FrameTier.COMMON),
+    ExploreUser("12", "Aryan", "M", "avatar_galaxy_dj", 37, true, "< 95km", "Playing Spy", false, "Catching the imposter every single round 🕵️", frameTier = FrameTier.MYTHIC),
 )
 
 @Composable
@@ -803,21 +829,28 @@ private fun ExploreFeedItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(VyboraSurface)
-            .border(1.dp, VyboraBorder, RoundedCornerShape(16.dp))
+            .shadow(1.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(AuroraSurface)
+            .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Animated 2.5D Character Avatar with Shimmer Glow Frame
-        AnimatedAvatar(
-            avatar = getAvatarById(user.avatarId),
-            size = 46.dp,
-            animate = true,
-            onClick = onClick,
-        )
+        // Avatar with Equipped Animated Profile Frame from FrameTier
+        Box(
+            modifier = Modifier.bounceClick(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            AvatarWithFrame(
+                name = user.name,
+                photoPath = null,
+                size = 52.dp,
+                frameTier = user.frameTier,
+                animated = user.isOnline,
+                showCrown = user.level >= 40,
+            )
+        }
 
         Spacer(Modifier.width(12.dp))
 
@@ -825,15 +858,18 @@ private fun ExploreFeedItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = user.name,
-                    color = VyboraTextPrimary,
+                    color = AuroraTextPrimary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = if (user.gender == "F") "♀" else "♂",
-                    color = if (user.gender == "F") Color(0xFFE91E63) else Color(0xFF1E88E5),
-                    fontSize = 12.sp,
+                    color = if (user.gender == "F") AuroraRose else AuroraCyan,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.width(6.dp))
@@ -842,7 +878,7 @@ private fun ExploreFeedItem(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(VyboraGold)
+                        .background(AuroraGold)
                         .padding(horizontal = 4.dp, vertical = 1.dp),
                 ) {
                     Text(
@@ -853,7 +889,7 @@ private fun ExploreFeedItem(
                     )
                 }
 
-                // Verified Online Green Dot
+                // Verified Online Green Dot ONLY when confirmed online
                 if (user.isOnline) {
                     Spacer(Modifier.width(6.dp))
                     Box(
@@ -863,22 +899,13 @@ private fun ExploreFeedItem(
                             .background(Color(0xFF00E676)),
                     )
                 }
-
-                if (user.distance.isNotEmpty()) {
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = user.distance,
-                        color = VyboraTextSecondary,
-                        fontSize = 10.sp,
-                    )
-                }
             }
 
             Spacer(Modifier.height(3.dp))
 
             Text(
                 text = user.bio,
-                color = VyboraTextSecondary,
+                color = AuroraTextSecondary,
                 fontSize = 11.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -890,12 +917,13 @@ private fun ExploreFeedItem(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (user.isOnline) Color(0xFFE8F5E9) else Color(0xFFF5F5F5))
+                    .background(if (user.isOnline) Color(0xFFE8F5E9) else AuroraBackground)
+                    .border(0.5.dp, if (user.isOnline) Color(0xFFC8E6C9) else AuroraBorder, RoundedCornerShape(6.dp))
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
                 Text(
                     text = user.statusText,
-                    color = if (user.isOnline) Color(0xFF2E7D32) else VyboraTextSecondary,
+                    color = if (user.isOnline) Color(0xFF2E7D32) else AuroraTextSecondary,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -904,7 +932,7 @@ private fun ExploreFeedItem(
 
         Spacer(Modifier.width(8.dp))
 
-        // Action Buttons Row: Follow + Message
+        // Interaction Actions: Follow / Chat
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -912,16 +940,16 @@ private fun ExploreFeedItem(
             // Follow Button
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isFollowed) VyboraBg else VyboraPurple)
-                    .border(1.dp, if (isFollowed) VyboraBorder else Color.Transparent, RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (isFollowed) AuroraBackground else AuroraOrchid)
+                    .border(1.dp, if (isFollowed) AuroraBorder else Color.Transparent, RoundedCornerShape(12.dp))
                     .clickable { isFollowed = !isFollowed }
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .padding(horizontal = 11.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = if (isFollowed) "Following" else "Follow",
-                    color = if (isFollowed) VyboraTextSecondary else Color.White,
+                    color = if (isFollowed) AuroraTextSecondary else Color.White,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -932,8 +960,8 @@ private fun ExploreFeedItem(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(VyboraBg)
-                    .border(1.dp, VyboraBorder, CircleShape)
+                    .background(AuroraBackground)
+                    .border(1.dp, AuroraBorder, CircleShape)
                     .clickable(onClick = onMessageClick),
                 contentAlignment = Alignment.Center,
             ) {
@@ -944,130 +972,7 @@ private fun ExploreFeedItem(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  10. Gaming Gift Pack Modal Bottom Sheet (Phase 7 Requirement)
-// ─────────────────────────────────────────────────────────────────────────────
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HomeGiftPackSheet(
-    onDismiss: () -> Unit,
-    onBrowseGifts: () -> Unit,
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.vb_gift_pack),
-                contentDescription = null,
-                modifier = Modifier.size(68.dp),
-            )
-
-            Spacer(Modifier.height(10.dp))
-
-            Text(
-                text = "Gaming Hub Gift Pack",
-                color = VyboraTextPrimary,
-                fontSize = 19.sp,
-                fontWeight = FontWeight.Bold,
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            Text(
-                text = "Unlock game bonuses, dice skins, spy badges & coin perks",
-                color = VyboraTextSecondary,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            val perks = listOf(
-                "🎲 Exclusive Royal Gold Dice Skin for Ludo",
-                "🕵️ 3x Free Spy Clue Hints & Magnifier Frame",
-                "⚡ 20% Faster XP Gain in Multiplayer Rooms",
-                "🪙 200 Welcome Bonus Game Chips",
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(VyboraBg)
-                    .border(1.dp, VyboraBorder, RoundedCornerShape(14.dp))
-                    .padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                perks.forEach { perk ->
-                    Text(text = perk, color = VyboraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                }
-            }
-
-            Spacer(Modifier.height(14.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFFFF3E0))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-            ) {
-                Text(
-                    text = "⚡ PREVIEW MODE: Live billing & payment gateway are currently disconnected. No real charges will occur.",
-                    color = Color(0xFFE65100),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(46.dp)
-                    .clip(RoundedCornerShape(23.dp))
-                    .background(VyboraPurple)
-                    .bounceClick(scaleDown = 0.98f, onClick = onDismiss),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "Got it",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = "Browse Full Gifts Collection ›",
-                color = VyboraPurple,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .clickable(onClick = onBrowseGifts)
-                    .padding(vertical = 6.dp),
-            )
-
-            Spacer(Modifier.height(16.dp))
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  11. Complete Games Home Screen (VYBORA Redesign + Audit Polished)
+//  10. Games Home Screen 3.0
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 fun GamesHomeScreen(
@@ -1092,7 +997,6 @@ fun GamesHomeScreen(
         }
     }
 
-    // Filtered games when search is active
     val searchResults = remember(searchQuery) {
         if (searchQuery.isBlank()) {
             emptyList()
@@ -1105,10 +1009,8 @@ fun GamesHomeScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(VyboraBg),
+    AuroraGamesBackground(
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
@@ -1123,14 +1025,14 @@ fun GamesHomeScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // ── Section 1: Distinctive Home Header ──
-            item { VyboraHomeHeader(nav = nav, profile = profile) }
+            // ── Section 1: Distinctive Home Header with Wallet & Star Event Icon ──
+            item { AuroraHomeHeader(nav = nav, profile = profile) }
 
-            // ── Section 2: Quick Action Tiles (Ranks, Tasks, Friends, VIP) ──
-            item { VyboraShortcutsRow(nav = nav) }
+            // ── Section 2: Rebalanced 3-Action Shortcuts (Ranks, Tasks, Friends) ──
+            item { AuroraShortcutsRow(nav = nav) }
 
-            // ── Section 3: Game Rooms Access Banner ──
-            item { VyboraGameRoomsBanner(nav = nav) }
+            // ── Section 3: B4: Compact Game Rooms Banner ──
+            item { AuroraGameRoomsBanner(nav = nav) }
 
             // ── Section 4: Games Discovery Header + Search Toggle ──
             item {
@@ -1142,7 +1044,7 @@ fun GamesHomeScreen(
                 ) {
                     Text(
                         text = "Gaming Hub",
-                        color = VyboraTextPrimary,
+                        color = AuroraTextPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.ExtraBold,
                     )
@@ -1155,8 +1057,8 @@ fun GamesHomeScreen(
                             .size(32.dp)
                             .shadow(1.dp, CircleShape)
                             .clip(CircleShape)
-                            .background(VyboraSurface)
-                            .border(1.dp, VyboraBorder, CircleShape)
+                            .background(AuroraSurface)
+                            .border(1.dp, AuroraBorder, CircleShape)
                             .bounceClick {
                                 isSearchActive = !isSearchActive
                                 if (!isSearchActive) searchQuery = ""
@@ -1166,7 +1068,7 @@ fun GamesHomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_search),
                             contentDescription = "Search games",
-                            tint = if (isSearchActive) VyboraPurple else VyboraTextPrimary,
+                            tint = if (isSearchActive) AuroraOrchid else AuroraTextPrimary,
                             modifier = Modifier.size(16.dp),
                         )
                     }
@@ -1175,7 +1077,7 @@ fun GamesHomeScreen(
 
                     Text(
                         text = "All Games ›",
-                        color = VyboraPurple,
+                        color = AuroraOrchid,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
@@ -1211,23 +1113,22 @@ fun GamesHomeScreen(
                         ) {
                             Text(
                                 text = "No games found matching \"$searchQuery\"",
-                                color = VyboraTextSecondary,
+                                color = AuroraTextSecondary,
                                 fontSize = 14.sp,
                             )
                             Spacer(Modifier.height(10.dp))
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(VyboraLavender)
+                                    .background(AuroraLavender)
                                     .bounceClick { searchQuery = "" }
                                     .padding(horizontal = 14.dp, vertical = 6.dp),
                             ) {
-                                Text("Clear search", color = VyboraPurple, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("Clear search", color = AuroraOrchid, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 } else {
-                    // Responsive 2-column grid of search results
                     items(searchResults.chunked(2)) { pair ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1235,7 +1136,7 @@ fun GamesHomeScreen(
                         ) {
                             Box(Modifier.weight(1f)) {
                                 val game = pair[0]
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = game.title,
                                     genre = game.genre,
                                     accentColor = game.accentColor,
@@ -1251,7 +1152,7 @@ fun GamesHomeScreen(
                             if (pair.size > 1) {
                                 Box(Modifier.weight(1f)) {
                                     val game = pair[1]
-                                    VyboraGameGridCard(
+                                    AuroraGameGridCard(
                                         title = game.title,
                                         genre = game.genre,
                                         accentColor = game.accentColor,
@@ -1271,14 +1172,14 @@ fun GamesHomeScreen(
                     }
                 }
             } else {
-                // ── Section 5: Section A — Prominent Hero Featured Game ──
+                // ── Section 5: Section A — Hero Featured Game ──
                 item {
                     HeroFeaturedGameCard(
                         onPlayClick = { comingSoon("Petrol Pump Simulator") }
                     )
                 }
 
-                // ── Section 6: Section B — Popular Games Row (Who's the Spy & Paint to Hide) ──
+                // ── Section 6: Section B — Popular Games Row ──
                 item {
                     PopularGamesRow(
                         onSpyClick = { nav.navigateSafe(Routes.SPY) },
@@ -1286,16 +1187,15 @@ fun GamesHomeScreen(
                     )
                 }
 
-                // ── Section 7: Section C — Explore More Games (2-Column Grid) ──
+                // ── Section 7: Section C — Explore More Games ──
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        // Row 1: Trickster's Cafe & Hide and Seek
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Trickster's Cafe",
                                     genre = "Card Bluffing",
                                     accentColor = Color(0xFF8D6E63),
@@ -1305,7 +1205,7 @@ fun GamesHomeScreen(
                                 )
                             }
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Hide And Seek",
                                     genre = "Prop Hunt",
                                     accentColor = Color(0xFF00796B),
@@ -1316,13 +1216,12 @@ fun GamesHomeScreen(
                             }
                         }
 
-                        // Row 2: Space Werewolf & Oh My Card
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Space Werewolf",
                                     genre = "Sci-Fi Impostor",
                                     accentColor = Color(0xFF5E35B1),
@@ -1331,7 +1230,7 @@ fun GamesHomeScreen(
                                 )
                             }
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Oh My Card",
                                     genre = "Card Matching",
                                     accentColor = Color(0xFF2E7D32),
@@ -1341,13 +1240,12 @@ fun GamesHomeScreen(
                             }
                         }
 
-                        // Row 3: Ludo & Billiards
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Ludo Classic",
                                     genre = "Royal Board Game",
                                     accentColor = Color(0xFFC62828),
@@ -1357,7 +1255,7 @@ fun GamesHomeScreen(
                                 )
                             }
                             Box(Modifier.weight(1f)) {
-                                VyboraGameGridCard(
+                                AuroraGameGridCard(
                                     title = "Billiards Lounge",
                                     genre = "8-Ball Pool",
                                     accentColor = Color(0xFF0288D1),
@@ -1370,52 +1268,69 @@ fun GamesHomeScreen(
                     }
                 }
 
-                // ── Section 8: Community Players ──
+                // ── Section 8: B5: Community Players with Animated Frames & Real Profiles ──
                 item {
                     Spacer(Modifier.height(6.dp))
                     Column(modifier = Modifier.padding(horizontal = 2.dp)) {
                         Text(
                             text = "Community Players",
-                            color = VyboraTextPrimary,
+                            color = AuroraTextPrimary,
                             fontSize = 19.sp,
                             fontWeight = FontWeight.ExtraBold,
                         )
                         Text(
                             text = "Meet people who share your vibe",
-                            color = VyboraTextSecondary,
+                            color = AuroraTextSecondary,
                             fontSize = 12.sp,
                         )
                     }
                 }
 
-                items(exploreUsers, key = { it.id }) { user ->
-                    ExploreFeedItem(
-                        user = user,
-                        onClick = { nav.navigateSafe(Routes.ROOM) },
-                        onMessageClick = { nav.navigateSafe(Routes.chatRoute(user.id)) },
-                    )
+                if (exploreUsers.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = "No players nearby right now",
+                                color = AuroraTextSecondary,
+                                fontSize = 14.sp,
+                            )
+                        }
+                    }
+                } else {
+                    items(exploreUsers, key = { it.id }) { user ->
+                        ExploreFeedItem(
+                            user = user,
+                            onClick = { nav.navigateSafe(Routes.userDetailRoute(user.id)) },
+                            onMessageClick = { nav.navigateSafe(Routes.chatRoute(user.id)) },
+                        )
+                    }
                 }
             }
         }
 
-        // ── Floating Gift Pack Widget (Bottom-Right, opens ModalBottomSheet) ──
+        // ── B7: Floating 3D Gift Pack Widget (Bottom-Right, opens Celebration Sheet) ──
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 14.dp, bottom = pad.calculateBottomPadding() + 8.dp)
-                .shadow(6.dp, RoundedCornerShape(18.dp))
+                .shadow(4.dp, RoundedCornerShape(18.dp))
                 .clip(RoundedCornerShape(18.dp))
-                .background(VyboraSurface)
-                .border(1.5.dp, VyboraGold, RoundedCornerShape(18.dp))
+                .background(AuroraSurface)
+                .border(1.5.dp, AuroraGold, RoundedCornerShape(18.dp))
                 .bounceClick { showGiftPackSheet = true }
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(R.drawable.vb_gift_pack),
-                    contentDescription = "Gift Pack",
-                    modifier = Modifier.size(28.dp),
+                    painter = painterResource(R.drawable.ic_gift_box_3d),
+                    contentDescription = "3D Gift Pack",
+                    modifier = Modifier.size(30.dp),
                 )
                 Text(
                     text = "Gift Pack",
@@ -1426,7 +1341,7 @@ fun GamesHomeScreen(
             }
         }
 
-        // ── Gift Pack Offers Modal Bottom Sheet ──
+        // ── 3D Gift Pack Offers Modal Bottom Sheet ──
         if (showGiftPackSheet) {
             com.sundram.weplay.ui.components.GiftPackOffersSheet(
                 userId = profile.id,
@@ -1451,9 +1366,9 @@ fun GamesHomeScreen(
                 modifier = Modifier
                     .shadow(3.dp, CircleShape)
                     .clip(CircleShape)
-                    .background(VyboraPurple)
+                    .background(AuroraGradients.sunsetFantasy)
                     .bounceClick { scope.launch { listState.animateScrollToItem(0) } }
-                    .padding(horizontal = 12.dp, vertical = 7.dp),
+                    .padding(horizontal = 14.dp, vertical = 7.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

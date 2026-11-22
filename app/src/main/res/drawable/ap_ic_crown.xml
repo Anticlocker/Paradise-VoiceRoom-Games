@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Aurora Paradise Ivory Tile Background -->
+    <path
+        android:pathData="M 27 2 h 46 a 25 25 0 0 1 25 25 v 46 a 25 25 0 0 1 -25 25 h -46 a 25 25 0 0 1 -25 -25 v -46 a 25 25 0 0 1 25 -25 Z"
+        android:fillColor="#FFF9F5" />
+    <!-- Gradient Icon Path -->
+    <path
+        android:pathData="M20 67 L14 29 L35 44 L50 18 L65 44 L86 29 L80 67 Z M20 74 H80 V83 H20 Z"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="100"
+                android:endY="100"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#F6C66E" />
+                <item android:offset="1.0" android:color="#A17BEB" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>

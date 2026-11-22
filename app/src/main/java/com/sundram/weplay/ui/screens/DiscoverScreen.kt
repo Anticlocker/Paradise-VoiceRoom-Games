@@ -31,6 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +51,21 @@ import com.sundram.weplay.platform.content.FeedPost
 import com.sundram.weplay.platform.content.LocalContentRepository
 import com.sundram.weplay.ui.components.InitialsAvatar
 import com.sundram.weplay.ui.components.SectionHeader
+import com.sundram.weplay.ui.components.bounceClick
+import com.sundram.weplay.ui.nav.Routes
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraDiscoverBackground
+import com.sundram.weplay.ui.theme.AuroraGradients
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.AuroraTextPrimary
+import com.sundram.weplay.ui.theme.AuroraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraTurquoise
+import com.sundram.weplay.ui.theme.CelestialViolet
+import com.sundram.weplay.ui.theme.ChampagneGold
+import com.sundram.weplay.ui.theme.DeepMidnight
+import com.sundram.weplay.ui.theme.DreamLavender
+import com.sundram.weplay.ui.theme.PearlWhite
+import com.sundram.weplay.ui.theme.SoftPeach
 import com.sundram.weplay.ui.theme.ChipBg
 import com.sundram.weplay.ui.theme.CyanDeep
 import com.sundram.weplay.ui.theme.OrangeAccent
@@ -64,12 +82,17 @@ import com.sundram.weplay.ui.theme.TextBody
 import com.sundram.weplay.ui.theme.TextMain
 import com.sundram.weplay.ui.theme.TextMuted
 
-private data class ExploreCard(val label: String, val icon: Int, val tint: Color, val bg: Color)
+private data class ExploreCard(
+    val label: String,
+    val icon: Int,
+    val brush: Brush,
+    val route: String? = null,
+)
 
 private val exploreCards = listOf(
-    ExploreCard("Games", R.drawable.ic_nav_games, TagOrange, TagOrangeBg),
-    ExploreCard("Rooms", R.drawable.ic_nav_room, TagBlue, TagBlueBg),
-    ExploreCard("Nearby", R.drawable.ic_users, TagGreen, TagGreenBg),
+    ExploreCard("Games", R.drawable.ic_nav_games, AuroraGradients.sunsetFantasy, Routes.GAMES),
+    ExploreCard("Rooms", R.drawable.ic_nav_room, AuroraGradients.dreamySky, Routes.ROOMS),
+    ExploreCard("Nearby", R.drawable.ic_users, Brush.linearGradient(listOf(ChampagneGold, SoftPeach)), null),
 )
 
 @Composable
@@ -92,59 +115,74 @@ fun DiscoverScreen(nav: NavHostController, pad: PaddingValues) {
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PageWhite)
-            .statusBarsPadding()
-            .padding(pad),
+    AuroraDiscoverBackground(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        when (val current = state) {
-            UiState.Loading -> LoadingState(Modifier.weight(1f))
-            is UiState.Empty -> EmptyState(current.message, Modifier.weight(1f))
-            is UiState.Error -> ErrorState(current.message, current.retryable, { refresh++ }, Modifier.weight(1f))
-            is UiState.Success -> DiscoverContent(current.data)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(bottom = pad.calculateBottomPadding()),
+        ) {
+            when (val current = state) {
+                UiState.Loading -> LoadingState(Modifier.weight(1f))
+                is UiState.Empty -> EmptyState(current.message, Modifier.weight(1f))
+                is UiState.Error -> ErrorState(current.message, current.retryable, { refresh++ }, Modifier.weight(1f))
+                is UiState.Success -> DiscoverContent(current.data, nav)
+            }
         }
     }
 }
 
 @Composable
-private fun DiscoverContent(feed: DiscoverFeed) {
+private fun DiscoverContent(feed: DiscoverFeed, nav: NavHostController) {
     val events = feed.events
     val posts = feed.posts
     val trending = feed.trending
 
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 28.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
         item {
-            Text(
-                "Discover",
-                color = TextMain,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 10.dp),
-            )
-            Spacer(Modifier.height(14.dp))
+            Column(modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)) {
+                Text(
+                    text = "Discover",
+                    color = DeepMidnight,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                )
+                Text(
+                    text = "Explore community moments and live updates",
+                    color = AuroraTextSecondary,
+                    fontSize = 12.sp,
+                )
+            }
+            Spacer(Modifier.height(10.dp))
             MomentsCard()
             Spacer(Modifier.height(12.dp))
-            ExploreRow()
-            Spacer(Modifier.height(16.dp))
+            ExploreRow(nav = nav)
+            Spacer(Modifier.height(14.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(trending, key = { it }) { tag ->
-                    Text(
-                        "#$tag",
-                        color = TagBlue,
-                        fontSize = 11.sp,
+                    Box(
                         modifier = Modifier
-                            .background(TagBlueBg, RoundedCornerShape(20.dp))
-                            .padding(horizontal = 11.dp, vertical = 6.dp),
-                    )
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(DreamLavender.copy(alpha = 0.25f))
+                            .border(1.dp, DreamLavender.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Text(
+                            text = "#$tag",
+                            color = CelestialViolet,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(14.dp))
             SectionHeader("Live updates", "Today")
             Spacer(Modifier.height(4.dp))
         }
@@ -153,46 +191,59 @@ private fun DiscoverContent(feed: DiscoverFeed) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(PageWhite)
-                    .padding(vertical = 6.dp),
+                    .shadow(1.dp, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(AuroraSurface)
+                    .border(1.dp, AuroraBorder, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                InitialsAvatar(event.who, size = 38.dp)
-                Spacer(Modifier.width(10.dp))
+                InitialsAvatar(event.who, size = 40.dp)
+                Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(event.who, color = TextMain, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                    Text(event.action, color = TextMuted, fontSize = 11.sp)
+                    Text(event.who, color = DeepMidnight, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(event.action, color = AuroraTextSecondary, fontSize = 11.sp)
                 }
-                Text(event.time, color = TextMuted, fontSize = 10.sp)
+                Text(event.time, color = AuroraTextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
             }
         }
 
         item {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
             SectionHeader("Moments", "Community")
             Spacer(Modifier.height(4.dp))
         }
 
         items(posts, key = { "${it.who}_${it.text.hashCode()}" }) { post ->
             Column(
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
-                    .background(PageWhite, RoundedCornerShape(16.dp))
-                    .border(1.dp, Stroke, RoundedCornerShape(16.dp))
-                    .padding(13.dp),
+                    .shadow(2.dp, RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(AuroraSurface)
+                    .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
+                    .padding(14.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    InitialsAvatar(post.who, size = 30.dp)
-                    Spacer(Modifier.width(8.dp))
-                    Text(post.who, color = TextMain, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    InitialsAvatar(post.who, size = 34.dp)
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text(post.who, color = DeepMidnight, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text("Active Now", color = AuroraTurquoise, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
-                Spacer(Modifier.height(8.dp))
-                Text(post.text, color = TextBody, fontSize = 13.sp, lineHeight = 18.sp)
                 Spacer(Modifier.height(10.dp))
+                Text(
+                    text = post.text,
+                    color = DeepMidnight.copy(alpha = 0.90f),
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                )
+                Spacer(Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Reaction(R.drawable.ic_heart, "${post.likes}", PinkGift)
-                    Spacer(Modifier.width(16.dp))
-                    Reaction(R.drawable.ic_comment, "${post.comments}", CyanDeep)
+                    Reaction(R.drawable.ic_heart, "${post.likes}", Color(0xFFF477AC))
+                    Spacer(Modifier.width(20.dp))
+                    Reaction(R.drawable.ic_comment, "${post.comments}", AuroraTurquoise)
                 }
             }
         }
@@ -204,60 +255,94 @@ private fun MomentsCard() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(PageWhite, RoundedCornerShape(16.dp))
-            .border(1.dp, Stroke, RoundedCornerShape(16.dp))
-            .clickable { }
-            .padding(horizontal = 14.dp, vertical = 13.dp),
+            .shadow(2.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(AuroraSurface)
+            .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
+            .bounceClick { }
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            Modifier
-                .size(30.dp)
-                .background(ChipBg, CircleShape),
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(AuroraGradients.sunsetFantasy),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_star),
                 contentDescription = null,
-                tint = OrangeAccent,
+                tint = Color.White,
                 modifier = Modifier.size(18.dp),
             )
         }
         Spacer(Modifier.width(12.dp))
-        Text("Moments", color = TextMain, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Community Moments",
+                color = DeepMidnight,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "Share memories & explore daily highlights",
+                color = AuroraTextSecondary,
+                fontSize = 11.sp,
+            )
+        }
         Icon(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
-            tint = TextMuted,
+            tint = AuroraTextSecondary,
             modifier = Modifier.size(18.dp),
         )
     }
 }
 
 @Composable
-private fun ExploreRow() {
+private fun ExploreRow(nav: NavHostController) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         exploreCards.forEach { card ->
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .background(PageWhite, RoundedCornerShape(16.dp))
-                    .border(1.dp, Stroke, RoundedCornerShape(16.dp))
-                    .clickable { }
-                    .padding(vertical = 16.dp),
+                    .shadow(1.dp, RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(AuroraSurface)
+                    .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
+                    .bounceClick {
+                        if (card.route != null) {
+                            nav.navigate(card.route)
+                        }
+                    }
+                    .padding(vertical = 14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Icon(
-                    painter = painterResource(card.icon),
-                    contentDescription = card.label,
-                    tint = card.tint,
-                    modifier = Modifier.size(30.dp),
-                )
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(card.brush),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(card.icon),
+                        contentDescription = card.label,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
                 Spacer(Modifier.height(8.dp))
-                Text(card.label, color = TextBody, fontSize = 13.sp)
+                Text(
+                    text = card.label,
+                    color = DeepMidnight,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
             }
         }
     }
@@ -270,9 +355,9 @@ private fun Reaction(icon: Int, count: String, tint: Color) {
             painter = painterResource(icon),
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.size(13.dp),
+            modifier = Modifier.size(14.dp),
         )
-        Spacer(Modifier.width(4.dp))
-        Text(count, color = TextMuted, fontSize = 11.sp)
+        Spacer(Modifier.width(5.dp))
+        Text(count, color = AuroraTextSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
     }
 }
