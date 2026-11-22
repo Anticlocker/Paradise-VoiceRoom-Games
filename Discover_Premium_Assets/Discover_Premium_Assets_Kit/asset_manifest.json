@@ -1,0 +1,221 @@
+{
+  "count": 24,
+  "assets": [
+    {
+      "name": "families",
+      "theme": "coral",
+      "files": [
+        "svg/discover_families.svg",
+        "png/discover_families.png",
+        "webp/discover_families.webp"
+      ]
+    },
+    {
+      "name": "nearby",
+      "theme": "mint",
+      "files": [
+        "svg/discover_nearby.svg",
+        "png/discover_nearby.png",
+        "webp/discover_nearby.webp"
+      ]
+    },
+    {
+      "name": "clubs_spaces",
+      "theme": "violet",
+      "files": [
+        "svg/discover_clubs_spaces.svg",
+        "png/discover_clubs_spaces.png",
+        "webp/discover_clubs_spaces.webp"
+      ]
+    },
+    {
+      "name": "live_events",
+      "theme": "orange",
+      "files": [
+        "svg/discover_live_events.svg",
+        "png/discover_live_events.png",
+        "webp/discover_live_events.webp"
+      ]
+    },
+    {
+      "name": "moments",
+      "theme": "rainbow",
+      "files": [
+        "svg/discover_moments.svg",
+        "png/discover_moments.png",
+        "webp/discover_moments.webp"
+      ]
+    },
+    {
+      "name": "post",
+      "theme": "cyan",
+      "files": [
+        "svg/discover_post.svg",
+        "png/discover_post.png",
+        "webp/discover_post.webp"
+      ]
+    },
+    {
+      "name": "gallery",
+      "theme": "mint",
+      "files": [
+        "svg/discover_gallery.svg",
+        "png/discover_gallery.png",
+        "webp/discover_gallery.webp"
+      ]
+    },
+    {
+      "name": "camera",
+      "theme": "violet",
+      "files": [
+        "svg/discover_camera.svg",
+        "png/discover_camera.png",
+        "webp/discover_camera.webp"
+      ]
+    },
+    {
+      "name": "search",
+      "theme": "cyan",
+      "files": [
+        "svg/discover_search.svg",
+        "png/discover_search.png",
+        "webp/discover_search.webp"
+      ]
+    },
+    {
+      "name": "trending",
+      "theme": "orange",
+      "files": [
+        "svg/discover_trending.svg",
+        "png/discover_trending.png",
+        "webp/discover_trending.webp"
+      ]
+    },
+    {
+      "name": "like",
+      "theme": "coral",
+      "files": [
+        "svg/discover_like.svg",
+        "png/discover_like.png",
+        "webp/discover_like.webp"
+      ]
+    },
+    {
+      "name": "comment",
+      "theme": "violet",
+      "files": [
+        "svg/discover_comment.svg",
+        "png/discover_comment.png",
+        "webp/discover_comment.webp"
+      ]
+    },
+    {
+      "name": "share",
+      "theme": "cyan",
+      "files": [
+        "svg/discover_share.svg",
+        "png/discover_share.png",
+        "webp/discover_share.webp"
+      ]
+    },
+    {
+      "name": "location",
+      "theme": "mint",
+      "files": [
+        "svg/discover_location.svg",
+        "png/discover_location.png",
+        "webp/discover_location.webp"
+      ]
+    },
+    {
+      "name": "filter",
+      "theme": "violet",
+      "files": [
+        "svg/discover_filter.svg",
+        "png/discover_filter.png",
+        "webp/discover_filter.webp"
+      ]
+    },
+    {
+      "name": "notification",
+      "theme": "orange",
+      "files": [
+        "svg/discover_notification.svg",
+        "png/discover_notification.png",
+        "webp/discover_notification.webp"
+      ]
+    },
+    {
+      "name": "profile",
+      "theme": "cyan",
+      "files": [
+        "svg/discover_profile.svg",
+        "png/discover_profile.png",
+        "webp/discover_profile.webp"
+      ]
+    },
+    {
+      "name": "empty_feed",
+      "theme": "violet",
+      "files": [
+        "svg/discover_empty_feed.svg",
+        "png/discover_empty_feed.png",
+        "webp/discover_empty_feed.webp"
+      ]
+    },
+    {
+      "name": "privacy",
+      "theme": "mint",
+      "files": [
+        "svg/discover_privacy.svg",
+        "png/discover_privacy.png",
+        "webp/discover_privacy.webp"
+      ]
+    },
+    {
+      "name": "upload",
+      "theme": "cyan",
+      "files": [
+        "svg/discover_upload.svg",
+        "png/discover_upload.png",
+        "webp/discover_upload.webp"
+      ]
+    },
+    {
+      "name": "edit",
+      "theme": "coral",
+      "files": [
+        "svg/discover_edit.svg",
+        "png/discover_edit.png",
+        "webp/discover_edit.webp"
+      ]
+    },
+    {
+      "name": "close",
+      "theme": "violet",
+      "files": [
+        "svg/discover_close.svg",
+        "png/discover_close.png",
+        "webp/discover_close.webp"
+      ]
+    },
+    {
+      "name": "hashtag",
+      "theme": "orange",
+      "files": [
+        "svg/discover_hashtag.svg",
+        "png/discover_hashtag.png",
+        "webp/discover_hashtag.webp"
+      ]
+    },
+    {
+      "name": "events_calendar",
+      "theme": "orange",
+      "files": [
+        "svg/discover_events_calendar.svg",
+        "png/discover_events_calendar.png",
+        "webp/discover_events_calendar.webp"
+      ]
+    }
+  ]
+}

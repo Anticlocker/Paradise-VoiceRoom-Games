@@ -1,0 +1,358 @@
+{
+  "pack": "VYBORA Rooms and Seats Update",
+  "version": "1.0",
+  "assets": [
+    {
+      "name": "vb_rs_bond_heart",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_bond_heart.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Partner/seat bond emblem",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_attach_pair",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_attach_pair.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Attach two seats",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_create_room",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_create_room.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Create room illustration",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_add_seat",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_add_seat.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Add/enable partner seat",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_host_crown",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_host_crown.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Host crown emblem",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_voice_mic",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_voice_mic.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Microphone art",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_privacy_shield",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_privacy_shield.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Privacy/security mode",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_password_lock",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_password_lock.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Password-enabled room",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_mode_games",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_mode_games.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Games room mode",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_mode_pk",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_mode_pk.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "PK room mode",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_mode_music",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_mode_music.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Music room mode",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_mode_dice",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_mode_dice.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Dice and casual activity",
+      "group": "glossy_illustrations"
+    },
+    {
+      "name": "vb_rs_bg_game_rooms",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_bg_game_rooms.webp",
+      "size": [
+        1440,
+        520
+      ],
+      "purpose": "Subtle original Aurora background for native Compose text/content",
+      "group": "backgrounds"
+    },
+    {
+      "name": "vb_rs_bg_create_room",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_bg_create_room.webp",
+      "size": [
+        1440,
+        540
+      ],
+      "purpose": "Subtle original Aurora background for native Compose text/content",
+      "group": "backgrounds"
+    },
+    {
+      "name": "vb_rs_bg_advanced_settings",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_bg_advanced_settings.webp",
+      "size": [
+        1440,
+        480
+      ],
+      "purpose": "Subtle original Aurora background for native Compose text/content",
+      "group": "backgrounds"
+    },
+    {
+      "name": "vb_rs_bg_partner_card",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_bg_partner_card.webp",
+      "size": [
+        1000,
+        480
+      ],
+      "purpose": "Subtle original Aurora background for native Compose text/content",
+      "group": "backgrounds"
+    },
+    {
+      "name": "vb_rs_bg_attach_card",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_bg_attach_card.webp",
+      "size": [
+        1000,
+        480
+      ],
+      "purpose": "Subtle original Aurora background for native Compose text/content",
+      "group": "backgrounds"
+    },
+    {
+      "name": "vb_rs_bg_empty_rooms",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_bg_empty_rooms.webp",
+      "size": [
+        1000,
+        600
+      ],
+      "purpose": "Subtle original Aurora background for native Compose text/content",
+      "group": "backgrounds"
+    },
+    {
+      "name": "vb_rs_frame_partner",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_frame_partner.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Transparent partner avatar ring, overlay over real/default avatar",
+      "group": "seat_frames"
+    },
+    {
+      "name": "vb_rs_frame_partner_selected",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_frame_partner_selected.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Transparent selected partner avatar ring, overlay over real/default avatar",
+      "group": "seat_frames"
+    },
+    {
+      "name": "vb_rs_frame_bonded",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_frame_bonded.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Transparent bonded avatar ring, overlay over real/default avatar",
+      "group": "seat_frames"
+    },
+    {
+      "name": "vb_rs_frame_seat_selected",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_frame_seat_selected.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Transparent selected seat avatar ring, overlay over real/default avatar",
+      "group": "seat_frames"
+    },
+    {
+      "name": "vb_rs_seat_partner_empty",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_seat_partner_empty.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Empty optional partner seat",
+      "group": "seat_states"
+    },
+    {
+      "name": "vb_rs_seat_linked",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_seat_linked.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Attached/bonded seat state",
+      "group": "seat_states"
+    },
+    {
+      "name": "vb_rs_seat_link_pending",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_seat_link_pending.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Seat attachment pending approval",
+      "group": "seat_states"
+    },
+    {
+      "name": "vb_rs_link_aurora",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_link_aurora.webp",
+      "size": [
+        900,
+        130
+      ],
+      "purpose": "Aurora seat-to-seat bond connector art",
+      "group": "bond_connectors"
+    },
+    {
+      "name": "vb_rs_link_gold",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_link_gold.webp",
+      "size": [
+        900,
+        130
+      ],
+      "purpose": "Gold themed seat connection",
+      "group": "bond_connectors"
+    },
+    {
+      "name": "vb_rs_link_pending",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_link_pending.webp",
+      "size": [
+        900,
+        130
+      ],
+      "purpose": "Pending attachment preview",
+      "group": "bond_connectors"
+    },
+    {
+      "name": "vb_rs_card_room_light",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_card_room_light.webp",
+      "size": [
+        1000,
+        320
+      ],
+      "purpose": "Soft card gradient, use native rounded clipping",
+      "group": "card_surfaces"
+    },
+    {
+      "name": "vb_rs_card_create_light",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_card_create_light.webp",
+      "size": [
+        1000,
+        320
+      ],
+      "purpose": "Soft card gradient, use native rounded clipping",
+      "group": "card_surfaces"
+    },
+    {
+      "name": "vb_rs_card_option_selected",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_card_option_selected.webp",
+      "size": [
+        1000,
+        320
+      ],
+      "purpose": "Soft card gradient, use native rounded clipping",
+      "group": "card_surfaces"
+    },
+    {
+      "name": "vb_rs_cover_friends",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_cover_friends.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Original themed cover/fallback for non-real demo room",
+      "group": "room_covers"
+    },
+    {
+      "name": "vb_rs_cover_music",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_cover_music.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Original themed cover/fallback for non-real demo room",
+      "group": "room_covers"
+    },
+    {
+      "name": "vb_rs_cover_games",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_cover_games.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Original themed cover/fallback for non-real demo room",
+      "group": "room_covers"
+    },
+    {
+      "name": "vb_rs_cover_pk",
+      "path": "android/app/src/main/res/drawable-nodpi/vb_rs_cover_pk.webp",
+      "size": [
+        512,
+        512
+      ],
+      "purpose": "Original themed cover/fallback for non-real demo room",
+      "group": "room_covers"
+    }
+  ],
+  "asset_count": 35,
+  "warning": "Illustrations are original standalone resources; generated icon cutouts may have faint edges from source atlas. Never treat demo room covers as live user data."
+}

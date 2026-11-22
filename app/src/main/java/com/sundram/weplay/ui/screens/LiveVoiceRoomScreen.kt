@@ -22,6 +22,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +38,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -64,6 +66,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,9 +79,15 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -105,9 +114,14 @@ import com.sundram.weplay.ui.theme.VyboraPurple
 import com.sundram.weplay.ui.theme.VyboraSurface
 import com.sundram.weplay.ui.theme.VyboraTextPrimary
 import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.voiceroom.HOST_SEAT_INDEX
+import com.sundram.weplay.voiceroom.PARTNER_SEAT_INDEX
+import com.sundram.weplay.voiceroom.REGULAR_SEAT_START
+import com.sundram.weplay.voiceroom.REGULAR_SEAT_END
 import com.sundram.weplay.voiceroom.RoomConnection
 import com.sundram.weplay.voiceroom.RoomMemberVo
 import com.sundram.weplay.voiceroom.RoomMessage
+import com.sundram.weplay.voiceroom.SeatBond
 import com.sundram.weplay.voiceroom.VOICE_ROOM_SEAT_COUNT
 import com.sundram.weplay.voiceroom.VoiceRoomState
 import com.sundram.weplay.voiceroom.VoiceRoomViewModel
@@ -161,6 +175,8 @@ fun LiveVoiceRoomScreen(
     var showMoreSheet by rememberSaveable { mutableStateOf(false) }
     var showPkSheet by rememberSaveable { mutableStateOf(false) }
     var showGamesSheet by rememberSaveable { mutableStateOf(false) }
+    var showAttachSeatsSheet by rememberSaveable { mutableStateOf(false) }
+    var selectedBondForDetails by remember { mutableStateOf<SeatBond?>(null) }
     var selectedMemberForProfile by remember { mutableStateOf<RoomMemberVo?>(null) }
     var activeGiftAnimation by remember { mutableStateOf<GiftAnimationData?>(null) }
 
@@ -178,10 +194,15 @@ fun LiveVoiceRoomScreen(
     // ── Seat Interaction Logic ──
     val onSeatClick: (Int) -> Unit = { seatIndex ->
         val occupant = state.seatAt(seatIndex)
+        val seatLabel = when (seatIndex) {
+            HOST_SEAT_INDEX -> "Host seat"
+            PARTNER_SEAT_INDEX -> "Partner seat"
+            else -> "Seat $seatIndex"
+        }
         when {
             occupant == null -> {
                 if (state.isSeatLocked(seatIndex)) {
-                    Toast.makeText(context, "Seat ${seatIndex + 1} is locked by host.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "$seatLabel is locked by host.", Toast.LENGTH_SHORT).show()
                 } else {
                     vm.takeSeat(seatIndex)
                 }
@@ -216,6 +237,8 @@ fun LiveVoiceRoomScreen(
             showPkSheet -> showPkSheet = false
             showGamesSheet -> showGamesSheet = false
             showMoreSheet -> showMoreSheet = false
+            showAttachSeatsSheet -> showAttachSeatsSheet = false
+            selectedBondForDetails != null -> selectedBondForDetails = null
             activeGiftAnimation != null -> activeGiftAnimation = null
             else -> showExitDialog = true
         }
@@ -277,9 +300,12 @@ fun LiveVoiceRoomScreen(
                 state = state,
                 onSeatClick = onSeatClick,
                 onHostProfileClick = {
-                    val hostMember = state.seatAt(0)
+                    val hostMember = state.seatAt(HOST_SEAT_INDEX)
                     if (hostMember != null) selectedMemberForProfile = hostMember
-                    else onSeatClick(0)
+                    else onSeatClick(HOST_SEAT_INDEX)
+                },
+                onBondDetailsClick = { bond ->
+                    selectedBondForDetails = bond
                 },
             )
 
@@ -529,11 +555,87 @@ fun LiveVoiceRoomScreen(
                     onLockSeatToggle = { seat ->
                         vm.toggleLockSeat(seat)
                     },
+                    onTogglePartnerSeat = {
+                        vm.togglePartnerSeat(!state.partnerEnabled)
+                    },
+                    onOpenAttachSeats = {
+                        showMoreSheet = false
+                        showAttachSeatsSheet = true
+                    },
                     onCloseRoom = {
                         showMoreSheet = false
                         showExitDialog = true
                     },
                     onDismiss = { showMoreSheet = false },
+                )
+            }
+        }
+
+        // 9. Mutual Consent Bond Request Dialog
+        state.pendingBondConsent?.let { pending ->
+            AlertDialog(
+                onDismissRequest = { vm.respondSeatBondConsent(pending.bondId, false) },
+                title = { Text("Aurora Seat Bond Request 💕", fontWeight = FontWeight.Bold) },
+                text = {
+                    Text("The Host has requested to form an Aurora Seat Bond between your seat and Seat ${pending.firstSeat}. Do you accept this bond?")
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        vm.respondSeatBondConsent(pending.bondId, true)
+                    }) {
+                        Text("Accept Bond", color = GlowCyan, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        vm.respondSeatBondConsent(pending.bondId, false)
+                    }) {
+                        Text("Decline", color = Color(0xFFD0C8E8), fontWeight = FontWeight.SemiBold)
+                    }
+                },
+                containerColor = RoomSurfaceColor,
+                titleContentColor = Color.White,
+                textContentColor = Color(0xFFD0C8E8),
+            )
+        }
+
+        // 10. Attach Seats Selection Bottom Sheet (Host Only)
+        if (showAttachSeatsSheet) {
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            ModalBottomSheet(
+                onDismissRequest = { showAttachSeatsSheet = false },
+                sheetState = sheetState,
+                containerColor = RoomSurfaceColor,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            ) {
+                AttachSeatsBottomSheet(
+                    state = state,
+                    onRequestBond = { seatA, seatB ->
+                        showAttachSeatsSheet = false
+                        vm.requestSeatBond(seatA, seatB)
+                    },
+                    onDismiss = { showAttachSeatsSheet = false },
+                )
+            }
+        }
+
+        // 11. Bond Details Bottom Sheet
+        selectedBondForDetails?.let { bond ->
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            ModalBottomSheet(
+                onDismissRequest = { selectedBondForDetails = null },
+                sheetState = sheetState,
+                containerColor = RoomSurfaceColor,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            ) {
+                BondDetailsBottomSheet(
+                    bond = bond,
+                    state = state,
+                    onDetach = {
+                        selectedBondForDetails = null
+                        vm.detachSeatBond(bond.bondId)
+                    },
+                    onDismiss = { selectedBondForDetails = null },
                 )
             }
         }
@@ -806,53 +908,172 @@ private fun AuroraSpeakerStage(
     state: VoiceRoomState,
     onSeatClick: (Int) -> Unit,
     onHostProfileClick: () -> Unit,
+    onBondDetailsClick: (SeatBond) -> Unit,
 ) {
-    Column(
+    var stageCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val seatCenters = remember { mutableStateMapOf<Int, Offset>() }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+            .onGloballyPositioned { stageCoords = it },
     ) {
-        // A. Featured Host Seat (Seat 0)
-        AuroraHostSeat(
-            member = state.seatAt(0),
-            isLocked = state.isSeatLocked(0),
-            onClick = onHostProfileClick,
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // B. Secondary Speaker Row (Seats 1, 2, 3)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        // ── Canvas for Active Seat Bonds (Behind seats, non-intercepting) ──
+        Canvas(
+            modifier = Modifier.matchParentSize(),
         ) {
-            for (seat in 1..3) {
-                AuroraSeatView(
-                    seatIndex = seat,
-                    member = state.seatAt(seat),
-                    isLocked = state.isSeatLocked(seat),
-                    size = 62.dp,
-                    onClick = { onSeatClick(seat) },
-                )
+            state.activeBonds.forEach { bond ->
+                val p1 = seatCenters[bond.firstSeat]
+                val p2 = seatCenters[bond.secondSeat]
+                if (p1 != null && p2 != null) {
+                    val path = Path().apply {
+                        moveTo(p1.x, p1.y)
+                        val midY = (p1.y + p2.y) / 2f - 24.dp.toPx()
+                        val midX = (p1.x + p2.x) / 2f
+                        quadraticTo(midX, midY, p2.x, p2.y)
+                    }
+                    // Outer aurora glow
+                    drawPath(
+                        path = path,
+                        brush = Brush.linearGradient(
+                            listOf(Color(0xFF39D5DC), Color(0xFFFF4081)),
+                            start = p1,
+                            end = p2,
+                        ),
+                        style = Stroke(
+                            width = 6.dp.toPx(),
+                            cap = StrokeCap.Round,
+                        ),
+                        alpha = 0.5f,
+                    )
+                    // Inner bright beam
+                    drawPath(
+                        path = path,
+                        color = Color.White,
+                        style = Stroke(
+                            width = 2.dp.toPx(),
+                            cap = StrokeCap.Round,
+                        ),
+                        alpha = 0.9f,
+                    )
+                }
             }
         }
 
-        Spacer(Modifier.height(10.dp))
+        // ── Active Bond Heart Emblems at Midpoint ──
+        val density = LocalDensity.current
+        state.activeBonds.forEach { bond ->
+            val p1 = seatCenters[bond.firstSeat]
+            val p2 = seatCenters[bond.secondSeat]
+            if (p1 != null && p2 != null) {
+                val midX = (p1.x + p2.x) / 2f
+                val midY = (p1.y + p2.y) / 2f
+                with(density) {
+                    val offsetX = (midX - 16.dp.toPx()).toDp()
+                    val offsetY = (midY - 22.dp.toPx() - 16.dp.toPx()).toDp()
+                    Box(
+                        modifier = Modifier
+                            .offset(x = offsetX, y = offsetY)
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xEE2A1245))
+                            .border(1.5.dp, Color(0xFFFF4081), CircleShape)
+                            .bounceClick { onBondDetailsClick(bond) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.vb_rs_bond_heart),
+                            contentDescription = "Bond Details",
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
+            }
+        }
 
-        // C. Remaining Seats Row (Seats 4, 5, 6, 7)
-        Row(
+        // ── Stage Seats Layout ──
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            for (seat in 4..7) {
-                AuroraSeatView(
-                    seatIndex = seat,
-                    member = state.seatAt(seat),
-                    isLocked = state.isSeatLocked(seat),
-                    size = 56.dp,
-                    onClick = { onSeatClick(seat) },
+            // A. Top Host + Optional Partner Row
+            if (state.partnerEnabled) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AuroraHostSeat(
+                        member = state.seatAt(HOST_SEAT_INDEX),
+                        isLocked = state.isSeatLocked(HOST_SEAT_INDEX),
+                        onClick = onHostProfileClick,
+                    )
+                    Spacer(Modifier.width(28.dp))
+                    AuroraPartnerSeat(
+                        member = state.seatAt(PARTNER_SEAT_INDEX),
+                        isLocked = state.isSeatLocked(PARTNER_SEAT_INDEX),
+                        onClick = { onSeatClick(PARTNER_SEAT_INDEX) },
+                    )
+                }
+            } else {
+                AuroraHostSeat(
+                    member = state.seatAt(HOST_SEAT_INDEX),
+                    isLocked = state.isSeatLocked(HOST_SEAT_INDEX),
+                    onClick = onHostProfileClick,
                 )
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            // B. Row 1 of Regular Mic Seats (Seats 1, 2, 3, 4)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                for (seat in 1..4) {
+                    AuroraSeatView(
+                        seatIndex = seat,
+                        member = state.seatAt(seat),
+                        isLocked = state.isSeatLocked(seat),
+                        isBonded = state.isSeatInBond(seat),
+                        size = 58.dp,
+                        onClick = { onSeatClick(seat) },
+                        onPositioned = { coords ->
+                            val stage = stageCoords
+                            if (stage != null && coords.isAttached && stage.isAttached) {
+                                val center = stage.localPositionOf(coords, Offset(coords.size.width / 2f, coords.size.height / 2f))
+                                seatCenters[seat] = center
+                            }
+                        },
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // C. Row 2 of Regular Mic Seats (Seats 5, 6, 7, 8)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                for (seat in 5..8) {
+                    AuroraSeatView(
+                        seatIndex = seat,
+                        member = state.seatAt(seat),
+                        isLocked = state.isSeatLocked(seat),
+                        isBonded = state.isSeatInBond(seat),
+                        size = 58.dp,
+                        onClick = { onSeatClick(seat) },
+                        onPositioned = { coords ->
+                            val stage = stageCoords
+                            if (stage != null && coords.isAttached && stage.isAttached) {
+                                val center = stage.localPositionOf(coords, Offset(coords.size.width / 2f, coords.size.height / 2f))
+                                seatCenters[seat] = center
+                            }
+                        },
+                    )
+                }
             }
         }
     }
@@ -976,12 +1197,145 @@ private fun AuroraHostSeat(
 }
 
 @Composable
+private fun AuroraPartnerSeat(
+    member: RoomMemberVo?,
+    isLocked: Boolean,
+    onClick: () -> Unit,
+) {
+    val infinite = rememberInfiniteTransition(label = "partnerPulse")
+    val pulseScale by infinite.animateFloat(
+        initialValue = 1.0f,
+        targetValue  = 1.06f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulseScale",
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.bounceClick(scaleDown = 0.98f, onClick = onClick),
+    ) {
+        Box(
+            modifier = Modifier.size(92.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            // Animated Speaking Glow Ring (Pink/Purple)
+            if (member?.speaking == true) {
+                Box(
+                    modifier = Modifier
+                        .size((92 * pulseScale).dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFF4081).copy(alpha = 0.25f)),
+                )
+            }
+
+            // Avatar or Empty Graphic
+            if (member != null) {
+                if (member.avatarRes != null) {
+                    Image(
+                        painter = painterResource(member.avatarRes),
+                        contentDescription = member.name,
+                        modifier = Modifier
+                            .size(66.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    InitialsAvatar(name = member.name, size = 66.dp)
+                }
+            } else {
+                Image(
+                    painter = painterResource(if (isLocked) R.drawable.vb_vr_seat_locked else R.drawable.vb_rs_seat_partner_empty),
+                    contentDescription = "Empty partner seat",
+                    modifier = Modifier.size(66.dp),
+                )
+            }
+
+            // Partner Frame Overlay (Cyan-Pink frame)
+            Image(
+                painter = painterResource(R.drawable.vb_rs_frame_partner),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+
+            // Heart Emblem on top
+            Image(
+                painter = painterResource(R.drawable.vb_rs_bond_heart),
+                contentDescription = "Partner Heart",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .size(22.dp),
+            )
+
+            // Mic Off Indicator
+            if (member != null && !member.micOn) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(LiveRedBadge)
+                        .border(1.dp, Color.White, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.vb_vr_ic_mic_off),
+                        contentDescription = "Muted",
+                        modifier = Modifier.size(11.dp),
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(4.dp))
+
+        // Partner Chip
+        Box(
+            modifier = Modifier
+                .height(18.dp)
+                .clip(RoundedCornerShape(9.dp))
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color(0xFFE91E63), Color(0xFF9C27B0))
+                    )
+                )
+                .padding(horizontal = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "PARTNER",
+                color = Color.White,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 0.5.sp,
+            )
+        }
+
+        Spacer(Modifier.height(2.dp))
+
+        Text(
+            text = member?.name ?: "Partner Seat",
+            color = if (member != null) Color.White else Color(0xFFE0B0FF),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
 private fun AuroraSeatView(
     seatIndex: Int,
     member: RoomMemberVo?,
     isLocked: Boolean,
+    isBonded: Boolean = false,
     size: Dp,
     onClick: () -> Unit,
+    onPositioned: (LayoutCoordinates) -> Unit = {},
 ) {
     val infinite = rememberInfiniteTransition(label = "seatSpeaking")
     val pulseScale by infinite.animateFloat(
@@ -996,7 +1350,9 @@ private fun AuroraSeatView(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.bounceClick(scaleDown = 0.97f, onClick = onClick),
+        modifier = Modifier
+            .bounceClick(scaleDown = 0.97f, onClick = onClick)
+            .onGloballyPositioned(onPositioned),
     ) {
         Box(
             modifier = Modifier.size(size),
@@ -1028,11 +1384,15 @@ private fun AuroraSeatView(
                     InitialsAvatar(name = member.name, size = avatarSize)
                 }
 
-                // Transparent Role Frame
-                val frameRes = member.frameRes ?: when (member.role) {
-                    "moderator" -> R.drawable.vb_vr_frame_moderator
-                    "vip" -> R.drawable.vb_vr_frame_vip
-                    else -> R.drawable.vb_vr_frame_speaker
+                // Transparent Role Frame or Bonded Frame
+                val frameRes = if (isBonded) {
+                    R.drawable.vb_rs_frame_bonded
+                } else {
+                    member.frameRes ?: when (member.role) {
+                        "moderator" -> R.drawable.vb_vr_frame_moderator
+                        "vip" -> R.drawable.vb_vr_frame_vip
+                        else -> R.drawable.vb_vr_frame_speaker
+                    }
                 }
                 Image(
                     painter = painterResource(frameRes),
@@ -1064,7 +1424,7 @@ private fun AuroraSeatView(
                 val seatIcon = if (isLocked) R.drawable.vb_vr_seat_locked else R.drawable.vb_vr_seat_empty
                 Image(
                     painter = painterResource(seatIcon),
-                    contentDescription = if (isLocked) "Locked Seat" else "Seat ${seatIndex + 1}",
+                    contentDescription = if (isLocked) "Locked Seat" else "Seat $seatIndex",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit,
                 )
@@ -1074,7 +1434,7 @@ private fun AuroraSeatView(
         Spacer(Modifier.height(3.dp))
 
         val label = when {
-            member == null -> if (isLocked) "Locked" else "${seatIndex + 1}"
+            member == null -> if (isLocked) "Locked" else "$seatIndex"
             member.isSelf -> "You"
             else -> member.name
         }
@@ -2444,6 +2804,8 @@ private fun RoomMoreActionsSheet(
     onOpenPk: () -> Unit,
     onOpenGames: () -> Unit,
     onLockSeatToggle: (Int) -> Unit,
+    onTogglePartnerSeat: () -> Unit,
+    onOpenAttachSeats: () -> Unit,
     onCloseRoom: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -2463,23 +2825,25 @@ private fun RoomMoreActionsSheet(
 
         Spacer(Modifier.height(14.dp))
 
-        // Grid of 6 Quick Action Icons
+        // Grid of Quick Action Icons
         val actions = listOf(
             Triple("Participants", R.drawable.vb_vr_ic_users, onOpenParticipants),
             Triple("Audio Settings", R.drawable.vb_vr_ic_headphones, onOpenAudioSettings),
             Triple("Theme Switch", R.drawable.vb_vr_ic_sparkles, onToggleTheme),
             Triple("PK Battle", R.drawable.vb_vr_ic_swords, onOpenPk),
             Triple("Party Games", R.drawable.vb_vr_ic_game, onOpenGames),
-            Triple("Lock Seat 8", R.drawable.vb_vr_ic_lock, { onLockSeatToggle(7) }),
+            Triple(if (state.partnerEnabled) "Partner: ON" else "Partner: OFF", R.drawable.vb_rs_seat_partner_empty, onTogglePartnerSeat),
+            Triple("Attach Seats", R.drawable.vb_rs_attach_pair, onOpenAttachSeats),
+            Triple("Lock Seat 8", R.drawable.vb_vr_ic_lock, { onLockSeatToggle(8) }),
         )
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
+            columns = GridCells.Fixed(4),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(actions) { (label, iconRes, action) ->
                 Column(
@@ -2488,16 +2852,23 @@ private fun RoomMoreActionsSheet(
                         .background(Color(0x33261A42))
                         .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
                         .bounceClick(onClick = action)
-                        .padding(12.dp),
+                        .padding(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(
                         painter = painterResource(iconRes),
                         contentDescription = label,
-                        modifier = Modifier.size(26.dp),
+                        modifier = Modifier.size(24.dp),
                     )
                     Spacer(Modifier.height(6.dp))
-                    Text(label, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+                    Text(
+                        label,
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
         }
@@ -2518,5 +2889,323 @@ private fun RoomMoreActionsSheet(
         }
 
         Spacer(Modifier.height(16.dp))
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  15. Attach Seats (Bonding) Selection Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun AttachSeatsBottomSheet(
+    state: VoiceRoomState,
+    onRequestBond: (Int, Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var selectedSeatA by remember { mutableStateOf<Int?>(null) }
+    var selectedSeatB by remember { mutableStateOf<Int?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(R.drawable.vb_rs_attach_pair),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("Attach Seats", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            }
+            TextButton(onClick = onDismiss) { Text("Close", color = Color.White.copy(alpha = 0.6f)) }
+        }
+
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Select two occupied regular mic seats (1-8) to link with an animated Aurora Bond.",
+            color = Color(0xFFC0B8DC),
+            fontSize = 12.sp,
+        )
+
+        Spacer(Modifier.height(14.dp))
+
+        // Grid of 8 regular seats
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(170.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items((1..8).toList()) { seat ->
+                val occupant = state.seatAt(seat)
+                val isSelected = seat == selectedSeatA || seat == selectedSeatB
+                val isOccupied = occupant != null
+                val isAlreadyBonded = state.isSeatInBond(seat)
+
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) GlowPurple.copy(alpha = 0.45f)
+                            else if (isAlreadyBonded) Color(0x33FF4081)
+                            else Color(0x33261A42)
+                        )
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = if (isSelected) GlowCyan else if (isAlreadyBonded) Color(0xFFFF4081) else Color.White.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        .clickable(enabled = isOccupied) {
+                            when {
+                                selectedSeatA == seat -> selectedSeatA = null
+                                selectedSeatB == seat -> selectedSeatB = null
+                                selectedSeatA == null -> selectedSeatA = seat
+                                selectedSeatB == null -> selectedSeatB = seat
+                                else -> selectedSeatB = seat
+                            }
+                        }
+                        .padding(6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Box(
+                        modifier = Modifier.size(36.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (occupant != null) {
+                            if (occupant.avatarRes != null) {
+                                Image(
+                                    painter = painterResource(occupant.avatarRes),
+                                    contentDescription = occupant.name,
+                                    modifier = Modifier.size(32.dp).clip(CircleShape),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            } else {
+                                InitialsAvatar(name = occupant.name, size = 32.dp)
+                            }
+                        } else {
+                            Image(
+                                painter = painterResource(R.drawable.vb_vr_seat_empty),
+                                contentDescription = "Empty",
+                                modifier = Modifier.size(28.dp),
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "Seat $seat",
+                        color = if (isSelected) GlowCyan else Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = if (occupant != null) occupant.name else "Empty",
+                        color = if (occupant != null) Color(0xFFD0C8E8) else Color.White.copy(alpha = 0.4f),
+                        fontSize = 9.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Selected summary
+        val canBond = selectedSeatA != null && selectedSeatB != null && selectedSeatA != selectedSeatB
+        val occupantA = selectedSeatA?.let { state.seatAt(it) }
+        val occupantB = selectedSeatB?.let { state.seatAt(it) }
+
+        if (selectedSeatA != null || selectedSeatB != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0x44261A42))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                    .padding(10.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Seat ${selectedSeatA ?: "?"} (${occupantA?.name ?: "—"})",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.vb_rs_bond_heart),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = "Seat ${selectedSeatB ?: "?"} (${occupantB?.name ?: "—"})",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // Action Button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp)
+                .clip(RoundedCornerShape(23.dp))
+                .background(
+                    if (canBond) Brush.horizontalGradient(listOf(GlowPurple, GlowCyan))
+                    else SolidColor(Color(0x33FFFFFF))
+                )
+                .bounceClick(enabled = canBond) {
+                    if (canBond) {
+                        onRequestBond(selectedSeatA!!, selectedSeatB!!)
+                    }
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = if (canBond) "Request Aurora Bond 💕" else "Select 2 Occupied Seats",
+                color = if (canBond) Color.White else Color.White.copy(alpha = 0.5f),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  16. Bond Details Bottom Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun BondDetailsBottomSheet(
+    bond: SeatBond,
+    state: VoiceRoomState,
+    onDetach: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val occupantA = state.seatAt(bond.firstSeat)
+    val occupantB = state.seatAt(bond.secondSeat)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            painter = painterResource(R.drawable.vb_rs_bond_heart),
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        Text(
+            text = "Aurora Seat Bond",
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        Text(
+            text = "Active decorative connection between two stage speakers",
+            color = Color(0xFFC0B8DC),
+            fontSize = 12.sp,
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        // Bonded Participants Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (occupantA?.avatarRes != null) {
+                    Image(
+                        painter = painterResource(occupantA.avatarRes),
+                        contentDescription = occupantA.name,
+                        modifier = Modifier.size(48.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    InitialsAvatar(name = occupantA?.name ?: "Seat ${bond.firstSeat}", size = 48.dp)
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = occupantA?.name ?: "Seat ${bond.firstSeat}",
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(text = "Seat ${bond.firstSeat}", color = GlowCyan, fontSize = 11.sp)
+            }
+
+            Image(
+                painter = painterResource(R.drawable.vb_rs_attach_pair),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+            )
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (occupantB?.avatarRes != null) {
+                    Image(
+                        painter = painterResource(occupantB.avatarRes),
+                        contentDescription = occupantB.name,
+                        modifier = Modifier.size(48.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    InitialsAvatar(name = occupantB?.name ?: "Seat ${bond.secondSeat}", size = 48.dp)
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = occupantB?.name ?: "Seat ${bond.secondSeat}",
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(text = "Seat ${bond.secondSeat}", color = GlowCyan, fontSize = 11.sp)
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        // Detach Button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp)
+                .clip(RoundedCornerShape(22.dp))
+                .background(Color(0x33FF334B))
+                .bounceClick(onClick = onDetach),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("Detach Seat Bond", color = LiveRedBadge, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        TextButton(onClick = onDismiss) {
+            Text("Close", color = Color.White.copy(alpha = 0.6f))
+        }
     }
 }

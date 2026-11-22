@@ -1,0 +1,266 @@
+{
+  "total_assets": 29,
+  "assets": [
+    {
+      "name": "vb_discover_moments",
+      "category": "feature",
+      "usage": "\u2726",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_families",
+      "category": "feature",
+      "usage": "\u265b",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_nearby",
+      "category": "feature",
+      "usage": "\u25ce",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_communities",
+      "category": "feature",
+      "usage": "\u273f",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_events",
+      "category": "feature",
+      "usage": "\u2605",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_friends",
+      "category": "feature",
+      "usage": "\u2665",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_trending",
+      "category": "feature",
+      "usage": "\u2197",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_clubs",
+      "category": "feature",
+      "usage": "\u2663",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_create",
+      "category": "feature",
+      "usage": "+",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_explore",
+      "category": "feature",
+      "usage": "\u2301",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_feed",
+      "category": "feature",
+      "usage": "\u224b",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_location_off",
+      "category": "feature",
+      "usage": "\u00d7",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_01",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_02",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_03",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_04",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_05",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_06",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_07",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_avatar_08",
+      "category": "avatar",
+      "usage": "fictional demo avatar; do not replace real profile photo",
+      "size": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "vb_discover_bg_aurora",
+      "category": "background",
+      "usage": "light themed decorative surface",
+      "size": [
+        1080,
+        480
+      ]
+    },
+    {
+      "name": "vb_discover_bg_sunrise",
+      "category": "background",
+      "usage": "light themed decorative surface",
+      "size": [
+        1080,
+        480
+      ]
+    },
+    {
+      "name": "vb_discover_bg_violet",
+      "category": "background",
+      "usage": "light themed decorative surface",
+      "size": [
+        1080,
+        480
+      ]
+    },
+    {
+      "name": "vb_discover_badge_verified",
+      "category": "badge",
+      "usage": "\u2713",
+      "size": [
+        200,
+        96
+      ]
+    },
+    {
+      "name": "vb_discover_badge_new",
+      "category": "badge",
+      "usage": "NEW",
+      "size": [
+        200,
+        96
+      ]
+    },
+    {
+      "name": "vb_discover_badge_live",
+      "category": "badge",
+      "usage": "\u25cf",
+      "size": [
+        200,
+        96
+      ]
+    },
+    {
+      "name": "vb_discover_badge_family",
+      "category": "badge",
+      "usage": "\u265b",
+      "size": [
+        200,
+        96
+      ]
+    },
+    {
+      "name": "vb_discover_badge_private",
+      "category": "badge",
+      "usage": "\u25c6",
+      "size": [
+        200,
+        96
+      ]
+    },
+    {
+      "name": "vb_discover_badge_pin",
+      "category": "badge",
+      "usage": "\u2316",
+      "size": [
+        200,
+        96
+      ]
+    }
+  ]
+}

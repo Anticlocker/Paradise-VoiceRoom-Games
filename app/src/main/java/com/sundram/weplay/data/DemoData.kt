@@ -21,6 +21,7 @@ data class RoomCard(
     @DrawableRes val coverRes: Int? = null,
     val badges: List<Int> = emptyList(),
     val activityText: String? = null,
+    val listeners: Int = members * 3,
 )
 
 data class ChatItem(

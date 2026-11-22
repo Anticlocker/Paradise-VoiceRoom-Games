@@ -35,7 +35,7 @@ interface VoiceRoomEngine {
     /** Send a text chat line to everyone in the room. */
     suspend fun sendChat(text: String)
 
-    /** Take a seat on the stage, moving out of the listener area. */
+    /** Take a seat on the stage (0 for Host, 1..8 for regular mic seats, 9 for Partner). */
     suspend fun takeSeat(seat: Int)
 
     /** Give up the current seat and become a listener. */
@@ -64,4 +64,19 @@ interface VoiceRoomEngine {
 
     /** Toggle master audio output mute. */
     suspend fun toggleOutputMute() {}
+
+    /** Host action: enable or disable the optional partner seat (beside host). */
+    suspend fun togglePartnerSeat(enabled: Boolean) {}
+
+    /** Host action: lock or unlock the partner seat. */
+    suspend fun toggleLockPartnerSeat() {}
+
+    /** Host action: request an attachment bond between two regular occupied seats (1..8). */
+    suspend fun requestSeatBond(firstSeat: Int, secondSeat: Int) {}
+
+    /** Participant action: respond to incoming bond consent request (Accept/Decline). */
+    suspend fun respondSeatBondConsent(bondId: String, accept: Boolean) {}
+
+    /** Host or Participant action: detach an existing seat bond. */
+    suspend fun detachSeatBond(bondId: String) {}
 }

@@ -167,7 +167,7 @@ private fun WePlayApp(
                 LiveVoiceRoomScreen(nav, entry.arguments?.getString("roomId"), profile)
             }
             composable(Routes.DISCOVER) {
-                DiscoverScreen(nav, pad)
+                DiscoverScreen(nav, pad, profile)
             }
             composable(Routes.MSG) {
                 MessagesScreen(nav, pad, store, onUnreadChange = { msgUnread = it })
