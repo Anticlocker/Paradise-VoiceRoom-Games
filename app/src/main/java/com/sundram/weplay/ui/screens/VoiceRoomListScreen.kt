@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -59,7 +60,6 @@ import com.sundram.weplay.ui.theme.AuroraBackground
 import com.sundram.weplay.ui.theme.AuroraBorder
 import com.sundram.weplay.ui.theme.AuroraCoral
 import com.sundram.weplay.ui.theme.AuroraCyan
-import com.sundram.weplay.ui.theme.AuroraVoiceRoomBackground
 import com.sundram.weplay.ui.theme.AuroraGold
 import com.sundram.weplay.ui.theme.AuroraGradients
 import com.sundram.weplay.ui.theme.AuroraLavender
@@ -69,13 +69,33 @@ import com.sundram.weplay.ui.theme.AuroraSurface
 import com.sundram.weplay.ui.theme.AuroraTextPrimary
 import com.sundram.weplay.ui.theme.AuroraTextSecondary
 import com.sundram.weplay.ui.theme.AuroraTurquoise
+import com.sundram.weplay.ui.theme.AuroraVoiceRoomBackground
+import com.sundram.weplay.ui.theme.CelestialNavy
 import com.sundram.weplay.ui.theme.CelestialViolet
 import com.sundram.weplay.ui.theme.ChampagneGold
+import com.sundram.weplay.ui.theme.CloudWhite
+import com.sundram.weplay.ui.theme.CrystalBlue
+import com.sundram.weplay.ui.theme.DeepInk
 import com.sundram.weplay.ui.theme.DeepMidnight
 import com.sundram.weplay.ui.theme.DreamLavender
+import com.sundram.weplay.ui.theme.RoyalGold
 import com.sundram.weplay.ui.theme.SoftPeach
+import com.sundram.weplay.ui.theme.SunsetRose
 
-private val LoungeTabs = listOf("Recent", "All", "Popular", "Related", "Following")
+private data class LoungeTabItem(
+    val id: String,
+    val label: String,
+    val iconPrefix: String? = null,
+)
+
+private val LoungeTabItems = listOf(
+    LoungeTabItem("Recent", "Recent"),
+    LoungeTabItem("All", "All"),
+    LoungeTabItem("Popular", "Popular", "🔥 "),
+    LoungeTabItem("Related", "Related", "🔗 "),
+    LoungeTabItem("Following", "Following", "♡ "),
+)
+
 private val CategoryPills = listOf("All", "Friends", "PK", "Music", "Video", "Game", "Chats")
 
 private fun formatVisitedAgo(timestamp: Long): String {
@@ -106,32 +126,21 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
     val filteredRooms = remember(selectedLoungeTab, selectedCategory, searchQuery, visitRefresh) {
         when (selectedLoungeTab) {
             "Following" -> {
-                emptyList<RoomCard>()
+                val followedIds = prefs.getFollowedRooms()
+                Demo.rooms.filter { it.id in followedIds }.filter { room ->
+                    if (searchQuery.isBlank()) true else {
+                        room.title.contains(searchQuery, ignoreCase = true) ||
+                                room.host.contains(searchQuery, ignoreCase = true)
+                    }
+                }
             }
             "Recent" -> {
-                val visitedPairs = prefs.getRecentVisitedRooms().ifEmpty {
-                    // Seed initial recent visited rooms if none recorded yet
-                    listOf(
-                        "r1" to (System.currentTimeMillis() - 15 * 60 * 1000L),
-                        "r6" to (System.currentTimeMillis() - 90 * 60 * 1000L),
-                    )
-                }
+                val visitedPairs = prefs.getRecentVisitedRooms()
                 visitedPairs.mapNotNull { (roomId, timestamp) ->
                     val found = Demo.rooms.find { it.id == roomId }
                     if (found != null) {
                         found.copy(activityText = "Visited ${formatVisitedAgo(timestamp)} • ${found.activityText ?: ""}")
-                    } else {
-                        RoomCard(
-                            id = roomId,
-                            title = "Past Session ($roomId)",
-                            host = "Host",
-                            members = 0,
-                            tag = "Casual",
-                            live = false,
-                            coverRes = R.drawable.vb_room_cover_moonlight,
-                            activityText = "Ended • Visited ${formatVisitedAgo(timestamp)}",
-                        )
-                    }
+                    } else null
                 }.filter { room ->
                     if (searchQuery.isBlank()) true else {
                         room.title.contains(searchQuery, ignoreCase = true) ||
@@ -196,13 +205,15 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
     }
 
     AuroraVoiceRoomBackground(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(pad),
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // ── Section 1: Voice Lounge Header ──
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(bottom = pad.calculateBottomPadding()),
+        ) {
+            // ── Section 1: Full Celestial Voice Lounge Header ──
             VoiceLoungeHeader(
                 nav = nav,
                 isSearchActive = isSearchActive,
@@ -225,10 +236,10 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
             }
 
             LazyColumn(
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 80.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                // ── Section 2: Discovery Pill-Based Navigation (Discover | Trending | Following) ──
+                // ── Section 2: Main Filter Tabs (Recent | All | Popular | Related | Following) ──
                 item {
                     LoungeNavPills(
                         selected = selectedLoungeTab,
@@ -236,11 +247,9 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                     )
                 }
 
-                // ── Section 3: Tonight's Spotlight (Royal Midnight Featured Card) ──
+                // ── Section 3: Featured Melody Night Lounge Banner ──
                 item {
-                    TonightsSpotlightCard(
-                        onExploreClick = { nav.navigateSafe(Routes.RANKING) },
-                    )
+                    FeaturedRoomBanner(nav = nav)
                 }
 
                 // ── Section 4: Category Filter Chips Row ──
@@ -251,8 +260,12 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                     )
                 }
 
-                // ── Section 5: Room Cards List ──
-                if (selectedLoungeTab == "Following") {
+                // ── Section 5: Illustrated Room Cards List ──
+                if (selectedLoungeTab == "Recent" && filteredRooms.isEmpty()) {
+                    item {
+                        RecentEmptyRoomsState(onExploreClick = { selectedLoungeTab = "All" })
+                    }
+                } else if (selectedLoungeTab == "Following" && filteredRooms.isEmpty()) {
                     item {
                         FollowingEmptyState(onExploreClick = { selectedLoungeTab = "All" })
                     }
@@ -285,7 +298,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 16.dp),
+                .padding(end = 16.dp, bottom = pad.calculateBottomPadding() + 16.dp),
         ) {
             CompactGiftPackWidget(onClick = { showGiftPackSheet = true })
         }
@@ -298,7 +311,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  1. Voice Lounge Header (Title + Subtitle + Search + Create Room Action)
+//  1. Full Celestial Voice Lounge Header (Emblem + Title + Search + Create Room)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun VoiceLoungeHeader(
@@ -312,59 +325,81 @@ private fun VoiceLoungeHeader(
             .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // Gold Microphone Emblem
+        Image(
+            painter = painterResource(R.drawable.ap_voice_emblem_mic),
+            contentDescription = null,
+            modifier = Modifier.size(38.dp),
+            contentScale = ContentScale.Fit,
+        )
+
+        Spacer(Modifier.width(10.dp))
+
+        // Title + Subtitle
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Voice Lounge",
-                color = AuroraTextPrimary,
-                fontSize = 24.sp,
+                color = CloudWhite,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-0.5).sp,
+                letterSpacing = (-0.3).sp,
             )
             Spacer(Modifier.height(1.dp))
             Text(
-                text = "Find your people. Join the vibe.",
-                color = AuroraTextSecondary,
-                fontSize = 12.sp,
+                text = "Find your people · Join the vibe",
+                color = DreamLavender,
+                fontSize = 11.5.sp,
                 fontWeight = FontWeight.Medium,
             )
         }
 
-        // Search Action Icon Button
+        Spacer(Modifier.width(8.dp))
+
+        // Circular Search Action Button
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .shadow(1.dp, CircleShape)
+                .size(38.dp)
+                .shadow(2.dp, CircleShape)
                 .clip(CircleShape)
-                .background(AuroraSurface)
-                .border(1.dp, AuroraBorder, CircleShape)
+                .background(Brush.verticalGradient(listOf(Color(0xFF2E1B5B), Color(0xFF1F1243))))
+                .border(1.2.dp, DreamLavender.copy(alpha = 0.45f), CircleShape)
                 .bounceClick(onClick = onToggleSearch),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_search),
                 contentDescription = "Search rooms",
-                tint = if (isSearchActive) AuroraOrchid else AuroraTextPrimary,
+                tint = if (isSearchActive) SunsetRose else CloudWhite,
                 modifier = Modifier.size(18.dp),
             )
         }
 
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(8.dp))
 
-        // Create Room Button (Sunset Fantasy Action)
-        Box(
+        // "+ Create Room" Pill Button (Sunset Fantasy)
+        Row(
             modifier = Modifier
-                .size(36.dp)
-                .shadow(2.dp, CircleShape)
-                .clip(CircleShape)
+                .height(38.dp)
+                .shadow(3.dp, RoundedCornerShape(19.dp))
+                .clip(RoundedCornerShape(19.dp))
                 .background(AuroraGradients.sunsetFantasy)
-                .bounceClick { nav.navigateSafe(Routes.CREATE_ROOM) },
-            contentAlignment = Alignment.Center,
+                .border(1.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(19.dp))
+                .bounceClick { nav.navigateSafe(Routes.CREATE_ROOM) }
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_plus),
-                contentDescription = "Create Room",
+                contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(14.dp),
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = "Create Room",
+                color = Color.White,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Bold,
             )
         }
     }
@@ -449,37 +484,43 @@ private fun VoiceSearchBar(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  3. Discovery Navigation Pills (Discover | Trending | Following)
+//  3. Main Filter Tabs (Recent | All | Popular | Related | Following)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun LoungeNavPills(
     selected: String,
     onSelect: (String) -> Unit,
 ) {
-    Row(
+    LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 2.dp),
     ) {
-        LoungeTabs.forEach { tab ->
-            val active = tab == selected
+        items(LoungeTabItems, key = { it.id }) { tab ->
+            val active = tab.id == selected
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(18.dp))
-                    .background(if (active) AuroraGradients.sunsetFantasy else Brush.linearGradient(listOf(AuroraSurface, AuroraSurface)))
+                    .background(
+                        if (active) AuroraGradients.sunsetFantasy
+                        else Brush.linearGradient(listOf(Color(0xFF221644), Color(0xFF170E33)))
+                    )
                     .border(
                         1.dp,
-                        if (active) Color.Transparent else AuroraBorder,
-                        RoundedCornerShape(18.dp)
+                        if (active) SunsetRose.copy(alpha = 0.85f) else Color(0xFF4C3775),
+                        RoundedCornerShape(18.dp),
                     )
-                    .bounceClick { onSelect(tab) }
+                    .bounceClick { onSelect(tab.id) }
                     .padding(horizontal = 16.dp, vertical = 7.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = tab,
-                    color = if (active) Color.White else AuroraTextSecondary,
+                    text = "${tab.iconPrefix ?: ""}${tab.label}",
+                    color = if (active) Color.White else Color(0xFFD6C7F8),
                     fontSize = 13.sp,
-                    fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.SemiBold,
+                    maxLines = 1,
+                    softWrap = false,
                 )
             }
         }
@@ -487,137 +528,156 @@ private fun LoungeNavPills(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  4. Tonight's Spotlight Card (Royal Midnight & Cyan Sheen)
+//  4. Featured Melody Night Lounge Banner
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun TonightsSpotlightCard(
-    onExploreClick: () -> Unit,
+private fun FeaturedRoomBanner(
+    nav: NavHostController,
 ) {
+    val liveRoomId = remember {
+        Demo.rooms.firstOrNull { it.live }?.id ?: "r3"
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp)
-            .shadow(4.dp, RoundedCornerShape(22.dp))
+            .height(165.dp)
+            .shadow(6.dp, RoundedCornerShape(22.dp))
             .clip(RoundedCornerShape(22.dp))
             .background(
-                Brush.linearGradient(
+                Brush.horizontalGradient(
                     listOf(
-                        Color(0xFF1B1438), // Royal Midnight
-                        Color(0xFF2E1C5E), // Deep Violet
-                        Color(0xFF1E284A), // Indigo Night
+                        Color(0xFF26124E), // Deep Violet
+                        Color(0xFF1C0F3A), // Royal Midnight
                     )
                 )
             )
-            .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(22.dp))
-            .bounceClick(scaleDown = 0.98f, onClick = onExploreClick)
-            .padding(16.dp),
+            .border(
+                1.2.dp,
+                Brush.horizontalGradient(
+                    listOf(
+                        Color(0xFFBA55D3), // Orchid
+                        RoyalGold,          // Gold
+                        SunsetRose,        // Rose
+                    )
+                ),
+                RoundedCornerShape(22.dp),
+            )
+            .bounceClick(scaleDown = 0.98f) {
+                nav.navigateSafe(Routes.roomRoute(liveRoomId))
+            }
+            .padding(14.dp),
     ) {
-        // Voice Discovery Backdrop Banner (ap3r_banner_voice_rooms)
+        // Decorative aurora trails overlay
         Image(
-            painter = painterResource(R.drawable.ap3r_banner_voice_rooms),
+            painter = painterResource(R.drawable.ap_voice_fx_aurora_ribbon),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.32f,
-        )
-
-        // Decorative radial overlay
-        Box(
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(150.dp)
-                .background(AuroraCyan.copy(alpha = 0.08f), CircleShape),
+                .fillMaxWidth()
+                .height(90.dp)
+                .align(Alignment.BottomCenter),
+            contentScale = ContentScale.Crop,
+            alpha = 0.35f,
         )
 
-        // Left Content: Tag + Headline + Subtitle + Action Button
+        // Right side: Official featured music artwork
+        Image(
+            painter = painterResource(R.drawable.ap_voice_featured_music),
+            contentDescription = "Melody Night Lounge",
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .size(165.dp)
+                .offset(x = 6.dp, y = (-4).dp),
+            contentScale = ContentScale.Fit,
+        )
+
+        // Left Content Column
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .fillMaxWidth(0.62f),
+                .fillMaxWidth(0.66f)
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            // Live Spotlight Pill
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF00E676)),
-                )
-                Spacer(Modifier.width(5.dp))
+            // Crown "Featured Room" ribbon pill
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF3A240C))
+                    .border(0.8.dp, RoyalGold.copy(alpha = 0.75f), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 7.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("👑", fontSize = 10.sp)
+                Spacer(Modifier.width(3.dp))
                 Text(
-                    text = "TONIGHT'S SPOTLIGHT",
-                    color = AuroraCyan,
+                    text = "Featured Room",
+                    color = RoyalGold,
                     fontSize = 10.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.6.sp,
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
-            Spacer(Modifier.height(4.dp))
+            Column {
+                Text(
+                    text = "Melody Night Lounge 🎵",
+                    color = CloudWhite,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.2).sp,
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text = "Live music · Chat · Make new friends",
+                    color = DreamLavender,
+                    fontSize = 11.5.sp,
+                    lineHeight = 14.sp,
+                    maxLines = 1,
+                )
+            }
 
-            Text(
-                text = "Rooms worth joining.",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.ExtraBold,
-            )
-
-            Text(
-                text = "Top-ranked hosts, live acoustic jam sessions & party games.",
-                color = Color.White.copy(alpha = 0.85f),
-                fontSize = 11.sp,
-                lineHeight = 14.sp,
-                maxLines = 2,
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            // Action Pill
+            // "Join Live >" golden pill button
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White)
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(AuroraGradients.royalGold)
+                    .border(0.8.dp, CloudWhite.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                    .clickable { nav.navigateSafe(Routes.roomRoute(liveRoomId)) }
+                    .padding(horizontal = 14.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Explore Spotlight ›",
-                    color = AuroraOrchid,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = "Join Live ›",
+                    color = DeepInk,
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Black,
                 )
             }
         }
 
-        // Right Overlapping Room Collage (Moonlight & Pop Star with glowing borders)
+        // 4-Dot carousel indicator at bottom center
         Row(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy((-16).dp),
+                .align(Alignment.BottomCenter)
+                .offset(y = (-2).dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painterResource(R.drawable.vb_room_cover_moonlight),
-                contentDescription = null,
+            Box(
                 modifier = Modifier
-                    .size(68.dp)
-                    .shadow(3.dp, RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp))
-                    .border(2.dp, Color.White.copy(alpha = 0.7f), RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Crop,
+                    .width(14.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(RoyalGold),
             )
-            Image(
-                painter = painterResource(R.drawable.vb_room_cover_pop_star),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(76.dp)
-                    .shadow(5.dp, RoundedCornerShape(18.dp))
-                    .clip(RoundedCornerShape(18.dp))
-                    .border(2.dp, Color.White, RoundedCornerShape(18.dp)),
-                contentScale = ContentScale.Crop,
-            )
+            repeat(3) {
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .clip(CircleShape)
+                        .background(DreamLavender.copy(alpha = 0.4f)),
+                )
+            }
         }
     }
 }
@@ -633,17 +693,21 @@ private fun CategoryChipRow(
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 2.dp),
     ) {
         items(CategoryPills, key = { it }) { label ->
             val active = label == selected
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
-                    .background(if (active) AuroraGradients.sunsetFantasy else Brush.linearGradient(listOf(AuroraSurface, AuroraSurface)))
+                    .background(
+                        if (active) AuroraGradients.sunsetFantasy
+                        else Brush.linearGradient(listOf(Color(0xFF241848), Color(0xFF191036)))
+                    )
                     .border(
                         1.dp,
-                        if (active) Color.Transparent else AuroraBorder,
-                        RoundedCornerShape(16.dp)
+                        if (active) Color.Transparent else DreamLavender.copy(alpha = 0.30f),
+                        RoundedCornerShape(16.dp),
                     )
                     .bounceClick { onSelect(label) }
                     .padding(horizontal = 14.dp, vertical = 6.dp),
@@ -651,9 +715,11 @@ private fun CategoryChipRow(
             ) {
                 Text(
                     text = label,
-                    color = if (active) Color.White else AuroraTextSecondary,
+                    color = if (active) Color.White else DreamLavender.copy(alpha = 0.85f),
                     fontSize = 12.sp,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                    maxLines = 1,
+                    softWrap = false,
                 )
             }
         }
@@ -661,7 +727,7 @@ private fun CategoryChipRow(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  6. Aurora Room Card Layout (Light Ivory Surface, Left Cover, Gradient Join Button)
+//  6. Illustrated Aurora Room Card (Official Artwork, Crest & Headphone Join)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun AuroraRoomCard(
@@ -670,110 +736,148 @@ private fun AuroraRoomCard(
 ) {
     val (tagBg, tagFg) = tagColors(room.tag)
 
+    // Crest drawable based on room category / type
+    val crestDrawable = when {
+        room.tag == "PK" || room.isPkActive || room.id == "r2" -> R.drawable.ap_voice_crest_pk
+        room.tag == "Music" || room.id == "r3" || room.id == "r6" -> R.drawable.ap_voice_crest_music
+        room.tag == "Game" || room.id == "r4" || room.id == "r7" || room.id == "r8" -> R.drawable.ap_voice_crest_game
+        else -> R.drawable.ap_voice_crest_royal
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(20.dp))
+            .shadow(4.dp, RoundedCornerShape(20.dp))
             .clip(RoundedCornerShape(20.dp))
-            .background(AuroraSurface)
-            .border(1.dp, AuroraBorder, RoundedCornerShape(20.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF261650),
+                        Color(0xFF1A103D),
+                    )
+                )
+            )
+            .border(1.2.dp, Color(0xFF6B4BAE).copy(alpha = 0.45f), RoundedCornerShape(20.dp))
             .bounceClick(scaleDown = 0.98f, onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // LEFT: Illustrated Square Room Cover (82dp x 82dp with smooth corners)
+        // LEFT: Room Cover (86dp x 86dp) with LIVE & PK badges
         Box(
             modifier = Modifier
-                .size(82.dp)
+                .size(86.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(AuroraBackground)
-                .border(1.dp, AuroraBorder.copy(alpha = 0.6f), RoundedCornerShape(16.dp)),
+                .background(Color(0xFF140E2C))
+                .border(1.dp, DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            val coverDrawable = room.coverRes ?: R.drawable.vb_room_cover_moonlight
+            val coverDrawable = room.coverRes ?: when (room.tag) {
+                "PK" -> R.drawable.ap_voice_cover_werewolf
+                "Music" -> R.drawable.ap_voice_cover_music
+                "Game" -> R.drawable.ap_voice_cover_dice
+                else -> R.drawable.ap_voice_cover_moon
+            }
             Image(
                 painter = painterResource(coverDrawable),
-                contentDescription = "${room.title} cover",
+                contentDescription = room.title,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
             )
 
-            // Top-left: LIVE vs ENDED status indicator badge
-            Box(
+            // Top-left Badges Row: LIVE + PK
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(5.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xD9000000))
-                    .padding(horizontal = 5.dp, vertical = 2.dp),
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(5.dp)
-                            .clip(CircleShape)
-                            .background(if (room.live) Color(0xFF00E676) else Color(0xFF9E9E9E)),
-                    )
-                    Spacer(Modifier.width(3.dp))
-                    Text(
-                        text = if (room.live) "LIVE" else "OFFLINE",
-                        color = Color.White,
-                        fontSize = 7.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
-
-            // Top-right: PK Active Badge (if PK active)
-            if (room.isPkActive) {
+                // LIVE Badge (Red pill)
                 Box(
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(5.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(Color(0xFFFF5252), Color(0xFFFF4081))
-                            )
-                        )
-                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                        .background(Color(0xD9000000))
+                        .padding(horizontal = 5.dp, vertical = 2.dp),
                 ) {
-                    Text(
-                        text = "⚡ PK",
-                        color = Color.White,
-                        fontSize = 7.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(5.dp)
+                                .clip(CircleShape)
+                                .background(if (room.live) Color(0xFFFF1744) else Color(0xFF9E9E9E)),
+                        )
+                        Spacer(Modifier.width(3.dp))
+                        Text(
+                            text = if (room.live) "LIVE" else "OFFLINE",
+                            color = Color.White,
+                            fontSize = 7.5.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+
+                // PK Badge (if PK active)
+                if (room.isPkActive || room.tag == "PK") {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFFFF5252), Color(0xFFFF4081))
+                                )
+                            )
+                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            text = "⚡ PK",
+                            color = Color.White,
+                            fontSize = 7.5.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                        )
+                    }
                 }
             }
         }
 
         Spacer(Modifier.width(12.dp))
 
-        // CENTER: Title + Host details (Level + Room Crest) + Category Pill + User Count
+        // CENTER: Title + Host details (framed avatar, Lv, Crest) + Subtitle + Metadata
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp),
+            verticalArrangement = Arrangement.spacedBy(3.5.dp),
         ) {
+            // Room Title
             Text(
                 text = room.title,
-                color = DeepMidnight,
-                fontSize = 15.sp,
+                color = CloudWhite,
+                fontSize = 15.5.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            // Host Identity with Host Level & Room Crest
+            // Host Row with Framed Avatar, Host Name, Level & Crest
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                InitialsAvatar(name = room.host, size = 16.dp)
+                // Host Avatar with official host frame
+                Box(
+                    modifier = Modifier.size(26.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    InitialsAvatar(name = room.host, size = 20.dp)
+                    Image(
+                        painter = painterResource(R.drawable.ap_voice_frame_host),
+                        contentDescription = null,
+                        modifier = Modifier.size(26.dp),
+                    )
+                }
+
                 Text(
                     text = room.host,
-                    color = AuroraTextSecondary,
-                    fontSize = 11.sp,
+                    color = CloudWhite.copy(alpha = 0.95f),
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -783,13 +887,14 @@ private fun AuroraRoomCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(SoftPeach.copy(alpha = 0.35f))
+                        .background(Color(0xFF4A2518))
+                        .border(0.6.dp, Color(0xFFF4A261).copy(alpha = 0.7f), RoundedCornerShape(4.dp))
                         .padding(horizontal = 4.dp, vertical = 1.dp),
                 ) {
                     Text(
                         text = "Lv.${room.hostLevel}",
-                        color = Color(0xFFC75D35),
-                        fontSize = 8.sp,
+                        color = Color(0xFFFFB74D),
+                        fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold,
                     )
                 }
@@ -798,41 +903,40 @@ private fun AuroraRoomCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(DreamLavender.copy(alpha = 0.35f))
+                        .background(Color(0xFF2E1C5E))
+                        .border(0.6.dp, DreamLavender.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
                         .padding(horizontal = 4.dp, vertical = 1.dp),
                 ) {
                     Text(
                         text = "👑 Crest Lv.${room.roomLevel}",
-                        color = CelestialViolet,
-                        fontSize = 8.sp,
+                        color = DreamLavender,
+                        fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold,
                     )
                 }
             }
 
-            // Activity text / visited time
+            // Activity text / Description
             val subtitle = room.activityText ?: "Casual conversation & music"
             Text(
                 text = subtitle,
-                color = AuroraTextSecondary,
-                fontSize = 10.sp,
+                color = DreamLavender.copy(alpha = 0.85f),
+                fontSize = 11.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(Modifier.height(1.dp))
-
-            // Metadata row: Category Tag + Users count + Listeners
+            // Metadata row: Category Tag + Listener Count
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = room.tag,
-                    color = tagFg,
+                    color = Color.White,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
                         .background(tagBg)
-                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                        .padding(horizontal = 7.dp, vertical = 2.dp),
                 )
 
                 Spacer(Modifier.width(8.dp))
@@ -840,51 +944,57 @@ private fun AuroraRoomCard(
                 Icon(
                     painter = painterResource(R.drawable.ic_users),
                     contentDescription = null,
-                    tint = AuroraTurquoise,
+                    tint = CrystalBlue,
                     modifier = Modifier.size(12.dp),
                 )
                 Spacer(Modifier.width(3.dp))
                 Text(
-                    text = "${room.members}",
-                    color = DeepMidnight,
+                    text = "${room.listeners} Listening",
+                    color = CloudWhite.copy(alpha = 0.90f),
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Spacer(Modifier.width(8.dp))
-
-                Text(
-                    text = "(${room.listeners} listening)",
-                    color = AuroraTextSecondary,
-                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
                 )
             }
         }
 
         Spacer(Modifier.width(8.dp))
 
-        // RIGHT: Badges + Join Action Button
+        // RIGHT: Crest Trophy/Emblem + Glowing Join Action Pill
         Column(
             horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (room.badges.isNotEmpty()) {
-                Image(
-                    painter = painterResource(room.badges.first()),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    contentScale = ContentScale.Fit,
-                )
-            }
+            // Type/Rank Crest Graphic (Royal, PK, Music, or Game)
+            Image(
+                painter = painterResource(crestDrawable),
+                contentDescription = null,
+                modifier = Modifier.size(34.dp),
+                contentScale = ContentScale.Fit,
+            )
 
-            // Compact Join Button Pill (Sunset Fantasy)
-            Box(
+            // Glowing Join Action Pill (with headphones icon + "Join")
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(if (room.live) AuroraGradients.sunsetFantasy else Brush.linearGradient(listOf(Color(0xFFBBB6C8), Color(0xFFCCC8D6))))
-                    .padding(horizontal = 14.dp, vertical = 5.dp),
-                contentAlignment = Alignment.Center,
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (room.live) AuroraGradients.sunsetFantasy
+                        else Brush.linearGradient(listOf(Color(0xFF382F58), Color(0xFF282042)))
+                    )
+                    .border(
+                        0.8.dp,
+                        if (room.live) Color.White.copy(alpha = 0.5f) else Color.Transparent,
+                        RoundedCornerShape(16.dp),
+                    )
+                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                Icon(
+                    painter = painterResource(R.drawable.vb_vr_ic_headphones),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(13.dp),
+                )
+                Spacer(Modifier.width(4.dp))
                 Text(
                     text = if (room.live) "Join" else "Revisit",
                     color = Color.White,
@@ -921,7 +1031,7 @@ private fun CompactGiftPackWidget(onClick: () -> Unit) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  8. Voice Gift Pack Offers Bottom Sheet (Preview / Demo State)
+//  8. Voice Gift Pack Offers Bottom Sheet
 // ─────────────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1032,6 +1142,52 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
 //  9. Empty States
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
+private fun RecentEmptyRoomsState(onExploreClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 36.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ap_voice_emblem_mic),
+            contentDescription = null,
+            modifier = Modifier.size(46.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "No Recent Voice Visits",
+            color = CloudWhite,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "You haven't visited any voice rooms yet. Join a lounge to start listening!",
+            color = DreamLavender,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(14.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(AuroraGradients.sunsetFantasy)
+                .bounceClick(onClick = onExploreClick)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            Text(
+                text = "Explore Live Rooms ›",
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+@Composable
 private fun FollowingEmptyState(onExploreClick: () -> Unit) {
     Column(
         modifier = Modifier
@@ -1043,33 +1199,34 @@ private fun FollowingEmptyState(onExploreClick: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_users),
             contentDescription = null,
-            tint = AuroraTextSecondary.copy(alpha = 0.4f),
+            tint = DreamLavender.copy(alpha = 0.6f),
             modifier = Modifier.size(46.dp),
         )
         Spacer(Modifier.height(10.dp))
         Text(
-            text = "No followed hosts are live",
-            color = AuroraTextPrimary,
+            text = "No Followed Rooms Yet",
+            color = CloudWhite,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Follow active room hosts to see them live here.",
-            color = AuroraTextSecondary,
+            color = DreamLavender,
             fontSize = 12.sp,
+            textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(14.dp))
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(AuroraLavender)
+                .background(AuroraGradients.sunsetFantasy)
                 .bounceClick(onClick = onExploreClick)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = "Explore Live Rooms",
-                color = AuroraOrchid,
+                text = "Explore All Rooms ›",
+                color = Color.White,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -1089,33 +1246,34 @@ private fun LoungeEmptyRoomsState(onReset: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_users),
             contentDescription = null,
-            tint = AuroraTextSecondary.copy(alpha = 0.4f),
+            tint = DreamLavender.copy(alpha = 0.6f),
             modifier = Modifier.size(46.dp),
         )
         Spacer(Modifier.height(10.dp))
         Text(
             text = "No voice rooms found",
-            color = AuroraTextPrimary,
+            color = CloudWhite,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Try clearing search or switching categories",
-            color = AuroraTextSecondary,
+            color = DreamLavender,
             fontSize = 12.sp,
+            textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(14.dp))
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(AuroraLavender)
+                .background(AuroraGradients.sunsetFantasy)
                 .bounceClick(onClick = onReset)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = "Reset filters",
-                color = AuroraOrchid,
+                text = "Reset Filters",
+                color = Color.White,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
             )

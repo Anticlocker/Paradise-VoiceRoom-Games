@@ -425,30 +425,75 @@ fun AuroraVoiceRoomBackground(
     animated: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val transition = rememberInfiniteTransition(label = "voiceBgAnim3")
+    val sparkleAlpha by if (animated) {
+        transition.animateFloat(
+            initialValue = 0.40f,
+            targetValue = 0.90f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(3000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "sparkleTwinkle3",
+        )
+    } else {
+        remember { mutableFloatStateOf(0.70f) }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(CelestialNavy),
     ) {
+        // 1. Continuous deep violet celestial body background with muted stars
         Image(
-            painter = painterResource(R.drawable.ap3r_bg_voice_midnight),
+            painter = painterResource(R.drawable.ap_voice_background_body),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
         )
+
+        // 2. Celestial Palace Header Artwork at top with illuminated golden palace, crescent moon, lavender clouds
+        Image(
+            painter = painterResource(R.drawable.ap_voice_header_palace),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .align(Alignment.TopCenter),
+            contentScale = ContentScale.Crop,
+        )
+
+        // 3. Delicate celestial sparkles overlay with gentle twinkle
+        Image(
+            painter = painterResource(R.drawable.ap_voice_fx_sparkles),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+                .align(Alignment.TopCenter),
+            contentScale = ContentScale.Crop,
+            alpha = sparkleAlpha * 0.55f,
+        )
+
+        // 4. Smooth gradient blend from header artwork down into list body
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(130.dp)
+                .align(Alignment.TopCenter)
+                .offset(y = 200.dp)
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            CelestialNavy.copy(alpha = 0.50f),
                             Color.Transparent,
-                            CelestialNavy.copy(alpha = 0.85f),
+                            CelestialNavy.copy(alpha = 0.50f),
+                            CelestialNavy.copy(alpha = 0.95f),
                         )
                     )
                 )
         )
+
         content()
     }
 }
@@ -861,7 +906,7 @@ fun CelestialHeader(
         // 2. Welcome Greeting & Name
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Welcome to Aurora",
+                text = "Welcome",
                 color = DreamLavender,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
@@ -876,9 +921,9 @@ fun CelestialHeader(
             )
         }
 
-        Spacer(Modifier.width(6.dp))
+        Spacer(Modifier.width(8.dp))
 
-        // 3. Gold Currency Pill
+        // 3. Gold Currency Pill (Coins with + top-up action)
         CrystalCurrencyPill(
             iconRes = R.drawable.vb_coin,
             amount = formattedCoins,
@@ -887,24 +932,9 @@ fun CelestialHeader(
             onClick = onCoinsClick,
         )
 
-        // 4. Crystal Diamond Currency Pill (only when user has verified crystal balance)
-        if (crystals != null) {
-            Spacer(Modifier.width(6.dp))
-            val formattedCrystals = remember(crystals) {
-                NumberFormat.getIntegerInstance().format(crystals)
-            }
-            CrystalCurrencyPill(
-                iconRes = R.drawable.aurora3_ic_diamond,
-                amount = formattedCrystals,
-                gradient = Brush.horizontalGradient(listOf(Color(0xFF0F2646), Color(0xFF141F3C))),
-                borderColor = CrystalBlue,
-                onClick = onCrystalsClick,
-            )
-        }
-
         Spacer(Modifier.width(8.dp))
 
-        // 5. Event Center Star Shortcut
+        // 4. Event Center Star Shortcut
         Box(
             modifier = Modifier
                 .size(34.dp)
@@ -1681,19 +1711,27 @@ fun AuroraNavigationDock(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            // Active glowing halo
+                            // Active glowing halo: smooth radiant aura pill, zero black shadow
                             if (isSelected) {
                                 Box(
                                     modifier = Modifier
-                                        .size(34.dp)
-                                        .clip(CircleShape)
-                                        .background(activeColor.copy(alpha = 0.22f)),
+                                        .width(44.dp)
+                                        .height(30.dp)
+                                        .clip(RoundedCornerShape(15.dp))
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    activeColor.copy(alpha = 0.38f),
+                                                    Color(0xFF7042D9).copy(alpha = 0.18f),
+                                                )
+                                            )
+                                        ),
                                 )
                             }
                             Icon(
                                 painter = painterResource(tab.iconRes),
                                 contentDescription = tab.label,
-                                tint = if (isSelected) activeColor else DreamLavender.copy(alpha = 0.70f),
+                                tint = if (isSelected) Color.White else DreamLavender.copy(alpha = 0.70f),
                                 modifier = Modifier.size(24.dp),
                             )
 

@@ -164,6 +164,19 @@ class UserPrefs(context: Context) {
             }
     }
 
+    fun followRoom(roomId: String, follow: Boolean) {
+        val current = getFollowedRooms().toMutableSet()
+        if (follow) current.add(roomId) else current.remove(roomId)
+        prefs.edit().putString("followed_rooms", current.joinToString(";")).apply()
+    }
+
+    fun getFollowedRooms(): Set<String> {
+        val current = prefs.getString("followed_rooms", "") ?: ""
+        return current.split(";").filter { it.isNotBlank() }.toSet()
+    }
+
+    fun isRoomFollowed(roomId: String): Boolean = getFollowedRooms().contains(roomId)
+
     private fun dayStamp(): String =
         SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 }

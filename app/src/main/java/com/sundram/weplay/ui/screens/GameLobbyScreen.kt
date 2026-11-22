@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -108,12 +109,11 @@ private fun AuroraShortcutsRow(nav: NavHostController) {
         AuroraShortcutItem("Ranks", "Leaderboard", R.drawable.ap_ic_trophy, Routes.RANKING),
         AuroraShortcutItem("Tasks", "Daily", R.drawable.ap_ic_shield, Routes.TASKS),
         AuroraShortcutItem("Social", "Chats", R.drawable.ap_ic_chat, Routes.MSG),
-        AuroraShortcutItem("Events", "Festival", R.drawable.aurora3_ic_nav_star, Routes.EVENT_CENTER, "HOT"),
     )
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         shortcuts.forEach { item ->
             com.sundram.weplay.ui.theme.PremiumShortcut(
@@ -916,6 +916,157 @@ private fun ExploreFeedItem(
     }
 }
 
+/**
+ * CompactCommunityPlayerCard:
+ * Sleek vertical card for horizontal carousel (~118dp wide) with framed avatar,
+ * level/gender badge, online dot, status tag, and one-tap Follow button.
+ */
+@Composable
+private fun CompactCommunityPlayerCard(
+    user: ExploreUser,
+    onClick: () -> Unit = {},
+    onMessageClick: () -> Unit = {},
+) {
+    var isFollowed by rememberSaveable { mutableStateOf(user.isFollowed) }
+
+    Column(
+        modifier = Modifier
+            .width(118.dp)
+            .shadow(2.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(AuroraGradients.celestialCard)
+            .border(
+                1.dp,
+                com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.28f),
+                RoundedCornerShape(18.dp),
+            )
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // Framed Avatar with Online dot
+        Box(
+            modifier = Modifier.bounceClick(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            AvatarWithFrame(
+                name = user.name,
+                photoPath = null,
+                size = 50.dp,
+                frameTier = user.frameTier,
+                animated = user.isOnline,
+                showCrown = user.level >= 40,
+            )
+
+            if (user.isOnline) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = (-2).dp, y = (-2).dp)
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF00E676))
+                        .border(1.5.dp, com.sundram.weplay.ui.theme.DeepInk, CircleShape),
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Username
+        Text(
+            text = user.name,
+            color = com.sundram.weplay.ui.theme.CloudWhite,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.height(3.dp))
+
+        // Level & Gender Pill
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(com.sundram.weplay.ui.theme.AuroraGradients.royalGold)
+                    .padding(horizontal = 4.dp, vertical = 1.dp),
+            ) {
+                Text(
+                    text = "Lv.${user.level}",
+                    color = com.sundram.weplay.ui.theme.DeepInk,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = if (user.gender == "F") "♀" else "♂",
+                color = if (user.gender == "F") com.sundram.weplay.ui.theme.SunsetRose else com.sundram.weplay.ui.theme.CrystalBlue,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Spacer(Modifier.height(5.dp))
+
+        // Activity tag (e.g. "In Voice Room", "Playing Ludo")
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(6.dp))
+                .background(if (user.isOnline) Color(0xFF133420) else com.sundram.weplay.ui.theme.DeepInk)
+                .border(
+                    0.6.dp,
+                    if (user.isOnline) Color(0xFF00E676).copy(alpha = 0.5f) else com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.3f),
+                    RoundedCornerShape(6.dp),
+                )
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = user.statusText,
+                color = if (user.isOnline) Color(0xFF69F0AE) else com.sundram.weplay.ui.theme.DreamLavender,
+                fontSize = 8.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Follow / Following Action Button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(26.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(if (isFollowed) com.sundram.weplay.ui.theme.DeepInk else com.sundram.weplay.ui.theme.RoyalViolet)
+                .border(
+                    1.dp,
+                    if (isFollowed) com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.4f) else Color.Transparent,
+                    RoundedCornerShape(13.dp),
+                )
+                .clickable { isFollowed = !isFollowed },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = if (isFollowed) "Following" else "Follow",
+                color = if (isFollowed) com.sundram.weplay.ui.theme.DreamLavender else Color.White,
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  10. Games Home Screen 3.0
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1225,30 +1376,60 @@ fun GamesHomeScreen(
                     )
                 }
 
-                // ── Section 9: Community Players with Animated Frames & Real Profiles ──
+                // ── Section 9: Community Players Carousel (Horizontal LazyRow with See All) ──
                 item {
                     Spacer(Modifier.height(6.dp))
-                    Column(modifier = Modifier.padding(horizontal = 2.dp)) {
-                        Text(
-                            text = "Community Players",
-                            color = AuroraTextPrimary,
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                        )
-                        Text(
-                            text = "Meet people who share your vibe",
-                            color = AuroraTextSecondary,
-                            fontSize = 12.sp,
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column {
+                            Text(
+                                text = "Community Players",
+                                color = AuroraTextPrimary,
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                            )
+                            Text(
+                                text = "Meet people who share your vibe",
+                                color = AuroraTextSecondary,
+                                fontSize = 12.sp,
+                            )
+                        }
+
+                        // "See All ›" action pill navigating to Friends / Social
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(com.sundram.weplay.ui.theme.DeepInk)
+                                .border(
+                                    1.dp,
+                                    com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f),
+                                    RoundedCornerShape(12.dp),
+                                )
+                                .bounceClick { nav.navigateSafe(Routes.FRIENDS) }
+                                .padding(horizontal = 11.dp, vertical = 5.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "See All ›",
+                                color = com.sundram.weplay.ui.theme.CrystalBlue,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     }
                 }
 
-                if (exploreUsers.isEmpty()) {
-                    item {
+                item {
+                    if (exploreUsers.isEmpty()) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 32.dp),
+                                .padding(vertical = 24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
@@ -1257,14 +1438,20 @@ fun GamesHomeScreen(
                                 fontSize = 14.sp,
                             )
                         }
-                    }
-                } else {
-                    items(exploreUsers, key = { it.id }) { user ->
-                        ExploreFeedItem(
-                            user = user,
-                            onClick = { nav.navigateSafe(Routes.userDetailRoute(user.id)) },
-                            onMessageClick = { nav.navigateSafe(Routes.chatRoute(user.id)) },
-                        )
+                    } else {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
+                        ) {
+                            items(exploreUsers, key = { it.id }) { user ->
+                                CompactCommunityPlayerCard(
+                                    user = user,
+                                    onClick = { nav.navigateSafe(Routes.userDetailRoute(user.id)) },
+                                    onMessageClick = { nav.navigateSafe(Routes.chatRoute(user.id)) },
+                                )
+                            }
+                        }
                     }
                 }
             }
