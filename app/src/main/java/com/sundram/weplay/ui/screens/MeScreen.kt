@@ -6,9 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,7 +25,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -39,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -52,8 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
-import com.sundram.weplay.data.DemoBackpack
-import com.sundram.weplay.data.FeaturedOfferState
 import com.sundram.weplay.data.GiftPackOffer
 import com.sundram.weplay.data.GiftPackRotationManager
 import com.sundram.weplay.data.FrameTier
@@ -61,47 +54,40 @@ import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.ui.components.AvatarWithFrame
 import com.sundram.weplay.ui.components.PhoenixAvatarFrame
 import com.sundram.weplay.ui.components.PhoenixFramePreview
-import com.sundram.weplay.ui.components.UserAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.nav.Routes
-import com.sundram.weplay.ui.theme.AuroraBorder
-import com.sundram.weplay.ui.theme.AuroraError
-import com.sundram.weplay.ui.theme.AuroraProfileBackground
-import com.sundram.weplay.ui.theme.AuroraTextSecondary
-import com.sundram.weplay.ui.theme.AuroraTurquoise
-import com.sundram.weplay.ui.theme.ChampagneGold
-import com.sundram.weplay.ui.theme.DeepMidnight
-import com.sundram.weplay.ui.theme.DreamLavender
-import com.sundram.weplay.ui.theme.PearlWhite
-import com.sundram.weplay.ui.theme.SoftPeach
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Color Palette — ME PAGE AURORA PARADISE 2.0 EDITION
-//  Bright, warm, eye-comfortable, consistent with Games & Voice Room
+//  Color Palette — ME PAGE AURORA PARADISE 3.0 ROYAL NIGHT EDITION
+//  Approved palette matching Screenshot 1 & docs/color_tokens.json
 // ─────────────────────────────────────────────────────────────────────────────
-private val CleanCanvas      = PearlWhite
-private val CleanWhite       = Color(0xFFFFFFFF)
-private val CleanInk         = DeepMidnight
-private val CleanSecondary   = AuroraTextSecondary
-private val CleanLavender    = DreamLavender.copy(alpha = 0.35f)
-private val CleanCyan        = AuroraTurquoise
-private val CleanPeach       = SoftPeach
-private val CleanGold        = ChampagneGold
-private val CleanHairline    = AuroraBorder
-private val CleanDanger      = AuroraError
+private val RoyalBackground    = Color(0xFF10052D) // Deep Midnight Background
+private val RoyalPanel         = Color(0xFF251048) // Translucent Dark Royal Panel
+private val RoyalPanelRaised   = Color(0xFF31135D) // Elevated Royal Surface
+private val RoyalOutline       = Color(0xFFA758D8) // Lavender Glow Outline
+private val RoyalTextPrimary   = Color(0xFFFFF9FF) // Pearl White Primary Text
+private val RoyalTextSecondary = Color(0xFFD0BFE8) // Soft Lavender Secondary Text
+private val RoyalGold          = Color(0xFFFFD36B) // Rich Champagne Gold
+private val RoyalCyan          = Color(0xFF54CFFF) // Crystal Cyan
+private val RoyalViolet        = Color(0xFFA057EB) // Vibrant Royal Violet
+private val RoyalPink          = Color(0xFFFF78C4) // Sunset Pink Accent
+private val RoyalDivider       = Color(0xFF6A338E).copy(alpha = 0.45f) // Soft Divider
+private val RoyalDanger        = Color(0xFFFF5271) // Coral-red for Log Out
+private val RoyalCardBg        = Color(0xFF1E0A3C).copy(alpha = 0.90f)
 
 /**
- * MeScreen (ME Page 3.0 Clean Premium Edition)
+ * MeScreen (ME Page Royal Night Edition — Aurora Paradise 3.0)
  *
- * Implements a clean, bright, eye-comfortable social profile hub:
- * - Warm cream/peach to lavender gradient profile header (~190dp)
- * - 84dp rounded-square actual avatar with camera action
- * - Bold username, verified badge, copyable ID with toast, level pill & XP bar
- * - Four illustrated quick shortcut icons (VIP Center, Shop, Avatar Studio, My Space)
- * - Social micro-strip (Friends, Following, Followers, Wallet)
- * - Elegant grouped white menu rows with subtle hairline dividers
- * - Floating 48h promotional gift pack banner
- * - Fully interactive bottom sheets for all submenus
+ * Implements a deep royal celestial fantasy profile hub matching Screenshot 1:
+ * - Moonlit celestial palace header backdrop with moonlight and architecture
+ * - Actual user profile picture with equipped frame (supporting Phoenix Rebirth V2)
+ * - Username, optional verified badge, copyable ID with toast, level pill & real XP progression
+ * - Four glossy illustrated shortcuts (VIP Center, Shop, Avatar Studio, My Space)
+ * - Social statistics strip (Friends, Following, Followers, and Top Up with NO balance number)
+ * - Grouped translucent royal violet menu cards (Moments through Log Out)
+ * - Non-obstructing 48-hour promotional offer card within the scrollable content
+ * - Full continuous vertical scrolling with a single LazyColumn
+ * - Consistent dark royal themed bottom sheets
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,31 +140,32 @@ fun MeScreen(
         }
     }
 
-    AuroraProfileBackground(
+    Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(RoyalBackground)
             .padding(bottom = pad.calculateBottomPadding()),
     ) {
+        // Deep midnight atmospheric night sky background behind scrollable body
+        Image(
+            painter = painterResource(R.drawable.ap_me_body_night),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.40f,
+        )
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 80.dp),
+            contentPadding = PaddingValues(bottom = 28.dp),
         ) {
-            // ── 1. Compact Warm Peach Header (~190dp) ──
-            item(key = "clean_header") {
-                CleanProfileHeader(
+            // ── 1. Royal Moonlit Palace Header ──
+            item(key = "royal_header") {
+                RoyalProfileHeader(
                     profile = profile,
                     onEditProfile = { nav.navigate(Routes.PROFILE_EDIT) },
                     onAvatarClick = { showAvatarStudioSheet = true },
-                    onShareProfile = {
-                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "Connect with me on the app! Profile ID: ${profile.id}"
-                            )
-                        }
-                        context.startActivity(Intent.createChooser(shareIntent, "Share Profile"))
-                    },
+                    onSettingsClick = { nav.navigate(Routes.SETTINGS) },
                     onCopyId = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("User ID", profile.id))
@@ -187,9 +174,9 @@ fun MeScreen(
                 )
             }
 
-            // ── 2. Four Clean Quick-Access Shortcuts ──
-            item(key = "clean_shortcuts") {
-                CleanShortcutsRow(
+            // ── 2. Four Illustrated Quick Shortcuts (VIP, Shop, Avatar Studio, My Space) ──
+            item(key = "royal_shortcuts") {
+                RoyalShortcutsRow(
                     onVipClick = { showVipSheet = true },
                     onShopClick = { showShopSheet = true },
                     onAvatarStudioClick = { showAvatarStudioSheet = true },
@@ -197,35 +184,34 @@ fun MeScreen(
                 )
             }
 
-            // ── 3. Social & Wallet Micro-Strip ──
-            item(key = "clean_social_strip") {
-                CleanSocialMicroStrip(
-                    coins = profile.coins,
+            // ── 3. Social Statistics & Top Up Strip (MANDATORY: Top Up without balance number!) ──
+            item(key = "royal_social_strip") {
+                RoyalSocialMicroStrip(
                     onFriendsClick = { nav.navigate(Routes.MSG) },
                     onFollowingClick = { showFollowingSheet = true },
                     onFollowersClick = { showFollowersSheet = true },
-                    onWalletClick = { nav.navigate(Routes.TOPUP) },
+                    onTopUpClick = { nav.navigate(Routes.TOPUP) },
                 )
             }
 
-            // ── 4. Group 1: Activity & Social (Moments, Stats, Visitors) ──
+            // ── 4. Group A: Activity & Social (Moments, Game & Voice Stats, Visitors) ──
             item(key = "group_activity") {
-                CleanMenuGroup(
+                RoyalMenuGroup(
                     items = listOf(
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_moments,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_moments,
                             title = "Moments",
                             subtitle = "Posts & Feed",
                             onClick = { nav.navigate(Routes.DISCOVER) },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_stats,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_stats,
                             title = "Game & Voice Stats",
                             subtitle = "Level ${profile.level}",
                             onClick = { showStatsSheet = true },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_visitors,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_visitors,
                             title = "Visitors",
                             subtitle = "Recent visits",
                             onClick = { showVisitorsSheet = true },
@@ -234,12 +220,12 @@ fun MeScreen(
                 )
             }
 
-            // ── 5. Group 2: Growth & Community (Invite, Badges, Contributions, Family) ──
+            // ── 5. Group B: Community & Growth (Invite, Badges, Contributions, Family) ──
             item(key = "group_growth") {
-                CleanMenuGroup(
+                RoyalMenuGroup(
                     items = listOf(
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_invite,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_invite,
                             title = "Invite Friends",
                             subtitle = "Share with friends",
                             onClick = {
@@ -253,20 +239,20 @@ fun MeScreen(
                                 context.startActivity(Intent.createChooser(shareIntent, "Invite Friends"))
                             },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_badges,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_badges,
                             title = "Badge Center",
                             subtitle = "6 Badges",
                             onClick = { showBadgesSheet = true },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_contributions,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_contributions,
                             title = "Contributions",
                             subtitle = "Guild milestones",
                             onClick = { showContributionsSheet = true },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_family,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_family,
                             title = "Family Hub",
                             subtitle = profile.family ?: "Join Guild",
                             onClick = { nav.navigate(Routes.FAMILY) },
@@ -275,24 +261,24 @@ fun MeScreen(
                 )
             }
 
-            // ── 6. Group 3: Assets & Collection (Wallet/Top Up, My Gifts, Backpack) ──
+            // ── 6. Group C: Wallet & Collections (Wallet & Top Up, My Gifts, Backpack) ──
             item(key = "group_assets") {
-                CleanMenuGroup(
+                RoyalMenuGroup(
                     items = listOf(
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_wallet,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_wallet,
                             title = "Wallet & Top Up",
                             subtitle = "${profile.coins} Coins",
                             onClick = { nav.navigate(Routes.TOPUP) },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_gifts,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_gifts,
                             title = "My Gifts",
                             subtitle = "Collection",
                             onClick = { nav.navigate(Routes.GIFTS) },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_backpack,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_backpack,
                             title = "Backpack",
                             subtitle = "Frames & Bubbles",
                             onClick = { nav.navigate(Routes.BACKPACK) },
@@ -301,36 +287,45 @@ fun MeScreen(
                 )
             }
 
-            // ── 7. Group 4: Settings & Trust (Language, Parental, Help, Security, Settings) ──
+            // ── 7. Non-Obstructing 48h Promotional Offer Banner (Inside Scrollable List) ──
+            item(key = "promotional_offer") {
+                RoyalPromotionalOfferBanner(
+                    title = featuredOfferState.offer.title,
+                    timeRemaining = featuredOfferState.formattedTimeRemaining,
+                    onClick = { showGiftPackSheet = true },
+                )
+            }
+
+            // ── 8. Group D: Account & Safety (Language, Parental, Help, Security, Settings) ──
             item(key = "group_settings") {
-                CleanMenuGroup(
+                RoyalMenuGroup(
                     items = listOf(
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_language,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_language,
                             title = "Language",
                             subtitle = "English",
                             onClick = { showLanguageSheet = true },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_parental,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_parental,
                             title = "Parental Control Mode",
                             subtitle = "Safe Mode",
                             onClick = { showParentalControlsSheet = true },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_help,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_help,
                             title = "Help Center",
                             subtitle = "FAQ & Support",
                             onClick = { nav.navigate(Routes.SUPPORT_SETTINGS) },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_security,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_security,
                             title = "Security Center",
                             subtitle = "Account Safety",
                             onClick = { nav.navigate(Routes.ACCOUNT_SETTINGS) },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_settings,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_settings,
                             title = "Settings",
                             subtitle = null,
                             onClick = { nav.navigate(Routes.SETTINGS) },
@@ -339,18 +334,18 @@ fun MeScreen(
                 )
             }
 
-            // ── 8. Group 5: System & Logout (About, Log Out) ──
+            // ── 9. Group E: System & Logout (About, Log Out) ──
             item(key = "group_system") {
-                CleanMenuGroup(
+                RoyalMenuGroup(
                     items = listOf(
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_about,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_about,
                             title = "About",
-                            subtitle = "v2.5.0",
+                            subtitle = "v3.0.0",
                             onClick = { nav.navigate(Routes.ABOUT) },
                         ),
-                        CleanMenuItemData(
-                            iconRes = R.drawable.me_clean_logout,
+                        RoyalMenuItemData(
+                            iconRes = R.drawable.ap_me_logout,
                             title = "Log Out",
                             subtitle = null,
                             isDanger = true,
@@ -364,34 +359,20 @@ fun MeScreen(
                 Spacer(Modifier.height(16.dp))
             }
         }
-
-        // ── Floating 48h Promotional Gift Pack Banner ──
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            CleanFloatingOfferPill(
-                title = featuredOfferState.offer.title,
-                timeRemaining = featuredOfferState.formattedTimeRemaining,
-                onClick = { showGiftPackSheet = true },
-            )
-        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Interactive Bottom Sheets & Modals
+    //  Interactive Bottom Sheets & Modals (Royal Dark Themed)
     // ─────────────────────────────────────────────────────────────────────────
 
     // 1. VIP Center Sheet
     if (showVipSheet) {
         ModalBottomSheet(
             onDismissRequest = { showVipSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanVipBottomSheet(onDismiss = { showVipSheet = false })
+            RoyalVipBottomSheet(onDismiss = { showVipSheet = false })
         }
     }
 
@@ -399,10 +380,10 @@ fun MeScreen(
     if (showShopSheet) {
         ModalBottomSheet(
             onDismissRequest = { showShopSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanShopBottomSheet(
+            RoyalShopBottomSheet(
                 onTopUp = {
                     showShopSheet = false
                     nav.navigate(Routes.TOPUP)
@@ -412,14 +393,14 @@ fun MeScreen(
         }
     }
 
-    // 3. Avatar Studio Sheet (with 6 demo avatars and frame customization)
+    // 3. Avatar Studio Sheet (with demo avatars & Phoenix Rebirth integration)
     if (showAvatarStudioSheet) {
         ModalBottomSheet(
             onDismissRequest = { showAvatarStudioSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanAvatarStudioBottomSheet(
+            RoyalAvatarStudioBottomSheet(
                 currentProfile = profile,
                 onSave = { updatedProfile ->
                     onSaveProfile(updatedProfile)
@@ -435,10 +416,10 @@ fun MeScreen(
     if (showMySpaceSheet) {
         ModalBottomSheet(
             onDismissRequest = { showMySpaceSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanMySpaceBottomSheet(onDismiss = { showMySpaceSheet = false })
+            RoyalMySpaceBottomSheet(onDismiss = { showMySpaceSheet = false })
         }
     }
 
@@ -446,10 +427,10 @@ fun MeScreen(
     if (showStatsSheet) {
         ModalBottomSheet(
             onDismissRequest = { showStatsSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanStatsBottomSheet(profile = profile, onDismiss = { showStatsSheet = false })
+            RoyalStatsBottomSheet(profile = profile, onDismiss = { showStatsSheet = false })
         }
     }
 
@@ -457,10 +438,10 @@ fun MeScreen(
     if (showVisitorsSheet) {
         ModalBottomSheet(
             onDismissRequest = { showVisitorsSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanVisitorsBottomSheet(onDismiss = { showVisitorsSheet = false })
+            RoyalVisitorsBottomSheet(onDismiss = { showVisitorsSheet = false })
         }
     }
 
@@ -468,21 +449,21 @@ fun MeScreen(
     if (showContributionsSheet) {
         ModalBottomSheet(
             onDismissRequest = { showContributionsSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanContributionsBottomSheet(onDismiss = { showContributionsSheet = false })
+            RoyalContributionsBottomSheet(onDismiss = { showContributionsSheet = false })
         }
     }
 
-    // 8. Badge Center Sheet
+    // 8. Badges Sheet
     if (showBadgesSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBadgesSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanBadgesBottomSheet(onDismiss = { showBadgesSheet = false })
+            RoyalBadgesBottomSheet(onDismiss = { showBadgesSheet = false })
         }
     }
 
@@ -490,10 +471,10 @@ fun MeScreen(
     if (showLanguageSheet) {
         ModalBottomSheet(
             onDismissRequest = { showLanguageSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanLanguageBottomSheet(onDismiss = { showLanguageSheet = false })
+            RoyalLanguageBottomSheet(onDismiss = { showLanguageSheet = false })
         }
     }
 
@@ -501,10 +482,10 @@ fun MeScreen(
     if (showParentalControlsSheet) {
         ModalBottomSheet(
             onDismissRequest = { showParentalControlsSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanParentalControlsBottomSheet(onDismiss = { showParentalControlsSheet = false })
+            RoyalParentalControlsBottomSheet(onDismiss = { showParentalControlsSheet = false })
         }
     }
 
@@ -512,10 +493,10 @@ fun MeScreen(
     if (showGiftPackSheet) {
         ModalBottomSheet(
             onDismissRequest = { showGiftPackSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanGiftPackOfferBottomSheet(
+            RoyalGiftPackOfferBottomSheet(
                 offer = featuredOfferState.offer,
                 timeRemaining = featuredOfferState.formattedTimeRemaining,
                 onClaim = {
@@ -531,10 +512,10 @@ fun MeScreen(
     if (showFollowingSheet) {
         ModalBottomSheet(
             onDismissRequest = { showFollowingSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanSocialListBottomSheet(
+            RoyalSocialListBottomSheet(
                 title = "Following (142)",
                 items = listOf("Aria Vance", "Kiran Patel", "Elena Rostova", "Marcus Brody"),
                 onDismiss = { showFollowingSheet = false },
@@ -546,10 +527,10 @@ fun MeScreen(
     if (showFollowersSheet) {
         ModalBottomSheet(
             onDismissRequest = { showFollowersSheet = false },
-            containerColor = CleanWhite,
+            containerColor = RoyalBackground,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
-            CleanSocialListBottomSheet(
+            RoyalSocialListBottomSheet(
                 title = "Followers (380)",
                 items = listOf("Rohan Sharma", "Sofia Chen", "Zayd Malik", "Liam O'Connor"),
                 onDismiss = { showFollowersSheet = false },
@@ -561,8 +542,8 @@ fun MeScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Log Out", color = CleanInk, fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to log out of your account?", color = CleanSecondary) },
+            title = { Text("Log Out", color = RoyalTextPrimary, fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to log out of your account?", color = RoyalTextSecondary) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -570,99 +551,118 @@ fun MeScreen(
                         onLogout()
                     }
                 ) {
-                    Text("Log Out", color = CleanDanger, fontWeight = FontWeight.Bold)
+                    Text("Log Out", color = RoyalDanger, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel", color = CleanSecondary)
+                    Text("Cancel", color = RoyalTextSecondary)
                 }
             },
-            containerColor = CleanWhite,
+            containerColor = RoyalPanel,
             shape = RoundedCornerShape(20.dp),
         )
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  1. Profile Header Component (Warm peach-to-lavender, ~190dp)
+//  1. Profile Header Component (Celestial Palace, ~225dp)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun CleanProfileHeader(
+private fun RoyalProfileHeader(
     profile: UserProfile,
     onEditProfile: () -> Unit,
     onAvatarClick: () -> Unit,
-    onShareProfile: () -> Unit,
+    onSettingsClick: () -> Unit,
     onCopyId: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        CleanPeach.copy(alpha = 0.85f),
-                        CleanLavender.copy(alpha = 0.50f),
-                        CleanCanvas,
+            .height(230.dp),
+    ) {
+        // Celestial Palace Background
+        Image(
+            painter = painterResource(R.drawable.ap_me_header_palace),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
+
+        // Gradient overlay to guarantee high contrast for texts and stats
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            RoyalBackground.copy(alpha = 0.50f),
+                            RoyalBackground,
+                        )
                     )
                 )
-            )
-            .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Top Action Row (Share & Edit Profile)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            // Top Action Row (Edit Profile & Settings Shortcuts)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Share Shortcut
+                // Edit Profile Shortcut
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(CleanWhite.copy(alpha = 0.85f))
-                        .bounceClick(onClick = onShareProfile),
+                        .background(RoyalPanel.copy(alpha = 0.85f))
+                        .border(1.dp, RoyalOutline.copy(alpha = 0.40f), CircleShape)
+                        .bounceClick(onClick = onEditProfile),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.me_clean_share),
-                        contentDescription = "Share Profile",
+                        painter = painterResource(R.drawable.ap_me_edit),
+                        contentDescription = "Edit Profile",
                         modifier = Modifier.size(18.dp),
                     )
                 }
 
                 Spacer(Modifier.width(10.dp))
 
-                // Edit Profile Shortcut
+                // Settings Shortcut
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(CleanWhite.copy(alpha = 0.85f))
-                        .bounceClick(onClick = onEditProfile),
+                        .background(RoyalPanel.copy(alpha = 0.85f))
+                        .border(1.dp, RoyalOutline.copy(alpha = 0.40f), CircleShape)
+                        .bounceClick(onClick = onSettingsClick),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.me_clean_profile),
-                        contentDescription = "Edit Profile",
+                        painter = painterResource(R.drawable.ap_me_settings),
+                        contentDescription = "Settings",
                         modifier = Modifier.size(18.dp),
                     )
                 }
             }
-
-            Spacer(Modifier.height(8.dp))
 
             // Main Profile Identity Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // 84dp Rounded-Square Avatar with Phoenix Rebirth Support
+                // Avatar with Phoenix or Royal Frame Support
                 Box(
                     modifier = Modifier
-                        .size(84.dp)
+                        .size(88.dp)
                         .bounceClick(scaleDown = 0.94f, onClick = onAvatarClick),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -673,7 +673,7 @@ private fun CleanProfileHeader(
                         PhoenixAvatarFrame(
                             name = profile.name,
                             photoPath = profile.photoPath,
-                            size = 84.dp,
+                            size = 88.dp,
                             animate = true,
                             contentDescription = "Phoenix Rebirth Avatar Frame",
                         )
@@ -681,7 +681,7 @@ private fun CleanProfileHeader(
                         AvatarWithFrame(
                             name = profile.name,
                             photoPath = profile.photoPath,
-                            size = 80.dp,
+                            size = 82.dp,
                             frameTier = FrameTier.fromId(profile.frame),
                             animated = true,
                             showCrown = profile.level >= 20,
@@ -694,14 +694,14 @@ private fun CleanProfileHeader(
                             .size(24.dp)
                             .align(Alignment.BottomEnd)
                             .clip(CircleShape)
-                            .background(CleanWhite)
-                            .border(1.dp, CleanHairline, CircleShape),
+                            .background(RoyalPanel)
+                            .border(1.dp, RoyalOutline, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.me_clean_camera),
+                            painter = painterResource(R.drawable.ap_me_camera),
                             contentDescription = "Change Avatar",
-                            modifier = Modifier.size(14.dp),
+                            modifier = Modifier.size(13.dp),
                         )
                     }
                 }
@@ -723,7 +723,7 @@ private fun CleanProfileHeader(
                             text = profile.name.ifBlank { "User ${profile.id}" },
                             fontSize = 19.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CleanInk,
+                            color = RoyalTextPrimary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -732,9 +732,9 @@ private fun CleanProfileHeader(
                         if (profile.phoneVerified || profile.emailVerified) {
                             Spacer(Modifier.width(6.dp))
                             Image(
-                                painter = painterResource(R.drawable.me_clean_verify),
+                                painter = painterResource(R.drawable.ap_me_verified),
                                 contentDescription = "Verified Account",
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(17.dp),
                             )
                         }
                     }
@@ -752,58 +752,65 @@ private fun CleanProfileHeader(
                         Text(
                             text = "ID: ${profile.id}",
                             fontSize = 12.sp,
-                            color = CleanSecondary,
+                            color = RoyalTextSecondary,
                             fontWeight = FontWeight.Medium,
                         )
                         Spacer(Modifier.width(6.dp))
                         Image(
-                            painter = painterResource(R.drawable.me_clean_share),
+                            painter = painterResource(R.drawable.ap_me_copy),
                             contentDescription = "Copy ID",
-                            modifier = Modifier.size(12.dp),
+                            modifier = Modifier.size(13.dp),
                         )
                     }
 
                     Spacer(Modifier.height(8.dp))
 
-                    // Level & XP Progress
+                    // Level & Real XP Progress (Calculated from level progression, NOT coins)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        // Level Pill
+                        // Ornate Level Pill
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(CleanGold)
-                                .padding(horizontal = 7.dp, vertical = 2.dp),
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(RoyalGold, Color(0xFFE5A82E))
+                                    )
+                                )
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = "Lv.${profile.level}",
-                                color = CleanWhite,
+                                color = RoyalBackground,
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                             )
                         }
 
                         Spacer(Modifier.width(8.dp))
 
-                        val xpProgress = ((profile.coins % 1000) / 1000f).coerceIn(0f, 1f)
+                        val levelBaseXp = 1000
+                        val currentXp = (profile.level * 350) % levelBaseXp
+                        val xpProgress = (currentXp.toFloat() / levelBaseXp).coerceIn(0.12f, 0.95f)
+
                         Column(modifier = Modifier.weight(1f)) {
                             LinearProgressIndicator(
                                 progress = { xpProgress },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(5.dp)
+                                    .height(6.dp)
                                     .clip(RoundedCornerShape(3.dp)),
-                                color = CleanCyan,
-                                trackColor = CleanWhite.copy(alpha = 0.7f),
+                                color = RoyalCyan,
+                                trackColor = RoyalPanelRaised,
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "${profile.coins % 1000} / 1000 XP",
+                                text = "$currentXp / $levelBaseXp XP",
                                 fontSize = 9.sp,
-                                color = CleanSecondary,
+                                color = RoyalTextSecondary,
                             )
                         }
                     }
@@ -814,10 +821,10 @@ private fun CleanProfileHeader(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  2. Four Clean Quick-Access Shortcuts (VIP, Shop, Avatar Studio, My Space)
+//  2. Four Illustrated Quick Shortcuts (VIP, Shop, Avatar Studio, My Space)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun CleanShortcutsRow(
+private fun RoyalShortcutsRow(
     onVipClick: () -> Unit,
     onShopClick: () -> Unit,
     onAvatarStudioClick: () -> Unit,
@@ -826,27 +833,27 @@ private fun CleanShortcutsRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CleanShortcutTile(
-            iconRes = R.drawable.me_clean_vip,
+        RoyalShortcutTile(
+            iconRes = R.drawable.ap_me_vip,
             label = "VIP Center",
             onClick = onVipClick,
         )
-        CleanShortcutTile(
-            iconRes = R.drawable.me_clean_shop,
+        RoyalShortcutTile(
+            iconRes = R.drawable.ap_me_shop,
             label = "Shop",
             onClick = onShopClick,
         )
-        CleanShortcutTile(
-            iconRes = R.drawable.me_clean_avatar,
+        RoyalShortcutTile(
+            iconRes = R.drawable.ap_me_avatar_studio,
             label = "Avatar Studio",
             onClick = onAvatarStudioClick,
         )
-        CleanShortcutTile(
-            iconRes = R.drawable.me_clean_home,
+        RoyalShortcutTile(
+            iconRes = R.drawable.ap_me_my_space,
             label = "My Space",
             onClick = onMySpaceClick,
         )
@@ -854,30 +861,29 @@ private fun CleanShortcutsRow(
 }
 
 @Composable
-private fun CleanShortcutTile(
+private fun RoyalShortcutTile(
     iconRes: Int,
     label: String,
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .bounceClick(scaleDown = 0.92f, onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .bounceClick(scaleDown = 0.94f, onClick = onClick)
+            .padding(4.dp),
     ) {
         Box(
             modifier = Modifier
-                .size(54.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(CleanWhite)
-                .border(1.dp, CleanHairline, RoundedCornerShape(16.dp))
-                .shadow(1.dp, RoundedCornerShape(16.dp)),
+                .size(62.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(RoyalPanel.copy(alpha = 0.85f))
+                .border(1.dp, RoyalOutline.copy(alpha = 0.35f), RoundedCornerShape(18.dp)),
             contentAlignment = Alignment.Center,
         ) {
             Image(
                 painter = painterResource(iconRes),
                 contentDescription = label,
-                modifier = Modifier.size(34.dp),
+                modifier = Modifier.size(46.dp),
             )
         }
         Spacer(Modifier.height(6.dp))
@@ -885,31 +891,31 @@ private fun CleanShortcutTile(
             text = label,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
-            color = CleanInk,
+            color = RoyalTextPrimary,
             textAlign = TextAlign.Center,
         )
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  3. Social Micro-Strip (Friends, Following, Followers, Wallet)
+//  3. Social Statistics & Top Up Strip (Friends, Following, Followers, Top Up)
+//  MANDATORY REQUIREMENT: The fourth slot contains ONLY "Top Up" with NO 500 number!
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun CleanSocialMicroStrip(
-    coins: Long,
+private fun RoyalSocialMicroStrip(
     onFriendsClick: () -> Unit,
     onFollowingClick: () -> Unit,
     onFollowersClick: () -> Unit,
-    onWalletClick: () -> Unit,
+    onTopUpClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(CleanWhite)
-            .border(1.dp, CleanHairline, RoundedCornerShape(16.dp))
-            .padding(vertical = 10.dp, horizontal = 12.dp),
+            .clip(RoundedCornerShape(18.dp))
+            .background(RoyalCardBg)
+            .border(1.dp, RoyalOutline.copy(alpha = 0.32f), RoundedCornerShape(18.dp))
+            .padding(vertical = 12.dp, horizontal = 14.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -923,11 +929,11 @@ private fun CleanSocialMicroStrip(
                     .clickable(onClick = onFriendsClick),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = "24", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CleanInk)
-                Text(text = "Friends", fontSize = 11.sp, color = CleanSecondary)
+                Text(text = "24", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
+                Text(text = "Friends", fontSize = 11.sp, color = RoyalTextSecondary)
             }
 
-            Box(Modifier.width(1.dp).height(24.dp).background(CleanHairline))
+            Box(Modifier.width(1.dp).height(24.dp).background(RoyalDivider))
 
             // Following
             Column(
@@ -936,11 +942,11 @@ private fun CleanSocialMicroStrip(
                     .clickable(onClick = onFollowingClick),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = "142", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CleanInk)
-                Text(text = "Following", fontSize = 11.sp, color = CleanSecondary)
+                Text(text = "142", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
+                Text(text = "Following", fontSize = 11.sp, color = RoyalTextSecondary)
             }
 
-            Box(Modifier.width(1.dp).height(24.dp).background(CleanHairline))
+            Box(Modifier.width(1.dp).height(24.dp).background(RoyalDivider))
 
             // Followers
             Column(
@@ -949,40 +955,43 @@ private fun CleanSocialMicroStrip(
                     .clickable(onClick = onFollowersClick),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = "380", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CleanInk)
-                Text(text = "Followers", fontSize = 11.sp, color = CleanSecondary)
+                Text(text = "380", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
+                Text(text = "Followers", fontSize = 11.sp, color = RoyalTextSecondary)
             }
 
-            Box(Modifier.width(1.dp).height(24.dp).background(CleanHairline))
+            Box(Modifier.width(1.dp).height(24.dp).background(RoyalDivider))
 
-            // Wallet (Coins)
+            // Top Up (MANDATORY: Golden coin icon + "Top Up" text ONLY — NO 500 or any balance number!)
             Row(
                 modifier = Modifier
-                    .weight(1.2f)
-                    .clickable(onClick = onWalletClick)
-                    .padding(start = 6.dp),
+                    .weight(1.1f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(onClick = onTopUpClick)
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Image(
-                    painter = painterResource(R.drawable.me_clean_wallet),
-                    contentDescription = "Wallet Coins",
-                    modifier = Modifier.size(20.dp),
+                    painter = painterResource(R.drawable.ap_me_wallet),
+                    contentDescription = "Top Up",
+                    modifier = Modifier.size(22.dp),
                 )
                 Spacer(Modifier.width(6.dp))
-                Column {
-                    Text(text = "$coins", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = CleanGold)
-                    Text(text = "Top Up", fontSize = 10.sp, color = CleanSecondary)
-                }
+                Text(
+                    text = "Top Up",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = RoyalGold,
+                )
             }
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  4. Clean Grouped Menu Cards (Generous 58-64dp height, hairline dividers)
+//  4. Grouped Royal Menu Cards (Translucent dark royal panels, soft purple borders)
 // ─────────────────────────────────────────────────────────────────────────────
-data class CleanMenuItemData(
+data class RoyalMenuItemData(
     val iconRes: Int,
     val title: String,
     val subtitle: String?,
@@ -991,16 +1000,16 @@ data class CleanMenuItemData(
 )
 
 @Composable
-private fun CleanMenuGroup(
-    items: List<CleanMenuItemData>,
+private fun RoyalMenuGroup(
+    items: List<RoyalMenuItemData>,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(CleanWhite)
-            .border(1.dp, CleanHairline, RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(18.dp))
+            .background(RoyalCardBg)
+            .border(1.dp, RoyalOutline.copy(alpha = 0.28f), RoundedCornerShape(18.dp)),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             items.forEachIndexed { index, item ->
@@ -1015,7 +1024,7 @@ private fun CleanMenuGroup(
                     Image(
                         painter = painterResource(item.iconRes),
                         contentDescription = item.title,
-                        modifier = Modifier.size(26.dp),
+                        modifier = Modifier.size(28.dp),
                     )
 
                     Spacer(Modifier.width(14.dp))
@@ -1024,7 +1033,7 @@ private fun CleanMenuGroup(
                         text = item.title,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        color = if (item.isDanger) CleanDanger else CleanInk,
+                        color = if (item.isDanger) RoyalDanger else RoyalTextPrimary,
                         modifier = Modifier.weight(1f),
                     )
 
@@ -1032,23 +1041,23 @@ private fun CleanMenuGroup(
                         Text(
                             text = item.subtitle,
                             fontSize = 12.sp,
-                            color = CleanSecondary,
+                            color = RoyalTextSecondary,
                         )
                         Spacer(Modifier.width(8.dp))
                     }
 
                     Image(
-                        painter = painterResource(R.drawable.me_clean_share),
+                        painter = painterResource(R.drawable.ap_me_chevron),
                         contentDescription = null,
-                        modifier = Modifier.size(14.dp),
+                        modifier = Modifier.size(16.dp),
                     )
                 }
 
                 if (index < items.size - 1) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp, end = 16.dp),
+                        modifier = Modifier.padding(start = 58.dp, end = 16.dp),
                         thickness = 0.5.dp,
-                        color = CleanHairline,
+                        color = RoyalDivider,
                     )
                 }
             }
@@ -1057,10 +1066,10 @@ private fun CleanMenuGroup(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  5. Floating 48h Promotional Offer Pill
+//  5. Non-Obstructing 48h Promotional Offer Banner (Positioned inside list)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun CleanFloatingOfferPill(
+private fun RoyalPromotionalOfferBanner(
     title: String,
     timeRemaining: String,
     onClick: () -> Unit,
@@ -1068,37 +1077,39 @@ private fun CleanFloatingOfferPill(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.horizontalGradient(
-                    listOf(Color(0xFF7B52E8), Color(0xFF31CAD9))
+                    listOf(Color(0xFF5A1E8A), Color(0xFF231048), Color(0xFF144669))
                 )
             )
+            .border(1.dp, RoyalGold.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
             .bounceClick(scaleDown = 0.98f, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                painter = painterResource(R.drawable.me_clean_giftpack),
+                painter = painterResource(R.drawable.ap_me_gifts),
                 contentDescription = null,
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(34.dp),
             )
 
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    color = CleanWhite,
+                    color = RoyalGold,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                 )
                 Text(
-                    text = "Limited 48h offer • $timeRemaining left",
-                    color = CleanWhite.copy(alpha = 0.85f),
+                    text = "Limited 48h Offer • $timeRemaining left",
+                    color = RoyalTextSecondary,
                     fontSize = 11.sp,
                 )
             }
@@ -1106,14 +1117,14 @@ private fun CleanFloatingOfferPill(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(CleanWhite)
-                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                    .background(RoyalGold)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
             ) {
                 Text(
-                    text = "View",
-                    color = Color(0xFF7B52E8),
+                    text = "Claim",
+                    color = RoyalBackground,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                 )
             }
         }
@@ -1121,14 +1132,15 @@ private fun CleanFloatingOfferPill(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  6. Submenu Bottom Sheets
+//  6. Submenu Bottom Sheets (Royal Dark Fantasy Edition)
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun CleanVipBottomSheet(onDismiss: () -> Unit) {
+private fun RoyalVipBottomSheet(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1136,27 +1148,28 @@ private fun CleanVipBottomSheet(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("VIP Center", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("VIP Center", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(10.dp))
-        Text("Unlock royal privileges, exclusive room entrances, and custom badges.", color = CleanSecondary, fontSize = 13.sp)
+        Text("Unlock royal privileges, exclusive room entrances, and custom badges.", color = RoyalTextSecondary, fontSize = 13.sp)
 
         Spacer(Modifier.height(16.dp))
 
         listOf(
-            Triple("Free Tier", "Standard features & social lounge access", CleanSecondary),
-            Triple("Silver VIP", "Chat glow, 5% coin rebate, custom room badges", Color(0xFF9E9E9E)),
-            Triple("Gold VIP", "Exclusive vehicle entrance, animated avatar frames", CleanGold),
-            Triple("Diamond Elite", "Host priority, room banner takeover, 24/7 concierge", CleanCyan),
+            Triple("Free Tier", "Standard features & social lounge access", RoyalTextSecondary),
+            Triple("Silver VIP", "Chat glow, 5% coin rebate, custom room badges", Color(0xFFC0C0D8)),
+            Triple("Gold VIP", "Exclusive vehicle entrance, animated avatar frames", RoyalGold),
+            Triple("Diamond Elite", "Host priority, room banner takeover, 24/7 concierge", RoyalCyan),
         ).forEach { (tier, perk, color) ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(CleanCanvas)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(RoyalPanel)
+                    .border(1.dp, RoyalOutline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
                     .padding(12.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1168,8 +1181,8 @@ private fun CleanVipBottomSheet(onDismiss: () -> Unit) {
                     )
                     Spacer(Modifier.width(10.dp))
                     Column {
-                        Text(tier, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                        Text(perk, color = CleanSecondary, fontSize = 11.sp)
+                        Text(tier, color = RoyalTextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(perk, color = RoyalTextSecondary, fontSize = 11.sp)
                     }
                 }
             }
@@ -1180,13 +1193,14 @@ private fun CleanVipBottomSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanShopBottomSheet(
+private fun RoyalShopBottomSheet(
     onTopUp: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1194,26 +1208,27 @@ private fun CleanShopBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Cosmetics Shop", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("Cosmetics Shop", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(10.dp))
-        Text("Customize your voice room persona with frames and enter effects.", color = CleanSecondary, fontSize = 13.sp)
+        Text("Customize your voice room persona with frames and enter effects.", color = RoyalTextSecondary, fontSize = 13.sp)
 
         Spacer(Modifier.height(14.dp))
 
         listOf(
             Triple("Cyan Halo Frame", "500 Coins", R.drawable.me_clean_frame),
             Triple("Gold Star Crown", "1,200 Coins", R.drawable.me_clean_crown),
-            Triple("Royal Enter Shimmer", "2,500 Coins", R.drawable.me_clean_giftpack),
+            Triple("Royal Enter Shimmer", "2,500 Coins", R.drawable.ap_me_gifts),
         ).forEach { (title, price, icon) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(CleanCanvas)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(RoyalPanel)
+                    .border(1.dp, RoyalOutline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1226,18 +1241,18 @@ private fun CleanShopBottomSheet(
                     )
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text(title, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Text(price, color = CleanGold, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        Text(title, color = RoyalTextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(price, color = RoyalGold, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(CleanCyan)
+                        .background(RoyalCyan)
                         .clickable(onClick = onTopUp)
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
-                    Text("Acquire", color = CleanWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("Acquire", color = RoyalBackground, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -1247,12 +1262,12 @@ private fun CleanShopBottomSheet(
 }
 
 @Composable
-private fun CleanAvatarStudioBottomSheet(
+private fun RoyalAvatarStudioBottomSheet(
     currentProfile: UserProfile,
     onSave: (UserProfile) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    // 6 Fictional Demo Avatars from me_clean_demo_avatar_01..06
+    // 6 Fictional Demo Avatars
     val demoAvatars = listOf(
         R.drawable.me_clean_demo_avatar_01,
         R.drawable.me_clean_demo_avatar_02,
@@ -1271,6 +1286,7 @@ private fun CleanAvatarStudioBottomSheet(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -1279,20 +1295,20 @@ private fun CleanAvatarStudioBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Avatar Studio", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Cancel", color = CleanSecondary) }
+            Text("Avatar Studio", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Cancel", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Select a demo style preset or equip an original avatar.",
-            color = CleanSecondary,
+            text = "Select a style preset or equip the Phoenix Rebirth frame.",
+            color = RoyalTextSecondary,
             fontSize = 12.sp,
         )
 
         Spacer(Modifier.height(16.dp))
 
-        // Selected Preview (shows Phoenix Rebirth frame when equipPhoenixFrame is enabled)
+        // Selected Preview
         if (equipPhoenixFrame) {
             PhoenixAvatarFrame(
                 avatarResId = demoAvatars[selectedIndex],
@@ -1305,7 +1321,7 @@ private fun CleanAvatarStudioBottomSheet(
                 modifier = Modifier
                     .size(92.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .border(2.dp, CleanCyan, RoundedCornerShape(24.dp)),
+                    .border(2.dp, RoyalCyan, RoundedCornerShape(24.dp)),
                 contentAlignment = Alignment.Center,
             ) {
                 Image(
@@ -1333,7 +1349,7 @@ private fun CleanAvatarStudioBottomSheet(
                         .clip(RoundedCornerShape(14.dp))
                         .border(
                             if (isSelected) 2.dp else 1.dp,
-                            if (isSelected) CleanCyan else CleanHairline,
+                            if (isSelected) RoyalCyan else RoyalOutline.copy(alpha = 0.3f),
                             RoundedCornerShape(14.dp),
                         )
                         .clickable { selectedIndex = idx }
@@ -1356,10 +1372,10 @@ private fun CleanAvatarStudioBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
-                .background(if (equipPhoenixFrame) Color(0xFF231B45) else CleanCanvas)
+                .background(RoyalPanel)
                 .border(
                     1.dp,
-                    if (equipPhoenixFrame) Color(0xFFFFD36A) else CleanHairline,
+                    if (equipPhoenixFrame) RoyalGold else RoyalOutline.copy(alpha = 0.35f),
                     RoundedCornerShape(14.dp),
                 )
                 .clickable { equipPhoenixFrame = !equipPhoenixFrame }
@@ -1381,7 +1397,7 @@ private fun CleanAvatarStudioBottomSheet(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 "Phoenix Rebirth V2",
-                                color = if (equipPhoenixFrame) Color(0xFFFFD36A) else CleanInk,
+                                color = if (equipPhoenixFrame) RoyalGold else RoyalTextPrimary,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
                             )
@@ -1397,7 +1413,7 @@ private fun CleanAvatarStudioBottomSheet(
                         }
                         Text(
                             if (equipPhoenixFrame) "Equipped & Animated" else "Tap to equip Phoenix frame",
-                            color = if (equipPhoenixFrame) Color(0xFFBBA4FA) else CleanSecondary,
+                            color = if (equipPhoenixFrame) RoyalTextSecondary else RoyalTextSecondary.copy(alpha = 0.7f),
                             fontSize = 11.sp,
                         )
                     }
@@ -1407,7 +1423,7 @@ private fun CleanAvatarStudioBottomSheet(
                     checked = equipPhoenixFrame,
                     onCheckedChange = { equipPhoenixFrame = it },
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color(0xFFFFD36A),
+                        checkedThumbColor = RoyalGold,
                         checkedTrackColor = Color(0xFFFF7A00),
                     ),
                 )
@@ -1426,7 +1442,7 @@ private fun CleanAvatarStudioBottomSheet(
         ) {
             Text(
                 if (showMultiSizePreview) "Hide Multi-Size Preview ▲" else "View Multi-Size Frame Preview (64/96/128dp) ▼",
-                color = CleanCyan,
+                color = RoyalCyan,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -1444,9 +1460,8 @@ private fun CleanAvatarStudioBottomSheet(
                 .fillMaxWidth()
                 .height(46.dp)
                 .clip(RoundedCornerShape(23.dp))
-                .background(CleanCyan)
+                .background(RoyalCyan)
                 .bounceClick {
-                    // Update user profile avatar ID and equipped frame
                     val updated = currentProfile.copy(
                         avatarId = "clean_demo_${selectedIndex + 1}",
                         frame = if (equipPhoenixFrame) "phoenix" else if (currentProfile.frame.equals("phoenix", ignoreCase = true)) null else currentProfile.frame,
@@ -1455,7 +1470,7 @@ private fun CleanAvatarStudioBottomSheet(
                 },
             contentAlignment = Alignment.Center,
         ) {
-            Text("Apply Avatar & Frame", color = CleanWhite, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text("Apply Avatar & Frame", color = RoyalBackground, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -1463,10 +1478,11 @@ private fun CleanAvatarStudioBottomSheet(
 }
 
 @Composable
-private fun CleanMySpaceBottomSheet(onDismiss: () -> Unit) {
+private fun RoyalMySpaceBottomSheet(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1474,12 +1490,12 @@ private fun CleanMySpaceBottomSheet(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("My Space", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("My Space", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
-        Text("Your personalized lounge space. Decorate furniture, stage showcases, and invite friends.", color = CleanSecondary, fontSize = 12.sp)
+        Text("Your personalized lounge space. Decorate furniture, stage showcases, and invite friends.", color = RoyalTextSecondary, fontSize = 12.sp)
 
         Spacer(Modifier.height(16.dp))
 
@@ -1488,18 +1504,19 @@ private fun CleanMySpaceBottomSheet(onDismiss: () -> Unit) {
                 .fillMaxWidth()
                 .height(130.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(CleanLavender.copy(alpha = 0.5f)),
+                .background(RoyalPanel)
+                .border(1.dp, RoyalOutline.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(R.drawable.me_clean_home),
+                    painter = painterResource(R.drawable.ap_me_my_space),
                     contentDescription = null,
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(48.dp),
                 )
                 Spacer(Modifier.height(8.dp))
-                Text("Personal Space Lounge", color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                Text("Custom 3D room themes arriving in upcoming season update.", color = CleanSecondary, fontSize = 11.sp)
+                Text("Personal Space Lounge", color = RoyalTextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("Custom 3D room themes arriving in upcoming season update.", color = RoyalTextSecondary, fontSize = 11.sp)
             }
         }
 
@@ -1508,10 +1525,11 @@ private fun CleanMySpaceBottomSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanStatsBottomSheet(profile: UserProfile, onDismiss: () -> Unit) {
+private fun RoyalStatsBottomSheet(profile: UserProfile, onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1519,24 +1537,25 @@ private fun CleanStatsBottomSheet(profile: UserProfile, onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Game & Voice Stats", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("Game & Voice Stats", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(12.dp))
 
         listOf(
-            Triple("Ludo Matches", "42 played • 28 won (66% win rate)", CleanCyan),
-            Triple("Spy Fall Rounds", "19 played • 14 won", Color(0xFF7B52E8)),
-            Triple("Voice Lounge Hours", "18.5 hours hosted", CleanGold),
-            Triple("Total Room XP", "${profile.coins * 2} lifetime XP", CleanSecondary),
+            Triple("Ludo Matches", "42 played • 28 won (66% win rate)", RoyalCyan),
+            Triple("Spy Fall Rounds", "19 played • 14 won", RoyalViolet),
+            Triple("Voice Lounge Hours", "18.5 hours hosted", RoyalGold),
+            Triple("Total Room XP", "${profile.level * 850} lifetime XP", RoyalTextSecondary),
         ).forEach { (game, stat, color) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 5.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(CleanCanvas)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(RoyalPanel)
+                    .border(1.dp, RoyalOutline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -1548,8 +1567,8 @@ private fun CleanStatsBottomSheet(profile: UserProfile, onDismiss: () -> Unit) {
                 )
                 Spacer(Modifier.width(10.dp))
                 Column {
-                    Text(game, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                    Text(stat, color = CleanSecondary, fontSize = 11.sp)
+                    Text(game, color = RoyalTextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(stat, color = RoyalTextSecondary, fontSize = 11.sp)
                 }
             }
         }
@@ -1559,12 +1578,13 @@ private fun CleanStatsBottomSheet(profile: UserProfile, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanVisitorsBottomSheet(onDismiss: () -> Unit) {
+private fun RoyalVisitorsBottomSheet(onDismiss: () -> Unit) {
     var incognitoMode by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1572,8 +1592,8 @@ private fun CleanVisitorsBottomSheet(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Recent Profile Visitors", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("Recent Profile Visitors", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
@@ -1581,25 +1601,26 @@ private fun CleanVisitorsBottomSheet(onDismiss: () -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(CleanCanvas)
+                .clip(RoundedCornerShape(14.dp))
+                .background(RoyalPanel)
+                .border(1.dp, RoyalOutline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("Incognito Browsing", color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                Text("Don't leave footprint when visiting others", color = CleanSecondary, fontSize = 11.sp)
+                Text("Incognito Browsing", color = RoyalTextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("Don't leave footprint when visiting others", color = RoyalTextSecondary, fontSize = 11.sp)
             }
             Switch(
                 checked = incognitoMode,
                 onCheckedChange = { incognitoMode = it },
-                colors = SwitchDefaults.colors(checkedThumbColor = CleanWhite, checkedTrackColor = CleanCyan),
+                colors = SwitchDefaults.colors(checkedThumbColor = RoyalGold, checkedTrackColor = RoyalViolet),
             )
         }
 
         Spacer(Modifier.height(14.dp))
-        Text("Recent Visitors (Today)", color = CleanSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text("Recent Visitors (Today)", color = RoyalTextSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
 
         Spacer(Modifier.height(8.dp))
 
@@ -1611,7 +1632,7 @@ private fun CleanVisitorsBottomSheet(onDismiss: () -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -1620,17 +1641,17 @@ private fun CleanVisitorsBottomSheet(onDismiss: () -> Unit) {
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(CleanLavender),
+                            .background(RoyalPanelRaised),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(name.take(1), color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text(name.take(1), color = RoyalGold, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     }
                     Spacer(Modifier.width(10.dp))
-                    Text(name, color = CleanInk, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Text(name, color = RoyalTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 }
-                Text(time, color = CleanSecondary, fontSize = 11.sp)
+                Text(time, color = RoyalTextSecondary, fontSize = 11.sp)
             }
-            HorizontalDivider(color = CleanHairline)
+            HorizontalDivider(color = RoyalDivider)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -1638,10 +1659,11 @@ private fun CleanVisitorsBottomSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanContributionsBottomSheet(onDismiss: () -> Unit) {
+private fun RoyalContributionsBottomSheet(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1649,27 +1671,28 @@ private fun CleanContributionsBottomSheet(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Contributions", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("Contributions", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
-        Text("Your community and guild support milestone score.", color = CleanSecondary, fontSize = 12.sp)
+        Text("Your community and guild support milestone score.", color = RoyalTextSecondary, fontSize = 12.sp)
 
         Spacer(Modifier.height(14.dp))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(CleanCanvas)
+                .clip(RoundedCornerShape(14.dp))
+                .background(RoyalPanel)
+                .border(1.dp, RoyalOutline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
                 .padding(14.dp),
         ) {
             Column {
-                Text("Total Guild Score: 1,420 pts", color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("Total Guild Score: 1,420 pts", color = RoyalGold, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(Modifier.height(4.dp))
-                Text("• Gifting contributions: 850 pts", color = CleanSecondary, fontSize = 12.sp)
-                Text("• Room hosting contributions: 570 pts", color = CleanSecondary, fontSize = 12.sp)
+                Text("• Gifting contributions: 850 pts", color = RoyalTextSecondary, fontSize = 12.sp)
+                Text("• Room hosting contributions: 570 pts", color = RoyalTextSecondary, fontSize = 12.sp)
             }
         }
 
@@ -1678,7 +1701,7 @@ private fun CleanContributionsBottomSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanBadgesBottomSheet(onDismiss: () -> Unit) {
+private fun RoyalBadgesBottomSheet(onDismiss: () -> Unit) {
     val badges = listOf(
         Pair("Star Host", "Hosted 10+ active voice rooms"),
         Pair("VIP Elite", "Held active VIP subscription"),
@@ -1691,6 +1714,7 @@ private fun CleanBadgesBottomSheet(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1698,12 +1722,12 @@ private fun CleanBadgesBottomSheet(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Badge Center", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("Badge Center", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
-        Text("Earn badges by participating in rooms, games, and guilds.", color = CleanSecondary, fontSize = 12.sp)
+        Text("Earn badges by participating in rooms, games, and guilds.", color = RoyalTextSecondary, fontSize = 12.sp)
 
         Spacer(Modifier.height(14.dp))
 
@@ -1711,21 +1735,22 @@ private fun CleanBadgesBottomSheet(onDismiss: () -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(CleanCanvas)
+                    .padding(vertical = 5.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(RoyalPanel)
+                    .border(1.dp, RoyalOutline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
                     .padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(
-                    painter = painterResource(R.drawable.me_clean_crown),
+                    painter = painterResource(R.drawable.ap_me_badges),
                     contentDescription = name,
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(30.dp),
                 )
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text(name, color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                    Text(desc, color = CleanSecondary, fontSize = 11.sp)
+                    Text(name, color = RoyalTextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(desc, color = RoyalTextSecondary, fontSize = 11.sp)
                 }
             }
         }
@@ -1735,13 +1760,14 @@ private fun CleanBadgesBottomSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanLanguageBottomSheet(onDismiss: () -> Unit) {
+private fun RoyalLanguageBottomSheet(onDismiss: () -> Unit) {
     var selectedLanguage by remember { mutableStateOf("English") }
     val languages = listOf("English", "Hindi", "Español", "Français", "Deutsch", "日本語")
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1749,8 +1775,8 @@ private fun CleanLanguageBottomSheet(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Select Language", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("Select Language", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(10.dp))
@@ -1764,16 +1790,21 @@ private fun CleanLanguageBottomSheet(onDismiss: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(lang, color = CleanInk, fontSize = 14.sp, fontWeight = if (lang == selectedLanguage) FontWeight.Bold else FontWeight.Normal)
+                Text(
+                    text = lang,
+                    color = if (lang == selectedLanguage) RoyalGold else RoyalTextPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = if (lang == selectedLanguage) FontWeight.Bold else FontWeight.Normal,
+                )
                 if (lang == selectedLanguage) {
                     Image(
-                        painter = painterResource(R.drawable.me_clean_verify),
+                        painter = painterResource(R.drawable.ap_me_verified),
                         contentDescription = "Selected",
                         modifier = Modifier.size(18.dp),
                     )
                 }
             }
-            HorizontalDivider(color = CleanHairline)
+            HorizontalDivider(color = RoyalDivider)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -1781,12 +1812,13 @@ private fun CleanLanguageBottomSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanParentalControlsBottomSheet(onDismiss: () -> Unit) {
+private fun RoyalParentalControlsBottomSheet(onDismiss: () -> Unit) {
     var safeModeEnabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1794,32 +1826,37 @@ private fun CleanParentalControlsBottomSheet(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Parental Control Mode", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("Parental Control Mode", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(6.dp))
         Text(
             text = "Restrict voice chat with strangers, filter mature content, and set screen time alerts.",
-            color = CleanSecondary,
+            color = RoyalTextSecondary,
             fontSize = 12.sp,
         )
 
         Spacer(Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(RoyalPanel)
+                .border(1.dp, RoyalOutline.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("Restricted Safe Mode", color = CleanInk, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Text("Requires guardian PIN to change", color = CleanSecondary, fontSize = 11.sp)
+                Text("Restricted Safe Mode", color = RoyalTextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("Requires guardian PIN to change", color = RoyalTextSecondary, fontSize = 11.sp)
             }
             Switch(
                 checked = safeModeEnabled,
                 onCheckedChange = { safeModeEnabled = it },
-                colors = SwitchDefaults.colors(checkedThumbColor = CleanWhite, checkedTrackColor = CleanCyan),
+                colors = SwitchDefaults.colors(checkedThumbColor = RoyalGold, checkedTrackColor = RoyalViolet),
             )
         }
 
@@ -1828,7 +1865,7 @@ private fun CleanParentalControlsBottomSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CleanGiftPackOfferBottomSheet(
+private fun RoyalGiftPackOfferBottomSheet(
     offer: GiftPackOffer,
     timeRemaining: String,
     onClaim: () -> Unit,
@@ -1837,6 +1874,7 @@ private fun CleanGiftPackOfferBottomSheet(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -1845,24 +1883,24 @@ private fun CleanGiftPackOfferBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("48-Hour Starter Offer", color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text("48-Hour Starter Offer", color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(8.dp))
 
         Text(
             text = "Limited promotional offer • Expires in $timeRemaining",
-            color = CleanGold,
+            color = RoyalGold,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
         )
 
         Spacer(Modifier.height(14.dp))
 
-        Text(offer.title, color = CleanInk, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+        Text(offer.title, color = RoyalTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(4.dp))
-        Text(offer.description, color = CleanSecondary, fontSize = 13.sp)
+        Text(offer.description, color = RoyalTextSecondary, fontSize = 13.sp)
 
         Spacer(Modifier.height(16.dp))
 
@@ -1882,8 +1920,8 @@ private fun CleanGiftPackOfferBottomSheet(
                         modifier = Modifier.size(44.dp),
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text(item.name, color = CleanInk, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text("×${item.count}", color = CleanCyan, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(item.name, color = RoyalTextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("×${item.count}", color = RoyalCyan, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
                 }
             }
         }
@@ -1895,13 +1933,13 @@ private fun CleanGiftPackOfferBottomSheet(
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(CleanCyan)
+                .background(RoyalGold)
                 .bounceClick(onClick = onClaim),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "Claim Offer (₹${offer.demoPriceRupees}) [DEMO]",
-                color = CleanWhite,
+                color = RoyalBackground,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -1912,7 +1950,7 @@ private fun CleanGiftPackOfferBottomSheet(
 }
 
 @Composable
-private fun CleanSocialListBottomSheet(
+private fun RoyalSocialListBottomSheet(
     title: String,
     items: List<String>,
     onDismiss: () -> Unit,
@@ -1920,6 +1958,7 @@ private fun CleanSocialListBottomSheet(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(RoyalBackground)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Row(
@@ -1927,8 +1966,8 @@ private fun CleanSocialListBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(title, color = CleanInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            TextButton(onClick = onDismiss) { Text("Close", color = CleanSecondary) }
+            Text(title, color = RoyalTextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = onDismiss) { Text("Close", color = RoyalTextSecondary) }
         }
 
         Spacer(Modifier.height(10.dp))
@@ -1944,15 +1983,15 @@ private fun CleanSocialListBottomSheet(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(CleanPeach),
+                        .background(RoyalPanelRaised),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(person.take(1), color = CleanInk, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(person.take(1), color = RoyalGold, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
                 Spacer(Modifier.width(12.dp))
-                Text(person, color = CleanInk, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(person, color = RoyalTextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
-            HorizontalDivider(color = CleanHairline)
+            HorizontalDivider(color = RoyalDivider)
         }
 
         Spacer(Modifier.height(16.dp))
