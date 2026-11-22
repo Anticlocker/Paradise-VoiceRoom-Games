@@ -106,23 +106,18 @@ import com.sundram.weplay.data.ReplyQuote
 import com.sundram.weplay.data.RoomCard
 import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.ui.nav.Routes
-import com.sundram.weplay.ui.theme.CyanBrand
-import com.sundram.weplay.ui.theme.DeepPurple
-import com.sundram.weplay.ui.theme.Gold
-import com.sundram.weplay.ui.theme.KtvRed
+import com.sundram.weplay.ui.theme.AuroraGradients
+import com.sundram.weplay.ui.theme.CelestialNavy
+import com.sundram.weplay.ui.theme.CloudWhite
+import com.sundram.weplay.ui.theme.CrystalBlue
+import com.sundram.weplay.ui.theme.DeepInk
+import com.sundram.weplay.ui.theme.DreamLavender
 import com.sundram.weplay.ui.theme.LiveRed
-import com.sundram.weplay.ui.theme.Midnight
 import com.sundram.weplay.ui.theme.MintGreen
-import com.sundram.weplay.ui.theme.VyboraBg
-import com.sundram.weplay.ui.theme.VyboraBorder
-import com.sundram.weplay.ui.theme.VyboraCyan
-import com.sundram.weplay.ui.theme.VyboraCyanSoft
-import com.sundram.weplay.ui.theme.VyboraGold
-import com.sundram.weplay.ui.theme.VyboraLavender
-import com.sundram.weplay.ui.theme.VyboraPurple
-import com.sundram.weplay.ui.theme.VyboraSurface
-import com.sundram.weplay.ui.theme.VyboraTextPrimary
-import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.ui.theme.MysticPurple
+import com.sundram.weplay.ui.theme.RoyalGold
+import com.sundram.weplay.ui.theme.SunsetRose
+import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.util.formatDayLabel
 import com.sundram.weplay.ui.util.formatMessageTime
 import kotlinx.coroutines.delay
@@ -352,7 +347,6 @@ fun ChatScreen(
     val chatItems = remember(messages) { buildChatItems(messages) }
     val blocked = remember(version, userId) { store.isBlocked(userId) }
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
 
     // Restore draft
     LaunchedEffect(userId) {
@@ -372,7 +366,6 @@ fun ChatScreen(
     }
 
     val wallpaper = chat?.wallpaper ?: 0
-    val isMidnight = wallpaper == 3
 
     // ── Root Container ────────────────────────────────────────────────────────
     Box(
@@ -382,50 +375,53 @@ fun ChatScreen(
     ) {
         Column(Modifier.fillMaxSize()) {
 
-            // ── Premium Header (Section 5.1) ─────────────────────────────────
+            // ── Premium Header (Eye Comfort, Sleek Business Design) ───────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (isMidnight) DeepPurple.copy(alpha = 0.95f) else VyboraSurface.copy(alpha = 0.96f))
-                    .border(1.dp, if (isMidnight) Color.White.copy(alpha = 0.08f) else VyboraBorder)
-                    .padding(horizontal = 8.dp, vertical = 10.dp),
+                    .background(DeepInk.copy(alpha = 0.96f))
+                    .border(1.dp, DreamLavender.copy(alpha = 0.18f))
+                    .padding(horizontal = 10.dp, vertical = 10.dp),
             ) {
                 // Back Button
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .clickable { nav.popBackStack() },
+                        .background(Color(0xFF1E143E))
+                        .border(1.dp, DreamLavender.copy(alpha = 0.2f), CircleShape)
+                        .bounceClick { nav.popBackStack() },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.vb_chat_ic_back),
                         contentDescription = "Back",
-                        tint = if (isMidnight) Color.White else VyboraTextPrimary,
-                        modifier = Modifier.size(20.dp),
+                        tint = CloudWhite,
+                        modifier = Modifier.size(18.dp),
                     )
                 }
 
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(8.dp))
 
                 // Avatar + Presence
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .weight(1f)
-                        .clickable {
+                        .bounceClick {
                             if (!isGroup) nav.navigate("user/$userId")
                             else showChatSettings = true
                         },
                 ) {
-                    Box(Modifier.size(40.dp)) {
+                    Box(Modifier.size(42.dp)) {
                         if (isGroup) {
                             Box(
                                 modifier = Modifier
-                                    .size(40.dp)
+                                    .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(VyboraLavender),
+                                    .background(Color(0xFF281552))
+                                    .border(1.dp, DreamLavender.copy(alpha = 0.3f), CircleShape),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Image(
@@ -435,14 +431,21 @@ fun ChatScreen(
                                 )
                             }
                         } else {
-                            NovaAvatarImage(id = userId, size = 40.dp)
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .border(1.2.dp, DreamLavender.copy(alpha = 0.35f), CircleShape),
+                            ) {
+                                NovaAvatarImage(id = userId, size = 42.dp)
+                            }
                             if (user?.online == true) {
                                 Box(
                                     Modifier
                                         .align(Alignment.BottomEnd)
-                                        .size(11.dp)
+                                        .size(12.dp)
                                         .background(MintGreen, CircleShape)
-                                        .border(2.dp, VyboraSurface, CircleShape),
+                                        .border(2.dp, DeepInk, CircleShape),
                                 )
                             }
                         }
@@ -454,9 +457,9 @@ fun ChatScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 displayName,
-                                color = if (isMidnight) Color.White else VyboraTextPrimary,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                color = CloudWhite,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.ExtraBold,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -465,7 +468,7 @@ fun ChatScreen(
                                 Image(
                                     painter = painterResource(R.drawable.vb_chat_badge_official),
                                     contentDescription = null,
-                                    modifier = Modifier.size(12.dp),
+                                    modifier = Modifier.size(14.dp),
                                 )
                             }
                         }
@@ -481,23 +484,24 @@ fun ChatScreen(
                                 else -> "Offline"
                             },
                             color = when {
-                                activeRoom != null -> LiveRed
-                                store.isTyping(userId) -> VyboraCyan
-                                else -> if (isMidnight) Color.White.copy(alpha = 0.7f) else VyboraTextSecondary
+                                activeRoom != null -> SunsetRose
+                                store.isTyping(userId) -> CrystalBlue
+                                user?.online == true -> MintGreen
+                                else -> DreamLavender
                             },
                             fontSize = 11.sp,
-                            fontWeight = if (activeRoom != null || store.isTyping(userId)) FontWeight.Bold else FontWeight.Normal,
+                            fontWeight = if (activeRoom != null || store.isTyping(userId) || user?.online == true) FontWeight.Bold else FontWeight.Medium,
                         )
                     }
                 }
 
-                // Header Live Room Shortcut Pill (Section 8.1)
+                // Header Live Room Shortcut Pill
                 if (activeRoom != null) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Brush.horizontalGradient(listOf(LiveRed, VyboraPurple)))
-                            .clickable { previewRoom = activeRoom }
+                            .background(AuroraGradients.sunsetFantasy)
+                            .bounceClick { previewRoom = activeRoom }
                             .padding(horizontal = 10.dp, vertical = 6.dp),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -505,14 +509,14 @@ fun ChatScreen(
                             Icon(
                                 painter = painterResource(R.drawable.vb_chat_ic_voice_room),
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = CloudWhite,
                                 modifier = Modifier.size(12.dp),
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Join Room", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text("Join Room", color = CloudWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(6.dp))
                 }
 
                 // More Menu Button
@@ -521,29 +525,32 @@ fun ChatScreen(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .clickable { menuOpen = true },
+                            .background(Color(0xFF1E143E))
+                            .border(1.dp, DreamLavender.copy(alpha = 0.2f), CircleShape)
+                            .bounceClick { menuOpen = true },
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.vb_chat_ic_more),
                             contentDescription = "Menu",
-                            tint = if (isMidnight) Color.White else VyboraTextPrimary,
-                            modifier = Modifier.size(20.dp),
+                            tint = CloudWhite,
+                            modifier = Modifier.size(18.dp),
                         )
                     }
 
                     DropdownMenu(
                         expanded = menuOpen,
                         onDismissRequest = { menuOpen = false },
-                        containerColor = VyboraSurface,
+                        containerColor = DeepInk,
+                        modifier = Modifier.border(1.dp, DreamLavender.copy(alpha = 0.25f), RoundedCornerShape(14.dp)),
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Chat Settings", color = VyboraTextPrimary) },
+                            text = { Text("Chat Settings", color = CloudWhite, fontWeight = FontWeight.SemiBold) },
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(R.drawable.vb_chat_ic_privacy),
                                     contentDescription = null,
-                                    tint = VyboraPurple,
+                                    tint = MysticPurple,
                                     modifier = Modifier.size(18.dp),
                                 )
                             },
@@ -551,12 +558,12 @@ fun ChatScreen(
                         )
                         if (!isGroup) {
                             DropdownMenuItem(
-                                text = { Text("View Profile", color = VyboraTextPrimary) },
+                                text = { Text("View Profile", color = CloudWhite, fontWeight = FontWeight.SemiBold) },
                                 leadingIcon = {
                                     Icon(
                                         painter = painterResource(R.drawable.vb_chat_ic_profile),
                                         contentDescription = null,
-                                        tint = VyboraCyan,
+                                        tint = CrystalBlue,
                                         modifier = Modifier.size(18.dp),
                                     )
                                 },
@@ -567,14 +574,15 @@ fun ChatScreen(
                             text = {
                                 Text(
                                     if (chat?.pinned == true) "Unpin Chat" else "Pin Chat",
-                                    color = VyboraTextPrimary,
+                                    color = CloudWhite,
+                                    fontWeight = FontWeight.SemiBold,
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(R.drawable.vb_chat_ic_pin_chat),
                                     contentDescription = null,
-                                    tint = VyboraPurple,
+                                    tint = MysticPurple,
                                     modifier = Modifier.size(18.dp),
                                 )
                             },
@@ -587,14 +595,15 @@ fun ChatScreen(
                             text = {
                                 Text(
                                     if (chat?.muted == true) "Unmute" else "Mute Notifications",
-                                    color = VyboraTextPrimary,
+                                    color = CloudWhite,
+                                    fontWeight = FontWeight.SemiBold,
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(R.drawable.vb_chat_ic_mute),
                                     contentDescription = null,
-                                    tint = VyboraTextSecondary,
+                                    tint = DreamLavender,
                                     modifier = Modifier.size(18.dp),
                                 )
                             },
@@ -604,29 +613,29 @@ fun ChatScreen(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Clear Chat History", color = VyboraTextPrimary) },
+                            text = { Text("Clear Chat History", color = CloudWhite, fontWeight = FontWeight.SemiBold) },
                             onClick = { menuOpen = false; confirmClear = true },
                         )
                         if (!isGroup) {
                             DropdownMenuItem(
-                                text = { Text("Block Contact", color = KtvRed) },
+                                text = { Text("Block Contact", color = LiveRed, fontWeight = FontWeight.Bold) },
                                 leadingIcon = {
                                     Icon(
                                         painter = painterResource(R.drawable.vb_chat_ic_block),
                                         contentDescription = null,
-                                        tint = KtvRed,
+                                        tint = LiveRed,
                                         modifier = Modifier.size(18.dp),
                                     )
                                 },
                                 onClick = { menuOpen = false; confirmBlock = true },
                             )
                             DropdownMenuItem(
-                                text = { Text("Report User", color = KtvRed) },
+                                text = { Text("Report User", color = LiveRed, fontWeight = FontWeight.Bold) },
                                 leadingIcon = {
                                     Icon(
                                         painter = painterResource(R.drawable.vb_chat_ic_report),
                                         contentDescription = null,
-                                         tint = KtvRed,
+                                        tint = LiveRed,
                                         modifier = Modifier.size(18.dp),
                                     )
                                 },
@@ -637,7 +646,7 @@ fun ChatScreen(
                 }
             }
 
-            // ── Messages Timeline (Section 5.2) ──────────────────────────────
+            // ── Messages Timeline ─────────────────────────────────────────────
             if (blocked) {
                 Box(
                     Modifier
@@ -649,14 +658,14 @@ fun ChatScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             "You blocked $displayName",
-                            color = if (isMidnight) Color.White else VyboraTextPrimary,
+                            color = CloudWhite,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
                             "Unblock them to resume messaging and room invites.",
-                            color = VyboraTextSecondary,
+                            color = DreamLavender,
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center,
                         )
@@ -664,11 +673,11 @@ fun ChatScreen(
                         Box(
                             Modifier
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(Brush.horizontalGradient(listOf(VyboraPurple, VyboraCyan)))
-                                .clickable { store.unblock(userId); bump() }
+                                .background(AuroraGradients.sunsetFantasy)
+                                .bounceClick { store.unblock(userId); bump() }
                                 .padding(horizontal = 24.dp, vertical = 12.dp),
                         ) {
-                            Text("Unblock", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Text("Unblock", color = CloudWhite, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -692,26 +701,27 @@ fun ChatScreen(
                                         modifier = Modifier
                                             .size(72.dp)
                                             .clip(CircleShape)
-                                            .background(VyboraLavender),
+                                            .background(Color(0xFF201344))
+                                            .border(1.dp, DreamLavender.copy(alpha = 0.25f), CircleShape),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Image(
                                             painter = painterResource(R.drawable.vb_chat_fx_sparkle),
                                             contentDescription = null,
-                                            modifier = Modifier.size(40.dp),
+                                            modifier = Modifier.size(38.dp),
                                         )
                                     }
                                     Spacer(Modifier.height(12.dp))
                                     Text(
                                         "Say hello to $displayName!",
-                                        color = if (isMidnight) Color.White else VyboraTextPrimary,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium,
+                                        color = CloudWhite,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
                                     )
                                     Spacer(Modifier.height(4.dp))
                                     Text(
                                         "Send a wave, text, or a gift to start the conversation",
-                                        color = VyboraTextSecondary,
+                                        color = DreamLavender,
                                         fontSize = 12.sp,
                                     )
                                 }
@@ -731,17 +741,15 @@ fun ChatScreen(
                                     Box(
                                         Modifier
                                             .clip(RoundedCornerShape(12.dp))
-                                            .background(
-                                                if (isMidnight) Color.White.copy(alpha = 0.12f)
-                                                else VyboraLavender
-                                            )
+                                            .background(Color(0xFF1A1236))
+                                            .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                                             .padding(horizontal = 12.dp, vertical = 4.dp),
                                     ) {
                                         Text(
                                             item.label,
-                                            color = if (isMidnight) Color.White.copy(alpha = 0.8f) else VyboraTextSecondary,
+                                            color = DreamLavender,
                                             fontSize = 11.sp,
-                                            fontWeight = FontWeight.Medium,
+                                            fontWeight = FontWeight.SemiBold,
                                         )
                                     }
                                 }
@@ -750,7 +758,6 @@ fun ChatScreen(
                             is ChatItem.Msg -> {
                                 ModernMessageBubble(
                                     m = item.m,
-                                    isMidnight = isMidnight,
                                     isGroup = isGroup,
                                     onDelete = {
                                         store.deleteMessageForMe(userId, item.m.id)
@@ -800,16 +807,16 @@ fun ChatScreen(
                                 Box(
                                     Modifier
                                         .clip(RoundedCornerShape(14.dp))
-                                        .background(if (isMidnight) DeepPurple else VyboraSurface)
-                                        .border(1.dp, if (isMidnight) Color.White.copy(alpha = 0.1f) else VyboraBorder, RoundedCornerShape(14.dp))
+                                        .background(Color(0xFF1B1238))
+                                        .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                                         .padding(horizontal = 12.dp, vertical = 6.dp),
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
                                             "$displayName is typing",
-                                            color = VyboraCyan,
+                                            color = CrystalBlue,
                                             fontSize = 12.sp,
-                                            fontWeight = FontWeight.Medium,
+                                            fontWeight = FontWeight.SemiBold,
                                         )
                                         TypingDots()
                                     }
@@ -819,52 +826,52 @@ fun ChatScreen(
                     }
                 }
 
-                // ── Reply Quote Preview Bar (if active) ──────────────────────
+                // ── Reply Quote Preview Bar ──────────────────────────────────
                 replyingTo?.let { quote ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(if (isMidnight) DeepPurple else VyboraLavender)
-                            .border(1.dp, VyboraBorder)
+                            .background(DeepInk.copy(alpha = 0.98f))
+                            .border(1.dp, DreamLavender.copy(alpha = 0.2f))
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.vb_chat_ic_reply),
                             contentDescription = "Reply",
-                            tint = VyboraPurple,
+                            tint = CrystalBlue,
                             modifier = Modifier.size(16.dp),
                         )
                         Spacer(Modifier.width(8.dp))
                         Column(Modifier.weight(1f)) {
-                            Text("Replying to ${quote.senderName}", color = VyboraPurple, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            Text(quote.text, color = VyboraTextSecondary, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("Replying to ${quote.senderName}", color = SunsetRose, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(quote.text, color = DreamLavender, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.08f))
-                                .clickable { replyingTo = null },
+                                .background(Color(0xFF26184C))
+                                .bounceClick { replyingTo = null },
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.vb_chat_ic_close),
                                 contentDescription = "Cancel reply",
-                                tint = Color.Unspecified,
+                                tint = CloudWhite,
                                 modifier = Modifier.size(10.dp),
                             )
                         }
                     }
                 }
 
-                // ── Message Composer (Section 5.3) ───────────────────────────
+                // ── Message Composer (Input Bar) ─────────────────────────────
                 Row(
                     verticalAlignment = Alignment.Bottom,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(if (isMidnight) DeepPurple.copy(alpha = 0.96f) else VyboraSurface.copy(alpha = 0.98f))
-                        .border(1.dp, if (isMidnight) Color.White.copy(alpha = 0.08f) else VyboraBorder)
+                        .background(DeepInk.copy(alpha = 0.98f))
+                        .border(1.dp, DreamLavender.copy(alpha = 0.18f))
                         .imePadding()
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                 ) {
@@ -881,11 +888,8 @@ fun ChatScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .background(
-                                if (isMidnight) Midnight else VyboraBg,
-                                RoundedCornerShape(22.dp),
-                            )
-                            .border(1.dp, if (isMidnight) Color.White.copy(alpha = 0.1f) else VyboraBorder, RoundedCornerShape(22.dp))
+                            .background(Color(0xFF160F2E), RoundedCornerShape(22.dp))
+                            .border(1.dp, DreamLavender.copy(alpha = 0.25f), RoundedCornerShape(22.dp))
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
@@ -898,16 +902,16 @@ fun ChatScreen(
                             singleLine = false,
                             maxLines = 4,
                             textStyle = TextStyle(
-                                color = if (isMidnight) Color.White else VyboraTextPrimary,
+                                color = CloudWhite,
                                 fontSize = 14.sp,
                             ),
-                            cursorBrush = SolidColor(VyboraCyan),
+                            cursorBrush = SolidColor(CrystalBlue),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                             keyboardActions = KeyboardActions(onSend = { sendInput() }),
                             modifier = Modifier.fillMaxWidth(),
                             decorationBox = { field ->
                                 if (input.isEmpty()) {
-                                    Text("Message…", color = VyboraTextSecondary, fontSize = 14.sp)
+                                    Text("Message…", color = DreamLavender.copy(alpha = 0.65f), fontSize = 14.sp)
                                 }
                                 field()
                             },
@@ -916,7 +920,7 @@ fun ChatScreen(
 
                     Spacer(Modifier.width(6.dp))
 
-                    // Gift shortcut button (Section 7)
+                    // Gift shortcut button
                     ComposerIconButton(
                         icon = R.drawable.vb_chat_ic_gift,
                         desc = "Send gift",
@@ -940,14 +944,14 @@ fun ChatScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(LiveRed)
-                                .clickable { stopRecording() }
+                                .bounceClick { stopRecording() }
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                         ) {
-                            Box(Modifier.size(8.dp).background(Color.White, CircleShape))
+                            Box(Modifier.size(8.dp).background(CloudWhite, CircleShape))
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 "0:%02d".format(recordingDurationSec),
-                                color = Color.White,
+                                color = CloudWhite,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -958,14 +962,14 @@ fun ChatScreen(
                             Modifier
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(Brush.horizontalGradient(listOf(VyboraPurple, VyboraCyan)))
-                                .clickable { sendInput() },
+                                .background(AuroraGradients.sunsetFantasy)
+                                .bounceClick { sendInput() },
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.vb_chat_ic_send),
                                 contentDescription = "Send",
-                                tint = Color.White,
+                                tint = CloudWhite,
                                 modifier = Modifier.size(18.dp),
                             )
                         }
@@ -974,13 +978,13 @@ fun ChatScreen(
             }
         }
 
-        // ── Celebration Overlay (confetti effect on gift send) ───────────────
+        // ── Celebration Overlay ──────────────────────────────────────────────
         if (showCelebration) {
             CelebrationOverlay(onComplete = { showCelebration = false })
         }
     }
 
-    // ── Virtual Gift Drawer Bottom Sheet (Section 7) ─────────────────────────
+    // ── Virtual Gift Drawer Bottom Sheet ─────────────────────────────────────
     if (showGiftDrawer) {
         VirtualGiftDrawerSheet(
             balance = coinBalance,
@@ -1013,11 +1017,11 @@ fun ChatScreen(
     if (showInsufficientBalance) {
         AlertDialog(
             onDismissRequest = { showInsufficientBalance = false },
-            title = { Text("Insufficient Coins", color = VyboraTextPrimary, fontWeight = FontWeight.Bold) },
+            title = { Text("Insufficient Coins", color = CloudWhite, fontWeight = FontWeight.Bold) },
             text = {
                 Text(
                     "You need more coins to send this gift. Would you like to top up your balance now?",
-                    color = VyboraTextSecondary,
+                    color = DreamLavender,
                     fontSize = 13.sp,
                 )
             },
@@ -1026,15 +1030,16 @@ fun ChatScreen(
                     showInsufficientBalance = false
                     nav.navigate(Routes.TOPUP)
                 }) {
-                    Text("Top Up Now", color = VyboraCyan, fontWeight = FontWeight.Bold)
+                    Text("Top Up Now", color = SunsetRose, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showInsufficientBalance = false }) {
-                    Text("Cancel", color = VyboraTextSecondary)
+                    Text("Cancel", color = DreamLavender)
                 }
             },
-            containerColor = VyboraSurface,
+            containerColor = DeepInk,
+            shape = RoundedCornerShape(22.dp),
         )
     }
 
@@ -1102,7 +1107,7 @@ fun ChatScreen(
         }
     }
 
-    // ── Chat Settings Sheet (Section 10) ─────────────────────────────────────
+    // ── Chat Settings Sheet ──────────────────────────────────────────────────
     if (showChatSettings) {
         ChatSettingsSheet(
             userId = userId,
@@ -1159,21 +1164,22 @@ fun ChatScreen(
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text("Clear chat history?", color = VyboraTextPrimary, fontWeight = FontWeight.Bold) },
-            text = { Text("All messages in this conversation will be permanently removed.", color = VyboraTextSecondary) },
+            title = { Text("Clear chat history?", color = CloudWhite, fontWeight = FontWeight.Bold) },
+            text = { Text("All messages in this conversation will be permanently removed.", color = DreamLavender) },
             confirmButton = {
                 TextButton(onClick = {
                     store.clearChat(userId)
                     confirmClear = false
                     bump()
                 }) {
-                    Text("Clear", color = KtvRed, fontWeight = FontWeight.Bold)
+                    Text("Clear", color = LiveRed, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmClear = false }) { Text("Cancel", color = VyboraTextSecondary) }
+                TextButton(onClick = { confirmClear = false }) { Text("Cancel", color = DreamLavender) }
             },
-            containerColor = VyboraSurface,
+            containerColor = DeepInk,
+            shape = RoundedCornerShape(22.dp),
         )
     }
 
@@ -1181,11 +1187,11 @@ fun ChatScreen(
     if (confirmBlock) {
         AlertDialog(
             onDismissRequest = { confirmBlock = false },
-            title = { Text("Block $displayName?", color = VyboraTextPrimary, fontWeight = FontWeight.Bold) },
+            title = { Text("Block $displayName?", color = CloudWhite, fontWeight = FontWeight.Bold) },
             text = {
                 Text(
                     "They will not be able to message you or see your profile. You will be removed from each other's friends.",
-                    color = VyboraTextSecondary,
+                    color = DreamLavender,
                 )
             },
             confirmButton = {
@@ -1194,13 +1200,14 @@ fun ChatScreen(
                     confirmBlock = false
                     nav.popBackStack()
                 }) {
-                    Text("Block", color = KtvRed, fontWeight = FontWeight.Bold)
+                    Text("Block", color = LiveRed, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmBlock = false }) { Text("Cancel", color = VyboraTextSecondary) }
+                TextButton(onClick = { confirmBlock = false }) { Text("Cancel", color = DreamLavender) }
             },
-            containerColor = VyboraSurface,
+            containerColor = DeepInk,
+            shape = RoundedCornerShape(22.dp),
         )
     }
 
@@ -1208,10 +1215,10 @@ fun ChatScreen(
     if (confirmReport) {
         AlertDialog(
             onDismissRequest = { confirmReport = false },
-            title = { Text("Report $displayName", color = VyboraTextPrimary, fontWeight = FontWeight.Bold) },
+            title = { Text("Report $displayName", color = CloudWhite, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
-                    Text("Select a reason. The user will also be blocked for your safety.", color = VyboraTextSecondary, fontSize = 12.sp)
+                    Text("Select a reason. The user will also be blocked for your safety.", color = DreamLavender, fontSize = 12.sp)
                     Spacer(Modifier.height(12.dp))
                     REPORT_REASONS.forEach { r ->
                         Row(
@@ -1226,17 +1233,17 @@ fun ChatScreen(
                                     .size(18.dp)
                                     .border(
                                         1.dp,
-                                        if (reportReason == r) VyboraCyan else VyboraBorder,
+                                        if (reportReason == r) SunsetRose else DreamLavender.copy(alpha = 0.4f),
                                         CircleShape,
                                     ),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 if (reportReason == r) {
-                                    Box(Modifier.size(10.dp).background(VyboraCyan, CircleShape))
+                                    Box(Modifier.size(10.dp).background(SunsetRose, CircleShape))
                                 }
                             }
                             Spacer(Modifier.width(10.dp))
-                            Text(r, color = VyboraTextPrimary, fontSize = 13.sp)
+                            Text(r, color = CloudWhite, fontSize = 13.sp)
                         }
                     }
                 }
@@ -1247,24 +1254,24 @@ fun ChatScreen(
                     confirmReport = false
                     nav.popBackStack()
                 }) {
-                    Text("Report & Block", color = KtvRed, fontWeight = FontWeight.Bold)
+                    Text("Report & Block", color = LiveRed, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmReport = false }) { Text("Cancel", color = VyboraTextSecondary) }
+                TextButton(onClick = { confirmReport = false }) { Text("Cancel", color = DreamLavender) }
             },
-            containerColor = VyboraSurface,
+            containerColor = DeepInk,
+            shape = RoundedCornerShape(22.dp),
         )
     }
 }
 
-// ─── Modern Message Bubble (Section 5.2) ─────────────────────────────────────
+// ─── Modern Message Bubble ───────────────────────────────────────────────────
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ModernMessageBubble(
     m: ChatMessage,
-    isMidnight: Boolean,
     isGroup: Boolean,
     onDelete: () -> Unit,
     onRecall: () -> Unit,
@@ -1292,7 +1299,7 @@ private fun ModernMessageBubble(
             ) {
                 NovaAvatarImage(id = m.senderId ?: "u", size = 18.dp)
                 Spacer(Modifier.width(6.dp))
-                Text(m.senderName, color = VyboraPurple, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(m.senderName, color = MysticPurple, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -1308,17 +1315,14 @@ private fun ModernMessageBubble(
                 )
                 .background(
                     if (fromMe)
-                        Brush.horizontalGradient(listOf(VyboraPurple, VyboraCyan))
-                    else if (isMidnight)
-                        SolidColor(DeepPurple)
+                        Brush.horizontalGradient(listOf(Color(0xFF6732D6), Color(0xFF4C21AA)))
                     else
-                        SolidColor(VyboraSurface)
+                        SolidColor(Color(0xFF1E143E))
                 )
                 .border(
                     1.dp,
-                    if (fromMe) Color.Transparent
-                    else if (isMidnight) Color.White.copy(alpha = 0.08f)
-                    else VyboraBorder,
+                    if (fromMe) SunsetRose.copy(alpha = 0.25f)
+                    else DreamLavender.copy(alpha = 0.22f),
                     RoundedCornerShape(
                         topStart = 18.dp,
                         topEnd = 18.dp,
@@ -1343,22 +1347,20 @@ private fun ModernMessageBubble(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (fromMe) Color.Black.copy(alpha = 0.15f)
-                                else VyboraLavender.copy(alpha = 0.6f)
-                            )
+                            .background(Color.Black.copy(alpha = 0.3f))
+                            .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
                             .padding(horizontal = 10.dp, vertical = 6.dp),
                     ) {
                         Column {
                             Text(
                                 quote.senderName,
-                                color = if (fromMe) Color.White else VyboraPurple,
+                                color = if (fromMe) SunsetRose else CrystalBlue,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                             )
                             Text(
                                 quote.text,
-                                color = if (fromMe) Color.White.copy(alpha = 0.85f) else VyboraTextSecondary,
+                                color = CloudWhite.copy(alpha = 0.85f),
                                 fontSize = 11.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -1373,8 +1375,9 @@ private fun ModernMessageBubble(
                     m.recalled -> {
                         Text(
                             "Message recalled",
-                            color = if (fromMe) Color.White.copy(alpha = 0.7f) else VyboraTextSecondary,
+                            color = DreamLavender,
                             fontSize = 13.sp,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                         )
                     }
 
@@ -1399,13 +1402,13 @@ private fun ModernMessageBubble(
                             Column {
                                 Text(
                                     m.text,
-                                    color = if (fromMe) Color.White else VyboraTextPrimary,
+                                    color = CloudWhite,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Text(
                                     "${m.giftCost * m.giftQuantity} Coins Spent",
-                                    color = if (fromMe) VyboraGold else Gold,
+                                    color = RoyalGold,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                 )
@@ -1416,36 +1419,36 @@ private fun ModernMessageBubble(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(VyboraCyanSoft)
-                                    .clickable(onClick = onSendGiftBack)
+                                    .background(AuroraGradients.sunsetFantasy)
+                                    .bounceClick(onClick = onSendGiftBack)
                                     .padding(horizontal = 10.dp, vertical = 5.dp),
                             ) {
-                                Text("Send Gift Back 🎁", color = VyboraCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Text("Send Gift Back 🎁", color = CloudWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
 
-                    // Voice Room Invitation Card (Section 8.2)
+                    // Voice Room Invitation Card
                     m.type == MsgType.ROOM_INVITE -> {
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     painter = painterResource(R.drawable.vb_chat_ic_voice_room),
                                     contentDescription = null,
-                                    tint = if (fromMe) Color.White else LiveRed,
+                                    tint = SunsetRose,
                                     modifier = Modifier.size(24.dp),
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Column {
                                     Text(
                                         m.roomTitle ?: "Voice Lounge",
-                                        color = if (fromMe) Color.White else VyboraTextPrimary,
+                                        color = CloudWhite,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
                                     )
                                     Text(
                                         "Live Voice Room Invitation",
-                                        color = if (fromMe) Color.White.copy(alpha = 0.8f) else VyboraTextSecondary,
+                                        color = DreamLavender,
                                         fontSize = 11.sp,
                                     )
                                 }
@@ -1454,17 +1457,14 @@ private fun ModernMessageBubble(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(
-                                        if (fromMe) SolidColor(Color.White)
-                                        else Brush.horizontalGradient(listOf(LiveRed, VyboraPurple))
-                                    )
-                                    .clickable { m.roomId?.let { onJoinRoom(it) } }
+                                    .background(AuroraGradients.sunsetFantasy)
+                                    .bounceClick { m.roomId?.let { onJoinRoom(it) } }
                                     .padding(horizontal = 14.dp, vertical = 7.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
                                     "Join Room 🎙️",
-                                    color = if (fromMe) VyboraPurple else Color.White,
+                                    color = CloudWhite,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -1479,20 +1479,20 @@ private fun ModernMessageBubble(
                                 Icon(
                                     painter = painterResource(R.drawable.vb_chat_ic_games),
                                     contentDescription = null,
-                                    tint = if (fromMe) Color.White else VyboraPurple,
+                                    tint = CrystalBlue,
                                     modifier = Modifier.size(24.dp),
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Column {
                                     Text(
                                         m.gameTitle ?: "Game Match",
-                                        color = if (fromMe) Color.White else VyboraTextPrimary,
+                                        color = CloudWhite,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
                                     )
                                     Text(
                                         "Social Game Match Invitation",
-                                        color = if (fromMe) Color.White.copy(alpha = 0.8f) else VyboraTextSecondary,
+                                        color = DreamLavender,
                                         fontSize = 11.sp,
                                     )
                                 }
@@ -1501,17 +1501,14 @@ private fun ModernMessageBubble(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(
-                                        if (fromMe) SolidColor(Color.White)
-                                        else Brush.horizontalGradient(listOf(VyboraPurple, VyboraCyan))
-                                    )
-                                    .clickable { m.gameId?.let { onPlayGame(it) } }
+                                    .background(Brush.horizontalGradient(listOf(MysticPurple, CrystalBlue)))
+                                    .bounceClick { m.gameId?.let { onPlayGame(it) } }
                                     .padding(horizontal = 14.dp, vertical = 7.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
                                     "Play Now 🎮",
-                                    color = if (fromMe) VyboraPurple else Color.White,
+                                    color = CloudWhite,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -1531,11 +1528,12 @@ private fun ModernMessageBubble(
                                 contentDescription = "Photo",
                                 modifier = Modifier
                                     .size(width = 200.dp, height = 140.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
                                 contentScale = ContentScale.Crop,
                             )
                         } else {
-                            Text("Photo", color = if (fromMe) Color.White else VyboraTextPrimary, fontSize = 13.sp)
+                            Text("Photo", color = CloudWhite, fontSize = 13.sp)
                         }
                     }
 
@@ -1548,7 +1546,7 @@ private fun ModernMessageBubble(
                     else -> {
                         Text(
                             m.text,
-                            color = if (fromMe) Color.White else if (isMidnight) Color.White else VyboraTextPrimary,
+                            color = CloudWhite,
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
                         )
@@ -1564,7 +1562,7 @@ private fun ModernMessageBubble(
                 ) {
                     Text(
                         formatMessageTime(m.ts),
-                        color = if (fromMe) Color.White.copy(alpha = 0.7f) else VyboraTextSecondary,
+                        color = if (fromMe) CloudWhite.copy(alpha = 0.75f) else DreamLavender,
                         fontSize = 10.sp,
                     )
                     if (fromMe) {
@@ -1574,7 +1572,7 @@ private fun ModernMessageBubble(
                                 Icon(
                                     painter = painterResource(R.drawable.vb_chat_ic_clock),
                                     contentDescription = "Pending",
-                                    tint = Color.White.copy(alpha = 0.8f),
+                                    tint = CloudWhite.copy(alpha = 0.8f),
                                     modifier = Modifier.size(11.dp),
                                 )
                             }
@@ -1582,7 +1580,7 @@ private fun ModernMessageBubble(
                                 Icon(
                                     painter = painterResource(R.drawable.vb_chat_ic_check),
                                     contentDescription = "Sent",
-                                    tint = Color.White.copy(alpha = 0.8f),
+                                    tint = CloudWhite.copy(alpha = 0.8f),
                                     modifier = Modifier.size(11.dp),
                                 )
                             }
@@ -1591,13 +1589,13 @@ private fun ModernMessageBubble(
                                     Icon(
                                         painter = painterResource(R.drawable.vb_chat_ic_check),
                                         contentDescription = "Delivered",
-                                        tint = Color.White.copy(alpha = 0.8f),
+                                        tint = CloudWhite.copy(alpha = 0.8f),
                                         modifier = Modifier.size(11.dp),
                                     )
                                     Icon(
                                         painter = painterResource(R.drawable.vb_chat_ic_check),
                                         contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.8f),
+                                        tint = CloudWhite.copy(alpha = 0.8f),
                                         modifier = Modifier.size(11.dp),
                                     )
                                 }
@@ -1607,19 +1605,19 @@ private fun ModernMessageBubble(
                                     Icon(
                                         painter = painterResource(R.drawable.vb_chat_ic_check),
                                         contentDescription = "Read",
-                                        tint = VyboraCyan,
+                                        tint = CrystalBlue,
                                         modifier = Modifier.size(11.dp),
                                     )
                                     Icon(
                                         painter = painterResource(R.drawable.vb_chat_ic_check),
                                         contentDescription = null,
-                                        tint = VyboraCyan,
+                                        tint = CrystalBlue,
                                         modifier = Modifier.size(11.dp),
                                     )
                                 }
                             }
                             MsgStatus.FAILED -> {
-                                Text("⚠️ Failed", color = KtvRed, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text("⚠️ Failed", color = LiveRed, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -1638,18 +1636,16 @@ private fun ModernMessageBubble(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isMidnight) DeepPurple else VyboraSurface
-                            )
-                            .border(1.dp, VyboraBorder, RoundedCornerShape(10.dp))
-                            .clickable { onToggleReaction(emoji) }
+                            .background(Color(0xFF181033))
+                            .border(1.dp, DreamLavender.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
+                            .bounceClick { onToggleReaction(emoji) }
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
                         Text(
                             "$emoji ${userList.size}",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isMidnight) Color.White else VyboraTextPrimary,
+                            color = CloudWhite,
                         )
                     }
                 }
@@ -1661,7 +1657,8 @@ private fun ModernMessageBubble(
             DropdownMenu(
                 expanded = true,
                 onDismissRequest = { showActionSheet = false },
-                containerColor = VyboraSurface,
+                containerColor = DeepInk,
+                modifier = Modifier.border(1.dp, DreamLavender.copy(alpha = 0.25f), RoundedCornerShape(14.dp)),
             ) {
                 // Quick emoji reaction bar
                 DropdownMenuItem(
@@ -1682,9 +1679,9 @@ private fun ModernMessageBubble(
                     onClick = {},
                 )
                 DropdownMenuItem(
-                    text = { Text("Reply", color = VyboraTextPrimary) },
+                    text = { Text("Reply", color = CloudWhite, fontWeight = FontWeight.SemiBold) },
                     leadingIcon = {
-                        Icon(painterResource(R.drawable.vb_chat_ic_reply), contentDescription = null, modifier = Modifier.size(16.dp), tint = VyboraPurple)
+                        Icon(painterResource(R.drawable.vb_chat_ic_reply), contentDescription = null, modifier = Modifier.size(16.dp), tint = MysticPurple)
                     },
                     onClick = {
                         showActionSheet = false
@@ -1692,9 +1689,9 @@ private fun ModernMessageBubble(
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text("Copy Text", color = VyboraTextPrimary) },
+                    text = { Text("Copy Text", color = CloudWhite, fontWeight = FontWeight.SemiBold) },
                     leadingIcon = {
-                        Icon(painterResource(R.drawable.vb_chat_ic_copy), contentDescription = null, modifier = Modifier.size(16.dp), tint = VyboraCyan)
+                        Icon(painterResource(R.drawable.vb_chat_ic_copy), contentDescription = null, modifier = Modifier.size(16.dp), tint = CrystalBlue)
                     },
                     onClick = {
                         showActionSheet = false
@@ -1704,7 +1701,7 @@ private fun ModernMessageBubble(
                 )
                 if (fromMe && withinRecallWindow && !m.recalled) {
                     DropdownMenuItem(
-                        text = { Text("Recall message", color = VyboraTextPrimary) },
+                        text = { Text("Recall message", color = CloudWhite, fontWeight = FontWeight.SemiBold) },
                         onClick = {
                             showActionSheet = false
                             onRecall()
@@ -1713,7 +1710,7 @@ private fun ModernMessageBubble(
                 }
                 if (!m.recalled) {
                     DropdownMenuItem(
-                        text = { Text("Delete for me", color = KtvRed) },
+                        text = { Text("Delete for me", color = LiveRed, fontWeight = FontWeight.Bold) },
                         onClick = {
                             showActionSheet = false
                             onDelete()
@@ -1746,15 +1743,16 @@ private fun VoicePlayerCard(m: ChatMessage, fromMe: Boolean) {
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(if (fromMe) Color.White.copy(alpha = 0.2f) else VyboraCyanSoft)
-                .clickable {
+                .background(Color(0xFF2B1854))
+                .border(1.dp, CrystalBlue.copy(alpha = 0.35f), CircleShape)
+                .bounceClick {
                     if (playing) {
                         player?.runCatching { stop() }
                         player?.release()
                         player = null
                         playing = false
                     } else {
-                        val path = m.mediaPath ?: return@clickable
+                        val path = m.mediaPath ?: return@bounceClick
                         val next = MediaPlayer()
                         val started = runCatching {
                             next.setDataSource(path)
@@ -1780,7 +1778,7 @@ private fun VoicePlayerCard(m: ChatMessage, fromMe: Boolean) {
             Icon(
                 painter = painterResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play),
                 contentDescription = if (playing) "Pause" else "Play",
-                tint = if (fromMe) Color.White else VyboraCyan,
+                tint = CrystalBlue,
                 modifier = Modifier.size(16.dp),
             )
         }
@@ -1788,20 +1786,20 @@ private fun VoicePlayerCard(m: ChatMessage, fromMe: Boolean) {
         Icon(
             painter = painterResource(R.drawable.vb_chat_ic_voice_wave),
             contentDescription = null,
-            tint = if (fromMe) Color.White.copy(alpha = 0.85f) else VyboraCyan,
+            tint = CrystalBlue,
             modifier = Modifier.size(width = 80.dp, height = 18.dp),
         )
         Spacer(Modifier.width(8.dp))
         Text(
             "0:%02d".format((m.durationMs / 1000).coerceAtLeast(1)),
-            color = if (fromMe) Color.White else VyboraTextPrimary,
+            color = CloudWhite,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
         )
     }
 }
 
-// ─── Virtual Gift Drawer Bottom Sheet (Section 7) ────────────────────────────
+// ─── Virtual Gift Drawer Bottom Sheet ────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1822,8 +1820,8 @@ private fun VirtualGiftDrawerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = DeepInk,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(
             modifier = Modifier
@@ -1839,27 +1837,28 @@ private fun VirtualGiftDrawerSheet(
                     "Send Gift to $recipientName",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = VyboraTextPrimary,
+                    color = CloudWhite,
                     modifier = Modifier.weight(1f),
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VyboraBg)
-                        .clickable(onClick = onTopUp)
+                        .background(Color(0xFF181033))
+                        .border(1.dp, RoyalGold.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                        .bounceClick(onClick = onTopUp)
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_coin),
                         contentDescription = "Coins",
-                        tint = Gold,
+                        tint = RoyalGold,
                         modifier = Modifier.size(16.dp),
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text("$balance", color = VyboraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text("$balance", color = CloudWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.width(6.dp))
-                    Text("+ Top Up", color = VyboraCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("+ Top Up", color = SunsetRose, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -1872,13 +1871,21 @@ private fun VirtualGiftDrawerSheet(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (isSel) VyboraPurple else VyboraBg)
-                            .clickable { selectedCategoryIndex = i }
+                            .background(
+                                if (isSel) AuroraGradients.sunsetFantasy
+                                else SolidColor(Color(0xFF160F2C))
+                            )
+                            .border(
+                                1.dp,
+                                if (isSel) Color.Transparent else DreamLavender.copy(alpha = 0.18f),
+                                RoundedCornerShape(12.dp),
+                            )
+                            .bounceClick { selectedCategoryIndex = i }
                             .padding(horizontal = 14.dp, vertical = 6.dp),
                     ) {
                         Text(
                             categories[i],
-                            color = if (isSel) Color.White else VyboraTextSecondary,
+                            color = if (isSel) CloudWhite else DreamLavender,
                             fontSize = 12.sp,
                             fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium,
                         )
@@ -1902,13 +1909,18 @@ private fun VirtualGiftDrawerSheet(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .clip(RoundedCornerShape(14.dp))
-                            .background(if (isSel) VyboraLavender else VyboraBg)
+                            .background(
+                                if (isSel)
+                                    Brush.verticalGradient(listOf(Color(0xFF2E1754), Color(0xFF1D103A)))
+                                else
+                                    SolidColor(Color(0xFF181033))
+                            )
                             .border(
                                 1.5.dp,
-                                if (isSel) VyboraCyan else Color.Transparent,
+                                if (isSel) SunsetRose else DreamLavender.copy(alpha = 0.15f),
                                 RoundedCornerShape(14.dp),
                             )
-                            .clickable { selectedGift = g }
+                            .bounceClick { selectedGift = g }
                             .padding(8.dp),
                     ) {
                         Image(
@@ -1927,14 +1939,14 @@ private fun VirtualGiftDrawerSheet(
                         Spacer(Modifier.height(4.dp))
                         Text(
                             g.name,
-                            color = VyboraTextPrimary,
+                            color = CloudWhite,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                         )
                         Text(
                             "${g.cost}c",
-                            color = Gold,
+                            color = RoyalGold,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                         )
@@ -1956,13 +1968,23 @@ private fun VirtualGiftDrawerSheet(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSel) VyboraCyan else VyboraBg)
-                                .clickable { selectedQty = q }
+                                .background(
+                                    if (isSel)
+                                        Brush.horizontalGradient(listOf(MysticPurple, CrystalBlue))
+                                    else
+                                        SolidColor(Color(0xFF181033))
+                                )
+                                .border(
+                                    1.dp,
+                                    if (isSel) Color.Transparent else DreamLavender.copy(alpha = 0.15f),
+                                    RoundedCornerShape(8.dp),
+                                )
+                                .bounceClick { selectedQty = q }
                                 .padding(horizontal = 10.dp, vertical = 6.dp),
                         ) {
                             Text(
                                 "x$q",
-                                color = if (isSel) Color.White else VyboraTextPrimary,
+                                color = if (isSel) CloudWhite else DreamLavender,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -1977,14 +1999,14 @@ private fun VirtualGiftDrawerSheet(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Brush.horizontalGradient(listOf(VyboraPurple, VyboraCyan)))
-                        .clickable { onSend(selectedGift, selectedQty) }
+                        .background(AuroraGradients.sunsetFantasy)
+                        .bounceClick { onSend(selectedGift, selectedQty) }
                         .padding(horizontal = 22.dp, vertical = 10.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         "Send ($totalCost c)",
-                        color = Color.White,
+                        color = CloudWhite,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -1996,7 +2018,7 @@ private fun VirtualGiftDrawerSheet(
     }
 }
 
-// ─── Chat Settings Bottom Sheet (Section 10) ─────────────────────────────────
+// ─── Chat Settings Bottom Sheet ──────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -2023,8 +2045,8 @@ private fun ChatSettingsSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = DeepInk,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(
             modifier = Modifier
@@ -2036,19 +2058,19 @@ private fun ChatSettingsSheet(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Chat Settings", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = VyboraTextPrimary, modifier = Modifier.weight(1f))
+                Text("Chat Settings", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = CloudWhite, modifier = Modifier.weight(1f))
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(VyboraBg)
-                        .clickable(onClick = onDismiss),
+                        .background(Color(0xFF1E143E))
+                        .bounceClick(onClick = onDismiss),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.vb_chat_ic_close),
                         contentDescription = "Close",
-                        tint = Color.Unspecified,
+                        tint = CloudWhite,
                         modifier = Modifier.size(12.dp),
                     )
                 }
@@ -2060,40 +2082,42 @@ private fun ChatSettingsSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(VyboraBg, RoundedCornerShape(16.dp))
+                    .background(Color(0xFF181033), RoundedCornerShape(16.dp))
+                    .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 NovaAvatarImage(id = userId, size = 48.dp)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(displayName, color = VyboraTextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    Text("@$userId", color = VyboraTextSecondary, fontSize = 12.sp)
+                    Text(displayName, color = CloudWhite, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text("@$userId", color = DreamLavender, fontSize = 12.sp)
                 }
                 if (!isGroup) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(VyboraLavender)
-                            .clickable(onClick = onViewProfile)
+                            .background(Color(0xFF281552))
+                            .border(1.dp, CrystalBlue.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                            .bounceClick(onClick = onViewProfile)
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                     ) {
-                        Text("Profile", color = VyboraPurple, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Profile", color = CrystalBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
             Spacer(Modifier.height(16.dp))
 
-            // Alias Input (Section 10)
+            // Alias Input
             if (!isGroup) {
-                Text("Custom Nickname / Alias", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = VyboraTextPrimary)
+                Text("Custom Nickname / Alias", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = CloudWhite)
                 Spacer(Modifier.height(6.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(VyboraBg, RoundedCornerShape(14.dp))
-                        .border(1.dp, VyboraBorder, RoundedCornerShape(14.dp))
+                        .background(Color(0xFF160F2C), RoundedCornerShape(14.dp))
+                        .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                 ) {
                     BasicTextField(
@@ -2103,12 +2127,12 @@ private fun ChatSettingsSheet(
                             store.setAlias(userId, it)
                         },
                         singleLine = true,
-                        textStyle = TextStyle(color = VyboraTextPrimary, fontSize = 14.sp),
-                        cursorBrush = SolidColor(VyboraCyan),
+                        textStyle = TextStyle(color = CloudWhite, fontSize = 14.sp),
+                        cursorBrush = SolidColor(CrystalBlue),
                         modifier = Modifier.fillMaxWidth(),
                         decorationBox = { field ->
                             if (localAlias.isEmpty()) {
-                                Text("Set local alias (only visible to you)", color = VyboraTextSecondary, fontSize = 13.sp)
+                                Text("Set local alias (only visible to you)", color = DreamLavender.copy(alpha = 0.6f), fontSize = 13.sp)
                             }
                             field()
                         },
@@ -2117,10 +2141,10 @@ private fun ChatSettingsSheet(
                 Spacer(Modifier.height(16.dp))
             }
 
-            // Wallpaper Themes Selector (Section 10)
-            Text("Conversation Background", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = VyboraTextPrimary)
+            // Wallpaper Themes Selector
+            Text("Conversation Background", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = CloudWhite)
             Spacer(Modifier.height(8.dp))
-            val themes = listOf("Pearl White", "Lavender", "Mint Lounge", "Midnight")
+            val themes = listOf("Celestial", "Amethyst", "Ocean", "Midnight")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 themes.forEachIndexed { idx, name ->
                     val isSel = currentWallpaper == idx
@@ -2130,25 +2154,25 @@ private fun ChatSettingsSheet(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 when (idx) {
-                                    1 -> VyboraLavender
-                                    2 -> VyboraCyanSoft
-                                    3 -> DeepPurple
-                                    else -> VyboraBg
+                                    1 -> Brush.verticalGradient(listOf(Color(0xFF281446), Color(0xFF180D2C)))
+                                    2 -> Brush.verticalGradient(listOf(Color(0xFF0F2644), Color(0xFF0A182E)))
+                                    3 -> Brush.verticalGradient(listOf(Color(0xFF121224), Color(0xFF0A0A14)))
+                                    else -> Brush.verticalGradient(listOf(Color(0xFF1F1545), Color(0xFF140D2F)))
                                 }
                             )
                             .border(
                                 2.dp,
-                                if (isSel) VyboraCyan else Color.Transparent,
+                                if (isSel) SunsetRose else Color.Transparent,
                                 RoundedCornerShape(12.dp),
                             )
-                            .clickable { onWallpaperChange(idx) }
+                            .bounceClick { onWallpaperChange(idx) }
                             .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             name,
-                            color = if (idx == 3) Color.White else VyboraTextPrimary,
-                            fontSize = 10.sp,
+                            color = CloudWhite,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                         )
@@ -2186,35 +2210,38 @@ private fun ChatSettingsSheet(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VyboraBg)
-                        .clickable(onClick = onClearHistory)
+                        .background(Color(0xFF1E143E))
+                        .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                        .bounceClick(onClick = onClearHistory)
                         .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("Clear History", color = VyboraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Clear History", color = CloudWhite, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 }
                 if (!isGroup) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(KtvRed.copy(alpha = 0.12f))
-                            .clickable(onClick = onBlock)
+                            .background(LiveRed.copy(alpha = 0.15f))
+                            .border(1.dp, LiveRed.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                            .bounceClick(onClick = onBlock)
                             .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text("Block User", color = KtvRed, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text("Block User", color = LiveRed, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(KtvRed.copy(alpha = 0.12f))
-                            .clickable(onClick = onReport)
+                            .background(LiveRed.copy(alpha = 0.15f))
+                            .border(1.dp, LiveRed.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                            .bounceClick(onClick = onReport)
                             .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text("Report", color = KtvRed, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text("Report", color = LiveRed, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -2232,13 +2259,15 @@ private fun SettingToggleRow(label: String, checked: Boolean, onCheckedChange: (
             .fillMaxWidth()
             .padding(vertical = 4.dp),
     ) {
-        Text(label, color = VyboraTextPrimary, fontSize = 13.sp, modifier = Modifier.weight(1f))
+        Text(label, color = CloudWhite, fontSize = 13.sp, modifier = Modifier.weight(1f))
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = VyboraCyan,
+                checkedThumbColor = CloudWhite,
+                checkedTrackColor = SunsetRose,
+                uncheckedTrackColor = Color(0xFF221644),
+                uncheckedThumbColor = DreamLavender,
             ),
         )
     }
@@ -2259,16 +2288,16 @@ private fun AttachmentPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = DeepInk,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
         ) {
-            Text("Send Attachment", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = VyboraTextPrimary)
-            Spacer(Modifier.height(16.dp))
+            Text("Send Attachment", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = CloudWhite)
+            Spacer(Modifier.height(18.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround,
@@ -2276,19 +2305,19 @@ private fun AttachmentPickerSheet(
                 AttachmentOptionItem(
                     icon = R.drawable.vb_chat_ic_gallery,
                     label = "Photo",
-                    color = VyboraPurple,
+                    color = MysticPurple,
                     onClick = onPickPhoto,
                 )
                 AttachmentOptionItem(
                     icon = R.drawable.vb_chat_ic_voice_room,
                     label = "Room Invite",
-                    color = LiveRed,
+                    color = SunsetRose,
                     onClick = onInviteRoom,
                 )
                 AttachmentOptionItem(
                     icon = R.drawable.vb_chat_ic_games,
                     label = "Game Match",
-                    color = VyboraCyan,
+                    color = CrystalBlue,
                     onClick = onInviteGame,
                 )
             }
@@ -2299,18 +2328,19 @@ private fun AttachmentPickerSheet(
 
 @Composable
 private fun AttachmentOptionItem(icon: Int, label: String, color: Color, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable(onClick = onClick)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.bounceClick(onClick = onClick)) {
         Box(
             modifier = Modifier
-                .size(54.dp)
+                .size(56.dp)
                 .clip(CircleShape)
-                .background(color.copy(alpha = 0.15f)),
+                .background(Color(0xFF1C133A))
+                .border(1.dp, color.copy(alpha = 0.35f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(painterResource(icon), contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
         }
         Spacer(Modifier.height(8.dp))
-        Text(label, color = VyboraTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text(label, color = CloudWhite, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -2328,16 +2358,16 @@ private fun RoomInvitePickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = DeepInk,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         ) {
-            Text("Select Voice Room to Invite", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = VyboraTextPrimary)
-            Spacer(Modifier.height(12.dp))
+            Text("Select Voice Room to Invite", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = CloudWhite)
+            Spacer(Modifier.height(14.dp))
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2348,8 +2378,9 @@ private fun RoomInvitePickerSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(VyboraBg, RoundedCornerShape(14.dp))
-                            .clickable { onSelect(r) }
+                            .background(Color(0xFF181033), RoundedCornerShape(14.dp))
+                            .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                            .bounceClick { onSelect(r) }
                             .padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -2357,7 +2388,7 @@ private fun RoomInvitePickerSheet(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(VyboraLavender),
+                                .background(Color(0xFF281552)),
                         ) {
                             if (r.coverRes != null && r.coverRes != 0) {
                                 Image(
@@ -2370,16 +2401,16 @@ private fun RoomInvitePickerSheet(
                         }
                         Spacer(Modifier.width(10.dp))
                         Column(Modifier.weight(1f)) {
-                            Text(r.title, color = VyboraTextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                            Text("Hosted by ${r.host} · ${r.members} listening", color = VyboraTextSecondary, fontSize = 11.sp)
+                            Text(r.title, color = CloudWhite, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Hosted by ${r.host} · ${r.members} listening", color = DreamLavender, fontSize = 11.sp)
                         }
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(VyboraCyan)
+                                .background(AuroraGradients.sunsetFantasy)
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
                         ) {
-                            Text("Invite", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Invite", color = CloudWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -2402,21 +2433,22 @@ private fun GameInvitePickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VyboraSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = DeepInk,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         ) {
-            Text("Invite Friend to Game", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = VyboraTextPrimary)
+            Text("Invite Friend to Game", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = CloudWhite)
             Spacer(Modifier.height(14.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(VyboraBg, RoundedCornerShape(14.dp))
-                    .clickable { onSelect("ludo") }
+                    .background(Color(0xFF181033), RoundedCornerShape(14.dp))
+                    .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                    .bounceClick { onSelect("ludo") }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -2424,31 +2456,32 @@ private fun GameInvitePickerSheet(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(VyboraCyanSoft),
+                        .background(Color(0xFF25164C)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text("🎲", fontSize = 24.sp)
                 }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("Ludo Classic", color = VyboraTextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    Text("2-4 players · Board strategy", color = VyboraTextSecondary, fontSize = 12.sp)
+                    Text("Ludo Classic", color = CloudWhite, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text("2-4 players · Board strategy", color = DreamLavender, fontSize = 12.sp)
                 }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(VyboraPurple)
+                        .background(AuroraGradients.sunsetFantasy)
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
-                    Text("Invite", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Invite", color = CloudWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(Modifier.height(10.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(VyboraBg, RoundedCornerShape(14.dp))
-                    .clickable { onSelect("spy") }
+                    .background(Color(0xFF181033), RoundedCornerShape(14.dp))
+                    .border(1.dp, DreamLavender.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                    .bounceClick { onSelect("spy") }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -2456,23 +2489,23 @@ private fun GameInvitePickerSheet(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(VyboraLavender),
+                        .background(Color(0xFF25164C)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text("🕵️", fontSize = 24.sp)
                 }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("Who's the Spy", color = VyboraTextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    Text("Social deduction · Word game", color = VyboraTextSecondary, fontSize = 12.sp)
+                    Text("Who's the Spy", color = CloudWhite, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text("Social deduction · Word game", color = DreamLavender, fontSize = 12.sp)
                 }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(VyboraPurple)
+                        .background(AuroraGradients.sunsetFantasy)
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
-                    Text("Invite", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Invite", color = CloudWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(Modifier.height(20.dp))
@@ -2515,16 +2548,16 @@ private fun FullscreenPhotoDialog(path: String, onDismiss: () -> Unit) {
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.2f))
-                    .clickable(onClick = onDismiss),
+                    .bounceClick(onClick = onDismiss),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(painterResource(R.drawable.vb_chat_ic_close), contentDescription = "Close", tint = Color.White, modifier = Modifier.size(16.dp))
+                Icon(painterResource(R.drawable.vb_chat_ic_close), contentDescription = "Close", tint = CloudWhite, modifier = Modifier.size(16.dp))
             }
         }
     }
 }
 
-// ─── Celebration Confetti Overlay (Section 7) ────────────────────────────────
+// ─── Celebration Confetti Overlay ────────────────────────────────────────────
 
 @Composable
 private fun CelebrationOverlay(onComplete: () -> Unit) {
@@ -2551,10 +2584,11 @@ private fun CelebrationOverlay(onComplete: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color.Black.copy(alpha = 0.75f))
+                        .background(DeepInk.copy(alpha = 0.85f))
+                        .border(1.dp, RoyalGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                         .padding(horizontal = 20.dp, vertical = 10.dp),
                 ) {
-                    Text("Gift Sent Successfully!", color = Gold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text("Gift Sent Successfully!", color = RoyalGold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -2571,11 +2605,11 @@ private fun TypingDots() {
     val alpha3 by infiniteTransition.animateFloat(0.2f, 1f, infiniteRepeatable(tween(600, delayMillis = 400), RepeatMode.Reverse), label = "d3")
 
     Row(modifier = Modifier.padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(3.dp).background(VyboraCyan.copy(alpha = alpha1), CircleShape))
+        Box(Modifier.size(3.dp).background(CrystalBlue.copy(alpha = alpha1), CircleShape))
         Spacer(Modifier.width(2.dp))
-        Box(Modifier.size(3.dp).background(VyboraCyan.copy(alpha = alpha2), CircleShape))
+        Box(Modifier.size(3.dp).background(CrystalBlue.copy(alpha = alpha2), CircleShape))
         Spacer(Modifier.width(2.dp))
-        Box(Modifier.size(3.dp).background(VyboraCyan.copy(alpha = alpha3), CircleShape))
+        Box(Modifier.size(3.dp).background(CrystalBlue.copy(alpha = alpha3), CircleShape))
     }
 }
 
@@ -2585,14 +2619,15 @@ private fun ComposerIconButton(icon: Int, desc: String, onClick: () -> Unit) {
         modifier = Modifier
             .size(40.dp)
             .clip(CircleShape)
-            .background(VyboraBg)
-            .clickable(onClick = onClick),
+            .background(Color(0xFF1E143E))
+            .border(1.dp, DreamLavender.copy(alpha = 0.2f), CircleShape)
+            .bounceClick(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = painterResource(icon),
             contentDescription = desc,
-            tint = Color.Unspecified,
+            tint = CloudWhite,
             modifier = Modifier.size(20.dp),
         )
     }
@@ -2600,8 +2635,8 @@ private fun ComposerIconButton(icon: Int, desc: String, onClick: () -> Unit) {
 
 @Composable
 private fun wallBrush(w: Int): Brush = when (w) {
-    1 -> Brush.verticalGradient(listOf(VyboraLavender, VyboraBg))
-    2 -> Brush.verticalGradient(listOf(VyboraCyanSoft, VyboraBg))
-    3 -> Brush.verticalGradient(listOf(Midnight, DeepPurple))
-    else -> Brush.verticalGradient(listOf(VyboraSurface, VyboraBg))
+    1 -> Brush.verticalGradient(listOf(Color(0xFF1B0E33), Color(0xFF140D2E), Color(0xFF0F0A24))) // Amethyst Glow
+    2 -> Brush.verticalGradient(listOf(Color(0xFF0A192F), Color(0xFF0F223D), Color(0xFF071224))) // Ocean Nebula
+    3 -> Brush.verticalGradient(listOf(Color(0xFF080816), Color(0xFF0D0D20), Color(0xFF060610))) // Midnight Obsidian
+    else -> Brush.verticalGradient(listOf(Color(0xFF0F1035), Color(0xFF141340), Color(0xFF101032))) // Celestial Navy
 }
