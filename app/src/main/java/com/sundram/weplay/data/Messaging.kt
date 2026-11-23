@@ -73,7 +73,7 @@ data class Chat(
 }
 
 enum class NotificationKind {
-    FRIEND_REQUEST, FRIEND_ACCEPTED, MESSAGE, FOLLOW, GIFT, ROOM_INVITE,
+    FRIEND_REQUEST, FRIEND_ACCEPTED, MESSAGE, FOLLOW, GIFT, ROOM_INVITE, SYSTEM,
 }
 
 data class AppNotification(
