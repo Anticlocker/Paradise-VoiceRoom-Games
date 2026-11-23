@@ -8,12 +8,25 @@ data class FeedPost(
     val text: String,
     val likes: Int,
     val comments: Int,
+    val id: String = "",
+    val mediaResId: Int? = null,
+    val mediaUri: String? = null,
+    val isVideo: Boolean = false,
+    val userLevel: Int = 1,
+    val timeAgo: String = "Just now",
+    val title: String = "",
+    val tag: String = "",
+    val isLiked: Boolean = false,
 )
 
 data class FeedEvent(
     val who: String,
     val action: String,
     val time: String,
+    val level: Int = 1,
+    val avatarLetter: String = who.take(1).uppercase(),
+    val iconEmoji: String? = null,
+    val isDemo: Boolean = true,
 )
 
 data class HomeFeed(

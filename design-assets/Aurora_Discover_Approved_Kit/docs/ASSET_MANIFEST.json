@@ -1,0 +1,236 @@
+{
+  "theme": "Aurora Paradise 3.0 / Discover community hub",
+  "asset_count": 23,
+  "assets": [
+    {
+      "name": "ap_discover_header_palace",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_header_palace.webp",
+      "width_px": 1920,
+      "height_px": 420,
+      "transparent": true,
+      "usage": "decorative top header artwork only; draw text/status bar in Compose",
+      "source": "Cropped from original generated palace art sheet; no UI or labels",
+      "sha256": "6c3091eb652383282f0e3660a0af2cbc990ad10d0bee2d3bdf82b74d0ab828ac"
+    },
+    {
+      "name": "ap_discover_body_midnight",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_body_midnight.webp",
+      "width_px": 1080,
+      "height_px": 1920,
+      "transparent": false,
+      "usage": "screen background below header; soft readable space for cards",
+      "source": "Original procedural gradient and subtle stars",
+      "sha256": "4eae088792903bf101fff4b78eb989dbc018c954329e621812351edd4d0f36ba"
+    },
+    {
+      "name": "ap_discover_ic_families",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_families.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Families shortcut icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "76c342e63205c84c316454e0a595525318dac4ee66037f76ac4cc6e1b1f3c46a"
+    },
+    {
+      "name": "ap_discover_ic_nearby",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_nearby.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Nearby shortcut icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "7397df387af1cb3958b29545cf6e487f9ed8375e26160fa45df4227aefe9b040"
+    },
+    {
+      "name": "ap_discover_ic_clubs",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_clubs.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Clubs and Spaces shortcut icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "589dbede45fad7cb5af9287b3d91f49da543ab28033ce4635142c62dd5fe2050"
+    },
+    {
+      "name": "ap_discover_ic_events",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_events.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Live Events shortcut icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "5bfdf0c659d851028f792217f6b0b500ecea77c32c3afbe45956787efc77d89d"
+    },
+    {
+      "name": "ap_discover_ic_moments",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_moments.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Moments section icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "7872b76356215c1435d2f5010db23b2b57890f23e0dbc0538266e739d3bc3f7c"
+    },
+    {
+      "name": "ap_discover_ic_activity",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_activity.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Community Activity section icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "49919008b33904fd66ec3b12d05ffd1e4c87b50ce4b11415ea2eda94ff1c919f"
+    },
+    {
+      "name": "ap_discover_ic_community_star",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_community_star.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Community Moments icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "c63f11ccaa1b100e0942bec3596892761c3c4b157cc5dcbcd7da0489961abdc8"
+    },
+    {
+      "name": "ap_discover_ic_trending",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_trending.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Trending tag icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "f3ffdfb91ed6b70675c0e6c0eed9d71d72c1dbbee3b7124379199bd85660310f"
+    },
+    {
+      "name": "ap_discover_ic_new_post",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_new_post.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Create a post action",
+      "source": "Original SVG created for this pack",
+      "sha256": "99136c54c39d8a796c6382cdab3b0dbd7da376e19223893f1011127e6bfea4bc"
+    },
+    {
+      "name": "ap_discover_ic_heart",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_heart.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Like reaction icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "f8c66a481e6364a5248f47f5b0e47ed5d66ba301963606cd51fa8a2b920412cb"
+    },
+    {
+      "name": "ap_discover_ic_comment",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_comment.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Comment reaction icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "073df8cabf015db83e222b697d8e57922c19b0f22262bd41d8a0ae1bab13d865"
+    },
+    {
+      "name": "ap_discover_ic_share",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_share.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Share action icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "658944f316481b455fdfeeb6d200b957a5dedfba7e9c1a3c05982c0d4c9657cc"
+    },
+    {
+      "name": "ap_discover_ic_chevron",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_chevron.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Trailing chevron icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "c2606e8bcc9194746613d519733c1233d05bcb1ee13050df506f11b6393a5dda"
+    },
+    {
+      "name": "ap_discover_ic_gallery",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_gallery.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Add image to post icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "7efc52a48f7e190ebce0dbb121d0863775d5c369a986808f6a11feca07224797"
+    },
+    {
+      "name": "ap_discover_ic_location",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_location.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Nearby permission prompt icon",
+      "source": "Original SVG created for this pack",
+      "sha256": "efa769b960c49f40368c8a3f35279f043f8f665f4a8331c12a0e7a1e6d794b76"
+    },
+    {
+      "name": "ap_discover_ic_empty",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_ic_empty.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Empty activity/feed illustration",
+      "source": "Original SVG created for this pack",
+      "sha256": "d7b885d4ad2fedd2dd031476081d466751a5cf02c26c2b7cc1a17518994f396e"
+    },
+    {
+      "name": "ap_discover_frame_violet",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_frame_violet.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Overlay frame around REAL avatar; center is transparent",
+      "source": "Original SVG created for this pack",
+      "sha256": "a3226ea403533bc9509efe0c3a57891e3dbd875efca98355399636cb05da5ece"
+    },
+    {
+      "name": "ap_discover_frame_cyan",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_frame_cyan.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Overlay frame around REAL avatar; center is transparent",
+      "source": "Original SVG created for this pack",
+      "sha256": "54f06fb78456db49cabd78494efd8e71bbfdf65448df6d4679cbfab6e55d2da2"
+    },
+    {
+      "name": "ap_discover_frame_gold",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_frame_gold.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Overlay frame around REAL avatar; center is transparent",
+      "source": "Original SVG created for this pack",
+      "sha256": "0db1393964573351700062c3036c76e3dba8331d26b3156a9ec61a413afcdf1a"
+    },
+    {
+      "name": "ap_discover_fx_sparkle",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_fx_sparkle.webp",
+      "width_px": 256,
+      "height_px": 256,
+      "transparent": true,
+      "usage": "Decorative sparkle overlay",
+      "source": "Original SVG created for this pack",
+      "sha256": "2acb3faff9da54db08586811b3b4ad0b5623c110b61d3e86fa020f9e5f7d4a6a"
+    },
+    {
+      "name": "ap_discover_media_fallback",
+      "path": "android/app/src/main/res/drawable-nodpi/ap_discover_media_fallback.webp",
+      "width_px": 640,
+      "height_px": 640,
+      "transparent": false,
+      "usage": "fallback ONLY when a real post has no usable media; not fake user media",
+      "source": "Original procedural fallback illustration",
+      "sha256": "656d4229f932120c1d0708a38e0ab79da5a2dc3a1bef226d4e045a919fac9066"
+    }
+  ]
+}

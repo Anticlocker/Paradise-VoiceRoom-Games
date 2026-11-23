@@ -1,0 +1,13 @@
+{
+  "background": "#170B40",
+  "background_low": "#130830",
+  "surface": "#29164F",
+  "surface_elevated": "#342164",
+  "border": "#9872CF",
+  "lavender": "#C8B2F4",
+  "cyan": "#54CFFF",
+  "gold": "#FFD36B",
+  "primary_text": "#FFF8FF",
+  "secondary_text": "#CFC2E9",
+  "error": "#FF7FA7"
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+    <defs><linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#A9CBFF"/><stop offset="1" stop-color="#B88FFF"/></linearGradient>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#FFF3BD"/><stop offset="0.45" stop-color="#FFD36B"/><stop offset="1" stop-color="#D88131"/></linearGradient>
+    <linearGradient id="cyan" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#BDF8FF"/><stop offset="0.5" stop-color="#54CFFF"/><stop offset="1" stop-color="#517FFF"/></linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <circle cx="128" cy="132" r="97" fill="url(#shine)" opacity="0.10"/>
+    <circle cx="128" cy="128" r="75" fill="#3C1E80" opacity="0.20"/>
+    <g filter="url(#glow)"><path d="M49 77q0-22 22-22h116q21 0 21 22v82q0 20-21 20h-57l-42 29v-29H71q-22 0-22-20z" fill="url(#shine)" stroke="#F3E5FF" stroke-width="8"/><path d="M85 111h87m-87 29h62" stroke="#513190" stroke-width="9" stroke-linecap="round"/></g></svg>
