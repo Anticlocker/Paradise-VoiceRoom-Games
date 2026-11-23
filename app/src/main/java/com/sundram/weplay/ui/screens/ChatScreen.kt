@@ -57,22 +57,40 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.sundram.weplay.R
 import com.sundram.weplay.data.ChatMessage
 import com.sundram.weplay.data.MessagingStore
-import com.sundram.weplay.ui.theme.AuroraChatsBackdrop
-import com.sundram.weplay.ui.theme.AuroraChatsTokens
-import com.sundram.weplay.ui.theme.AuroraFramedAvatar
+import com.sundram.weplay.ui.components.InitialsAvatar
 import com.sundram.weplay.ui.theme.WallBlue
 import com.sundram.weplay.ui.theme.WallMint
 import com.sundram.weplay.ui.theme.WallPurple
 import com.sundram.weplay.ui.util.formatDayLabel
 import com.sundram.weplay.ui.util.formatMessageTime
 import kotlinx.coroutines.delay
+
+/**
+ * Unslopped Design Tokens for ChatScreen (Ink/Graphite Nocturnal Ramp)
+ * Based on unslop 9-pass design framework.
+ */
+private object UnsloppedChatTokens {
+    val BgBase          = Color(0xFF0B0D14) // Deep midnight observatory base
+    val Surface         = Color(0xFF11141C) // Quiet chrome top bar & composer
+    val SurfaceRaised   = Color(0xFF1A1E28) // Input field & elevated cards
+    val TextPrimary     = Color(0xFFEEF0F5) // Crisp readable primary text
+    val TextSecondary   = Color(0xFFA3A9B8) // Balanced secondary metadata
+    val TextMuted       = Color(0xFF7A8296) // Low-prominence captions & hints
+    val Hairline        = Color(0xFFEEF0F5).copy(alpha = 0.08f) // 8% hairline border
+    val HairlineFocused = Color(0xFF4F46E5).copy(alpha = 0.40f) // Subtle accent focus
+    val Accent          = Color(0xFF4F46E5) // Purposeful indigo accent (no gradient)
+    val IncomingBubble  = Color(0xFF161B26) // Deep slate neutral incoming
+    val OutgoingBubble  = Color(0xFF4338CA) // Solid rich indigo outgoing
+    val OnlineBeacon    = Color(0xFF4CC38A) // Clean active green
+    val AlertDanger     = Color(0xFFE5484D) // Restrained negative red
+    val GoldCoin        = Color(0xFFF59E0B) // Amber coin balance
+}
 
 private val REPORT_REASONS = listOf(
     "Harassment",
@@ -272,11 +290,12 @@ fun ChatScreen(
 
     val wallOverlay = customWallpaperOverlay(chat?.wallpaper ?: 0)
 
-    AuroraChatsBackdrop(
-        backgroundRes = R.drawable.ap_chats_hybrid_bg_conversation,
-        modifier = Modifier.fillMaxSize(),
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(UnsloppedChatTokens.BgBase),
     ) {
-        // Optional wallpaper tint overlay if user selected wallpaper 1, 2, or 3
+        // Optional user wallpaper tint overlay
         if (wallOverlay != null) {
             Box(
                 modifier = Modifier
@@ -285,21 +304,20 @@ fun ChatScreen(
             )
         }
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            // ==================== 1. TOP CONVERSATION BAR ====================
+        Column(modifier = Modifier.fillMaxSize()) {
+            // ==================== 1. TOP APP BAR (56dp, quiet chrome) ====================
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(AuroraChatsTokens.Header.copy(alpha = 0.92f))
+                    .height(56.dp)
+                    .background(UnsloppedChatTokens.Surface)
                     .border(
-                        0.5.dp,
-                        AuroraChatsTokens.CardBorder,
-                        RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+                        1.dp,
+                        UnsloppedChatTokens.Hairline,
+                        RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp),
                     )
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp),
             ) {
                 // Back Button
                 Image(
@@ -308,7 +326,7 @@ fun ChatScreen(
                     modifier = Modifier
                         .size(32.dp)
                         .clickable { nav.popBackStack() }
-                        .padding(2.dp),
+                        .padding(4.dp),
                 )
 
                 Spacer(Modifier.width(8.dp))
@@ -320,120 +338,116 @@ fun ChatScreen(
                         .weight(1f)
                         .clickable { nav.navigate("user/$userId") },
                 ) {
-                    AuroraFramedAvatar(
-                        name = user?.name ?: userId,
-                        size = 40.dp,
-                        frameRes = R.drawable.ap_chats_hybrid_frame_royal,
-                        online = user?.online == true && !blocked,
-                    )
+                    Box(contentAlignment = Alignment.BottomEnd) {
+                        InitialsAvatar(
+                            name = user?.name ?: userId,
+                            size = 36.dp,
+                            modifier = Modifier.clip(CircleShape),
+                        )
+                        if (!blocked && user?.online == true) {
+                            Box(
+                                modifier = Modifier
+                                    .size(9.dp)
+                                    .background(UnsloppedChatTokens.OnlineBeacon, CircleShape)
+                                    .border(1.5.dp, UnsloppedChatTokens.Surface, CircleShape)
+                            )
+                        }
+                    }
 
                     Spacer(Modifier.width(10.dp))
 
                     Column {
                         Text(
                             text = user?.name ?: userId,
-                            color = AuroraChatsTokens.TextPrimary,
+                            color = UnsloppedChatTokens.TextPrimary,
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Medium,
                         )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!blocked && user?.online == true) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(6.dp)
-                                        .background(AuroraChatsTokens.OnlineGreen, CircleShape)
-                                )
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    "Online",
-                                    color = AuroraChatsTokens.OnlineGreen,
-                                    fontSize = 11.sp,
-                                )
-                            } else {
-                                Text(
-                                    when {
-                                        blocked -> "Blocked"
-                                        else -> "Offline"
-                                    },
-                                    color = AuroraChatsTokens.TextSecondary,
-                                    fontSize = 11.sp,
-                                )
-                            }
-                        }
+                        Text(
+                            text = when {
+                                blocked -> "Blocked"
+                                user?.online == true -> "Active now"
+                                else -> "Offline"
+                            },
+                            color = if (!blocked && user?.online == true) UnsloppedChatTokens.OnlineBeacon else UnsloppedChatTokens.TextMuted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                        )
                     }
                 }
 
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(8.dp))
 
-                // Audio Call Icon Action
+                // Audio Call Action
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .background(AuroraChatsTokens.SurfaceElevated, CircleShape)
-                        .border(1.dp, AuroraChatsTokens.CardBorder, CircleShape)
+                        .background(UnsloppedChatTokens.SurfaceRaised, CircleShape)
+                        .border(1.dp, UnsloppedChatTokens.Hairline, CircleShape)
                         .clickable {
-                            Toast.makeText(context, "Voice call to ${user?.name ?: userId}...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Starting voice call", Toast.LENGTH_SHORT).show()
                         },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_phone),
                         contentDescription = "Audio call",
-                        tint = AuroraChatsTokens.CrystalCyan,
-                        modifier = Modifier.size(17.dp),
+                        tint = UnsloppedChatTokens.TextSecondary,
+                        modifier = Modifier.size(16.dp),
                     )
                 }
 
                 Spacer(Modifier.width(8.dp))
 
-                // Video Call Icon Action
+                // Video Call Action
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .background(AuroraChatsTokens.SurfaceElevated, CircleShape)
-                        .border(1.dp, AuroraChatsTokens.CardBorder, CircleShape)
+                        .background(UnsloppedChatTokens.SurfaceRaised, CircleShape)
+                        .border(1.dp, UnsloppedChatTokens.Hairline, CircleShape)
                         .clickable {
-                            Toast.makeText(context, "Video call to ${user?.name ?: userId}...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Starting video call", Toast.LENGTH_SHORT).show()
                         },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_videocam),
                         contentDescription = "Video call",
-                        tint = AuroraChatsTokens.CrystalCyan,
-                        modifier = Modifier.size(18.dp),
+                        tint = UnsloppedChatTokens.TextSecondary,
+                        modifier = Modifier.size(17.dp),
                     )
                 }
 
                 Spacer(Modifier.width(8.dp))
 
-                // More Menu Button
+                // More Options Menu
                 Box {
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .background(AuroraChatsTokens.SurfaceElevated, CircleShape)
-                            .border(1.dp, AuroraChatsTokens.CardBorder, CircleShape)
+                            .background(UnsloppedChatTokens.SurfaceRaised, CircleShape)
+                            .border(1.dp, UnsloppedChatTokens.Hairline, CircleShape)
                             .clickable { menuOpen = true },
                         contentAlignment = Alignment.Center,
                     ) {
                         Image(
                             painter = painterResource(R.drawable.ap_chats_hybrid_ic_settings),
-                            contentDescription = "Menu",
-                            modifier = Modifier.size(18.dp),
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(16.dp),
                         )
                     }
 
                     DropdownMenu(
                         expanded = menuOpen,
                         onDismissRequest = { menuOpen = false },
-                        containerColor = AuroraChatsTokens.SurfaceElevated,
+                        containerColor = UnsloppedChatTokens.SurfaceRaised,
                     ) {
                         DropdownMenuItem(
                             text = {
                                 Text(
                                     if (chat?.pinned == true) "Unpin chat" else "Pin chat",
-                                    color = AuroraChatsTokens.TextPrimary,
+                                    color = UnsloppedChatTokens.TextPrimary,
+                                    fontSize = 13.sp,
                                 )
                             },
                             leadingIcon = {
@@ -453,7 +467,8 @@ fun ChatScreen(
                             text = {
                                 Text(
                                     if (chat?.muted == true) "Unmute notifications" else "Mute notifications",
-                                    color = AuroraChatsTokens.TextPrimary,
+                                    color = UnsloppedChatTokens.TextPrimary,
+                                    fontSize = 13.sp,
                                 )
                             },
                             leadingIcon = {
@@ -471,7 +486,7 @@ fun ChatScreen(
                         )
                         DropdownMenuItem(
                             text = {
-                                Text("Change wallpaper", color = AuroraChatsTokens.TextPrimary)
+                                Text("Change wallpaper", color = UnsloppedChatTokens.TextPrimary, fontSize = 13.sp)
                             },
                             leadingIcon = {
                                 Image(
@@ -487,14 +502,14 @@ fun ChatScreen(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("View profile", color = AuroraChatsTokens.TextPrimary) },
+                            text = { Text("View profile", color = UnsloppedChatTokens.TextPrimary, fontSize = 13.sp) },
                             onClick = {
                                 menuOpen = false
                                 nav.navigate("user/$userId")
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Clear chat", color = AuroraChatsTokens.TextPrimary) },
+                            text = { Text("Clear chat", color = UnsloppedChatTokens.TextPrimary, fontSize = 13.sp) },
                             leadingIcon = {
                                 Image(
                                     painter = painterResource(R.drawable.ap_chats_hybrid_ic_clear),
@@ -508,7 +523,7 @@ fun ChatScreen(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Block", color = AuroraChatsTokens.RoseAlert) },
+                            text = { Text("Block", color = UnsloppedChatTokens.AlertDanger, fontSize = 13.sp) },
                             leadingIcon = {
                                 Image(
                                     painter = painterResource(R.drawable.ap_chats_hybrid_ic_block),
@@ -522,7 +537,7 @@ fun ChatScreen(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Report", color = AuroraChatsTokens.RoseAlert) },
+                            text = { Text("Report", color = UnsloppedChatTokens.AlertDanger, fontSize = 13.sp) },
                             leadingIcon = {
                                 Image(
                                     painter = painterResource(R.drawable.ap_chats_hybrid_ic_report),
@@ -539,7 +554,7 @@ fun ChatScreen(
                 }
             }
 
-            // ==================== 2. MESSAGES LIST ====================
+            // ==================== 2. MESSAGES STREAM ====================
             if (blocked) {
                 Box(
                     modifier = Modifier
@@ -550,39 +565,39 @@ fun ChatScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "You blocked ${user?.name ?: userId}",
-                            color = AuroraChatsTokens.TextPrimary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
+                            text = "${user?.name ?: userId} is blocked",
+                            color = UnsloppedChatTokens.TextPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
                         )
-                        Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(4.dp))
                         Text(
-                            "Unblock them to resume chatting.",
-                            color = AuroraChatsTokens.TextSecondary,
-                            fontSize = 12.sp,
+                            text = "Unblock to resume messaging and calls.",
+                            color = UnsloppedChatTokens.TextSecondary,
+                            fontSize = 13.sp,
                         )
                         Spacer(Modifier.height(16.dp))
                         Box(
                             modifier = Modifier
-                                .background(AuroraChatsTokens.ActiveTabGradient, RoundedCornerShape(14.dp))
+                                .background(UnsloppedChatTokens.Accent, RoundedCornerShape(10.dp))
                                 .clickable {
                                     store.unblock(userId)
                                     bump()
                                 }
-                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                         ) {
-                            Text("Unblock", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text("Unblock", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                         }
                     }
                 }
             } else {
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.weight(1f),
                 ) {
-                    // HERO HEADER (Matches Screen 4 of reference image)
+                    // Subtle conversation header meta (Pass 6 Layout - no oversized hero blob)
                     item {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -590,57 +605,28 @@ fun ChatScreen(
                                 .fillMaxWidth()
                                 .padding(top = 8.dp, bottom = 12.dp),
                         ) {
-                            AuroraFramedAvatar(
+                            InitialsAvatar(
                                 name = user?.name ?: userId,
-                                size = 80.dp,
-                                frameRes = R.drawable.ap_chats_hybrid_frame_royal,
-                                online = user?.online == true,
+                                size = 52.dp,
+                                modifier = Modifier.clip(CircleShape),
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
                                 text = user?.name ?: userId,
-                                color = AuroraChatsTokens.TextPrimary,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
+                                color = UnsloppedChatTokens.TextPrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
                             )
-                            Spacer(Modifier.height(4.dp))
-                            // Level & Friend Badge Pill
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            listOf(
-                                                AuroraChatsTokens.RoyalGold.copy(alpha = 0.2f),
-                                                AuroraChatsTokens.GlowPurple.copy(alpha = 0.2f),
-                                            )
-                                        ),
-                                        RoundedCornerShape(12.dp),
-                                    )
-                                    .border(
-                                        0.5.dp,
-                                        AuroraChatsTokens.RoyalGold.copy(alpha = 0.6f),
-                                        RoundedCornerShape(12.dp),
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                            ) {
-                                Text(
-                                    "Lv.${user?.level ?: 5} • Friend",
-                                    color = AuroraChatsTokens.RoyalGold,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                            Spacer(Modifier.height(4.dp))
+                            Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "Chatting with ${user?.name ?: userId}",
-                                color = AuroraChatsTokens.TextSecondary,
+                                text = "Lv.${user?.level ?: 5} • Direct Message",
+                                color = UnsloppedChatTokens.TextMuted,
                                 fontSize = 12.sp,
                             )
                         }
                     }
 
-                    // DATE SEPARATORS & MESSAGES
+                    // Date Separators & Messages
                     items(chatItems, key = {
                         when (it) {
                             is ChatItem.Msg -> "m" + it.m.id
@@ -650,25 +636,25 @@ fun ChatScreen(
                         when (item) {
                             is ChatItem.DateSep -> {
                                 Box(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Box(
                                         modifier = Modifier
                                             .background(
-                                                AuroraChatsTokens.SurfaceElevated.copy(alpha = 0.85f),
-                                                RoundedCornerShape(12.dp),
+                                                UnsloppedChatTokens.SurfaceRaised,
+                                                RoundedCornerShape(8.dp),
                                             )
                                             .border(
-                                                0.5.dp,
-                                                AuroraChatsTokens.CardBorder,
-                                                RoundedCornerShape(12.dp),
+                                                1.dp,
+                                                UnsloppedChatTokens.Hairline,
+                                                RoundedCornerShape(8.dp),
                                             )
-                                            .padding(horizontal = 14.dp, vertical = 4.dp),
+                                            .padding(horizontal = 10.dp, vertical = 4.dp),
                                     ) {
                                         Text(
-                                            item.label,
-                                            color = AuroraChatsTokens.TextSecondary,
+                                            text = item.label,
+                                            color = UnsloppedChatTokens.TextSecondary,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Medium,
                                         )
@@ -676,7 +662,7 @@ fun ChatScreen(
                                 }
                             }
 
-                            is ChatItem.Msg -> HybridMessageBubble(
+                            is ChatItem.Msg -> UnsloppedMessageBubble(
                                 m = item.m,
                                 partnerName = user?.name ?: userId,
                                 onDelete = {
@@ -694,141 +680,104 @@ fun ChatScreen(
                     // Typing Indicator
                     if (store.isTyping(userId)) {
                         item {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(start = 6.dp, top = 4.dp),
-                            ) {
-                                Text(
-                                    "${user?.name ?: userId} is typing…",
-                                    color = AuroraChatsTokens.CrystalCyan,
-                                    fontSize = 12.sp,
-                                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                )
-                            }
+                            Text(
+                                text = "${user?.name ?: userId} is typing…",
+                                color = UnsloppedChatTokens.TextMuted,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(start = 4.dp, top = 2.dp),
+                            )
                         }
                     }
                 }
 
-                // ==================== 3. INPUT COMPOSER BAR ====================
+                // ==================== 3. INPUT COMPOSER (Quiet chrome, 4px grid) ====================
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(AuroraChatsTokens.Header.copy(alpha = 0.95f))
+                        .background(UnsloppedChatTokens.Surface)
                         .border(
-                            0.5.dp,
-                            AuroraChatsTokens.CardBorder,
-                            RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                            1.dp,
+                            UnsloppedChatTokens.Hairline,
+                            RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp),
                         )
                         .imePadding()
-                        .padding(horizontal = 10.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
                 ) {
                     // Gift Button
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        AuroraChatsTokens.GlowPurple.copy(alpha = 0.35f),
-                                        AuroraChatsTokens.SurfaceElevated,
-                                    )
-                                ),
-                                CircleShape,
-                            )
-                            .border(1.dp, AuroraChatsTokens.CardBorderGlow, CircleShape)
+                            .size(36.dp)
+                            .background(UnsloppedChatTokens.SurfaceRaised, CircleShape)
+                            .border(1.dp, UnsloppedChatTokens.Hairline, CircleShape)
                             .clickable { showGiftPicker = true },
                         contentAlignment = Alignment.Center,
                     ) {
                         Image(
                             painter = painterResource(R.drawable.ap_chats_hybrid_ic_gift),
                             contentDescription = "Send gift",
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(18.dp),
                         )
                     }
 
                     Spacer(Modifier.width(8.dp))
 
-                    // Text Input Field with inside emoji button
+                    // Text Input Field
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .background(AuroraChatsTokens.SurfaceElevated, RoundedCornerShape(22.dp))
-                            .border(1.dp, AuroraChatsTokens.CardBorder, RoundedCornerShape(22.dp))
-                            .padding(horizontal = 14.dp, vertical = 9.dp),
+                            .background(UnsloppedChatTokens.SurfaceRaised, RoundedCornerShape(20.dp))
+                            .border(1.dp, UnsloppedChatTokens.Hairline, RoundedCornerShape(20.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                        BasicTextField(
+                            value = input,
+                            onValueChange = {
+                                input = it
+                                store.saveDraft(userId, it)
+                            },
+                            singleLine = false,
+                            maxLines = 4,
+                            textStyle = TextStyle(
+                                color = UnsloppedChatTokens.TextPrimary,
+                                fontSize = 14.sp,
+                            ),
+                            cursorBrush = SolidColor(UnsloppedChatTokens.Accent),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                            keyboardActions = KeyboardActions(
+                                onSend = { sendInput() },
+                            ),
                             modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            BasicTextField(
-                                value = input,
-                                onValueChange = {
-                                    input = it
-                                    store.saveDraft(userId, it)
-                                },
-                                singleLine = false,
-                                maxLines = 4,
-                                textStyle = TextStyle(
-                                    color = AuroraChatsTokens.TextPrimary,
-                                    fontSize = 14.sp,
-                                ),
-                                cursorBrush = SolidColor(AuroraChatsTokens.CrystalCyan),
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                                keyboardActions = KeyboardActions(
-                                    onSend = { sendInput() },
-                                ),
-                                modifier = Modifier.weight(1f),
-                                decorationBox = { field ->
-                                    Box {
-                                        if (input.isEmpty()) {
-                                            Text(
-                                                "Type a message...",
-                                                color = AuroraChatsTokens.TextSecondary.copy(alpha = 0.6f),
-                                                fontSize = 13.sp,
-                                            )
-                                        }
-                                        field()
+                            decorationBox = { field ->
+                                Box {
+                                    if (input.isEmpty()) {
+                                        Text(
+                                            text = "Type a message",
+                                            color = UnsloppedChatTokens.TextMuted,
+                                            fontSize = 14.sp,
+                                        )
                                     }
-                                },
-                            )
-
-                            Spacer(Modifier.width(6.dp))
-
-                            // Emoji Icon inside input
-                            Image(
-                                painter = painterResource(R.drawable.ap_chats_hybrid_ic_emoji),
-                                contentDescription = "Emoji",
-                                modifier = Modifier
-                                    .size(22.dp)
-                                    .clickable {
-                                        input += " 😊"
-                                    },
-                            )
-                        }
+                                    field()
+                                }
+                            },
+                        )
                     }
 
                     Spacer(Modifier.width(8.dp))
 
-                    // Voice Note / Mic Button
+                    // Voice Note Button
                     val isRecording = recordingState == RecorderState.RECORDING
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(36.dp)
                             .background(
-                                if (isRecording) AuroraChatsTokens.RoseGradient
-                                else Brush.linearGradient(
-                                    listOf(
-                                        AuroraChatsTokens.SurfaceElevated,
-                                        AuroraChatsTokens.Surface,
-                                    )
-                                ),
+                                if (isRecording) UnsloppedChatTokens.AlertDanger else UnsloppedChatTokens.SurfaceRaised,
                                 CircleShape,
                             )
                             .border(
                                 1.dp,
-                                if (isRecording) AuroraChatsTokens.RoseAlert else AuroraChatsTokens.CardBorder,
+                                if (isRecording) UnsloppedChatTokens.AlertDanger else UnsloppedChatTokens.Hairline,
                                 CircleShape,
                             )
                             .clickable {
@@ -838,50 +787,42 @@ fun ChatScreen(
                     ) {
                         Image(
                             painter = painterResource(R.drawable.ap_chats_hybrid_ic_mic),
-                            contentDescription = if (isRecording) "Stop voice note" else "Voice note",
-                            modifier = Modifier.size(20.dp),
+                            contentDescription = if (isRecording) "Stop voice note" else "Record voice note",
+                            modifier = Modifier.size(17.dp),
                         )
                     }
 
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.width(8.dp))
 
                     if (input.isBlank()) {
-                        // Media / Photo Button
+                        // Media Attachment Button
                         Box(
                             modifier = Modifier
-                                .size(42.dp)
-                                .background(
-                                    Brush.linearGradient(
-                                        listOf(
-                                            AuroraChatsTokens.SurfaceElevated,
-                                            AuroraChatsTokens.Surface,
-                                        )
-                                    ),
-                                    CircleShape,
-                                )
-                                .border(1.dp, AuroraChatsTokens.CardBorder, CircleShape)
+                                .size(36.dp)
+                                .background(UnsloppedChatTokens.SurfaceRaised, CircleShape)
+                                .border(1.dp, UnsloppedChatTokens.Hairline, CircleShape)
                                 .clickable { showPhotoPicker = true },
                             contentAlignment = Alignment.Center,
                         ) {
                             Image(
                                 painter = painterResource(R.drawable.ap_chats_hybrid_ic_attach),
-                                contentDescription = "Attach photo",
-                                modifier = Modifier.size(20.dp),
+                                contentDescription = "Attach media",
+                                modifier = Modifier.size(18.dp),
                             )
                         }
                     } else {
-                        // Send Button
+                        // Send Action Button (Solid Indigo Accent)
                         Box(
                             modifier = Modifier
-                                .size(42.dp)
-                                .background(AuroraChatsTokens.ActiveTabGradient, CircleShape)
+                                .size(36.dp)
+                                .background(UnsloppedChatTokens.Accent, CircleShape)
                                 .clickable { sendInput() },
                             contentAlignment = Alignment.Center,
                         ) {
                             Image(
                                 painter = painterResource(R.drawable.ap_chats_hybrid_ic_send),
                                 contentDescription = "Send",
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(17.dp),
                             )
                         }
                     }
@@ -892,7 +833,7 @@ fun ChatScreen(
 
     // ==================== 4. BOTTOM SHEETS & DIALOGS ====================
     if (showGiftPicker) {
-        GiftPickerSheet(
+        UnsloppedGiftPickerSheet(
             balance = coinBalance,
             onDismiss = { showGiftPicker = false },
             onSelect = { gift ->
@@ -907,7 +848,7 @@ fun ChatScreen(
     }
 
     if (showPhotoPicker) {
-        PhotoPickerSheet(
+        UnsloppedPhotoPickerSheet(
             onDismiss = { showPhotoPicker = false },
             onPick = { path ->
                 store.sendMedia(userId, com.sundram.weplay.data.MsgType.IMAGE, path)
@@ -922,15 +863,17 @@ fun ChatScreen(
             onDismissRequest = { confirmClear = false },
             title = {
                 Text(
-                    "Clear chat?",
-                    color = AuroraChatsTokens.TextPrimary,
-                    fontWeight = FontWeight.Bold,
+                    text = "Clear chat history?",
+                    color = UnsloppedChatTokens.TextPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                 )
             },
             text = {
                 Text(
-                    "All messages in this conversation will be permanently deleted.",
-                    color = AuroraChatsTokens.TextSecondary,
+                    text = "All messages in this conversation will be deleted.",
+                    color = UnsloppedChatTokens.TextSecondary,
+                    fontSize = 13.sp,
                 )
             },
             confirmButton = {
@@ -939,15 +882,15 @@ fun ChatScreen(
                     confirmClear = false
                     bump()
                 }) {
-                    Text("Clear", color = AuroraChatsTokens.RoseAlert, fontWeight = FontWeight.Bold)
+                    Text("Clear", color = UnsloppedChatTokens.AlertDanger, fontWeight = FontWeight.Medium)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmClear = false }) {
-                    Text("Cancel", color = AuroraChatsTokens.TextSecondary)
+                    Text("Cancel", color = UnsloppedChatTokens.TextSecondary)
                 }
             },
-            containerColor = AuroraChatsTokens.SurfaceElevated,
+            containerColor = UnsloppedChatTokens.SurfaceRaised,
         )
     }
 
@@ -956,15 +899,17 @@ fun ChatScreen(
             onDismissRequest = { confirmBlock = false },
             title = {
                 Text(
-                    "Block ${user?.name ?: userId}?",
-                    color = AuroraChatsTokens.TextPrimary,
-                    fontWeight = FontWeight.Bold,
+                    text = "Block ${user?.name ?: userId}?",
+                    color = UnsloppedChatTokens.TextPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                 )
             },
             text = {
                 Text(
-                    "They will not be able to message you or see your profile. You will be removed from each other's friends list.",
-                    color = AuroraChatsTokens.TextSecondary,
+                    text = "They will not be able to message or call you. You will be removed from each other's friends list.",
+                    color = UnsloppedChatTokens.TextSecondary,
+                    fontSize = 13.sp,
                 )
             },
             confirmButton = {
@@ -973,15 +918,15 @@ fun ChatScreen(
                     confirmBlock = false
                     nav.popBackStack()
                 }) {
-                    Text("Block", color = AuroraChatsTokens.RoseAlert, fontWeight = FontWeight.Bold)
+                    Text("Block", color = UnsloppedChatTokens.AlertDanger, fontWeight = FontWeight.Medium)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmBlock = false }) {
-                    Text("Cancel", color = AuroraChatsTokens.TextSecondary)
+                    Text("Cancel", color = UnsloppedChatTokens.TextSecondary)
                 }
             },
-            containerColor = AuroraChatsTokens.SurfaceElevated,
+            containerColor = UnsloppedChatTokens.SurfaceRaised,
         )
     }
 
@@ -990,17 +935,18 @@ fun ChatScreen(
             onDismissRequest = { confirmReport = false },
             title = {
                 Text(
-                    "Report ${user?.name ?: userId}",
-                    color = AuroraChatsTokens.TextPrimary,
-                    fontWeight = FontWeight.Bold,
+                    text = "Report ${user?.name ?: userId}",
+                    color = UnsloppedChatTokens.TextPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                 )
             },
             text = {
                 Column {
                     Text(
-                        "Pick a reason. The user will also be blocked.",
-                        color = AuroraChatsTokens.TextSecondary,
-                        fontSize = 12.sp,
+                        text = "Select a reason. The user will also be blocked.",
+                        color = UnsloppedChatTokens.TextSecondary,
+                        fontSize = 13.sp,
                     )
                     Spacer(Modifier.height(12.dp))
                     REPORT_REASONS.forEach { r ->
@@ -1013,10 +959,10 @@ fun ChatScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(18.dp)
+                                    .size(16.dp)
                                     .border(
                                         1.5.dp,
-                                        if (reportReason == r) AuroraChatsTokens.ActiveCyan else AuroraChatsTokens.TextSecondary,
+                                        if (reportReason == r) UnsloppedChatTokens.Accent else UnsloppedChatTokens.TextMuted,
                                         CircleShape,
                                     ),
                                 contentAlignment = Alignment.Center,
@@ -1024,13 +970,13 @@ fun ChatScreen(
                                 if (reportReason == r) {
                                     Box(
                                         Modifier
-                                            .size(10.dp)
-                                            .background(AuroraChatsTokens.ActiveCyan, CircleShape)
+                                            .size(8.dp)
+                                            .background(UnsloppedChatTokens.Accent, CircleShape)
                                     )
                                 }
                             }
                             Spacer(Modifier.width(10.dp))
-                            Text(r, color = AuroraChatsTokens.TextPrimary, fontSize = 13.sp)
+                            Text(r, color = UnsloppedChatTokens.TextPrimary, fontSize = 13.sp)
                         }
                     }
                 }
@@ -1041,24 +987,24 @@ fun ChatScreen(
                     confirmReport = false
                     nav.popBackStack()
                 }) {
-                    Text("Report & Block", color = AuroraChatsTokens.RoseAlert, fontWeight = FontWeight.Bold)
+                    Text("Report and block", color = UnsloppedChatTokens.AlertDanger, fontWeight = FontWeight.Medium)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmReport = false }) {
-                    Text("Cancel", color = AuroraChatsTokens.TextSecondary)
+                    Text("Cancel", color = UnsloppedChatTokens.TextSecondary)
                 }
             },
-            containerColor = AuroraChatsTokens.SurfaceElevated,
+            containerColor = UnsloppedChatTokens.SurfaceRaised,
         )
     }
 }
 
-// ==================== HYBRID MESSAGE BUBBLE ====================
+// ==================== UNSLOPPED MESSAGE BUBBLE ====================
 
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@ExperimentalFoundationApi
 @Composable
-private fun HybridMessageBubble(
+private fun UnsloppedMessageBubble(
     m: ChatMessage,
     partnerName: String,
     onDelete: () -> Unit = {},
@@ -1075,11 +1021,10 @@ private fun HybridMessageBubble(
         verticalAlignment = Alignment.Bottom,
     ) {
         if (!fromMe) {
-            // Incoming message avatar thumbnail
-            AuroraFramedAvatar(
+            InitialsAvatar(
                 name = partnerName,
-                size = 32.dp,
-                frameRes = R.drawable.ap_chats_hybrid_frame_royal,
+                size = 28.dp,
+                modifier = Modifier.clip(CircleShape),
             )
             Spacer(Modifier.width(8.dp))
         }
@@ -1088,45 +1033,39 @@ private fun HybridMessageBubble(
             Box(
                 modifier = Modifier
                     .background(
-                        if (fromMe) AuroraChatsTokens.OutgoingBubbleGradient
-                        else Brush.linearGradient(
-                            listOf(
-                                AuroraChatsTokens.IncomingBubble,
-                                AuroraChatsTokens.IncomingBubble.copy(alpha = 0.95f),
-                            )
-                        ),
+                        if (fromMe) UnsloppedChatTokens.OutgoingBubble else UnsloppedChatTokens.IncomingBubble,
                         RoundedCornerShape(
-                            topStart = 18.dp,
-                            topEnd = 18.dp,
-                            bottomStart = if (fromMe) 18.dp else 4.dp,
-                            bottomEnd = if (fromMe) 4.dp else 18.dp,
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = if (fromMe) 16.dp else 4.dp,
+                            bottomEnd = if (fromMe) 4.dp else 16.dp,
                         ),
                     )
                     .border(
                         1.dp,
-                        if (fromMe) AuroraChatsTokens.CardBorderGlow.copy(alpha = 0.35f) else AuroraChatsTokens.CardBorder,
+                        UnsloppedChatTokens.Hairline,
                         RoundedCornerShape(
-                            topStart = 18.dp,
-                            topEnd = 18.dp,
-                            bottomStart = if (fromMe) 18.dp else 4.dp,
-                            bottomEnd = if (fromMe) 4.dp else 18.dp,
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = if (fromMe) 16.dp else 4.dp,
+                            bottomEnd = if (fromMe) 4.dp else 16.dp,
                         ),
                     )
                     .combinedClickable(
                         onClick = {},
                         onLongClick = { showMenu = true },
                     )
-                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
             ) {
                 // Long press dropdown
                 if (showMenu) {
                     DropdownMenu(
                         expanded = true,
                         onDismissRequest = { showMenu = false },
-                        containerColor = AuroraChatsTokens.SurfaceElevated,
+                        containerColor = UnsloppedChatTokens.SurfaceRaised,
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Copy", color = AuroraChatsTokens.TextPrimary) },
+                            text = { Text("Copy", color = UnsloppedChatTokens.TextPrimary, fontSize = 13.sp) },
                             leadingIcon = {
                                 Image(
                                     painter = painterResource(R.drawable.ap_chats_hybrid_ic_copy),
@@ -1141,7 +1080,7 @@ private fun HybridMessageBubble(
                         )
                         if (fromMe && withinRecallWindow && !m.recalled) {
                             DropdownMenuItem(
-                                text = { Text("Recall message", color = AuroraChatsTokens.TextPrimary) },
+                                text = { Text("Recall message", color = UnsloppedChatTokens.TextPrimary, fontSize = 13.sp) },
                                 leadingIcon = {
                                     Image(
                                         painter = painterResource(R.drawable.ap_chats_hybrid_ic_reply),
@@ -1157,7 +1096,7 @@ private fun HybridMessageBubble(
                         }
                         if (!m.recalled) {
                             DropdownMenuItem(
-                                text = { Text("Delete for me", color = AuroraChatsTokens.RoseAlert) },
+                                text = { Text("Delete for me", color = UnsloppedChatTokens.AlertDanger, fontSize = 13.sp) },
                                 leadingIcon = {
                                     Image(
                                         painter = painterResource(R.drawable.ap_chats_hybrid_ic_delete),
@@ -1178,10 +1117,9 @@ private fun HybridMessageBubble(
                     when {
                         m.recalled -> {
                             Text(
-                                "Message recalled",
-                                color = if (fromMe) Color.White.copy(alpha = 0.7f) else AuroraChatsTokens.TextSecondary,
-                                fontSize = 12.sp,
-                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                text = "Message recalled",
+                                color = UnsloppedChatTokens.TextMuted,
+                                fontSize = 13.sp,
                             )
                         }
 
@@ -1191,21 +1129,20 @@ private fun HybridMessageBubble(
                                 Image(
                                     painter = painterResource(R.drawable.ap_chats_hybrid_ic_gift),
                                     contentDescription = null,
-                                    modifier = Modifier.size(28.dp),
+                                    modifier = Modifier.size(24.dp),
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        gift?.name ?: "Celestial Gift",
-                                        color = if (fromMe) Color.White else AuroraChatsTokens.TextPrimary,
+                                        text = gift?.name ?: "Gift",
+                                        color = if (fromMe) Color.White else UnsloppedChatTokens.TextPrimary,
                                         fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.Medium,
                                     )
                                     Text(
-                                        "${m.giftCost} coins",
-                                        color = AuroraChatsTokens.RoyalGold,
+                                        text = "${m.giftCost} coins",
+                                        color = UnsloppedChatTokens.GoldCoin,
                                         fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
                                     )
                                 }
                             }
@@ -1221,30 +1158,30 @@ private fun HybridMessageBubble(
                                     bitmap = bitmap,
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(width = 190.dp, height = 130.dp)
-                                        .clip(RoundedCornerShape(12.dp)),
+                                        .size(width = 180.dp, height = 120.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
                                     contentScale = ContentScale.Crop,
                                 )
                             } else {
-                                Text("Photo", color = if (fromMe) Color.White else AuroraChatsTokens.TextPrimary, fontSize = 13.sp)
+                                Text("Photo", color = if (fromMe) Color.White else UnsloppedChatTokens.TextPrimary, fontSize = 13.sp)
                             }
                         }
 
                         m.type == com.sundram.weplay.data.MsgType.VOICE && m.mediaPath != null -> {
-                            HybridVoiceNoteRow(m = m, fromMe = fromMe)
+                            UnsloppedVoiceNoteRow(m = m, fromMe = fromMe)
                         }
 
                         else -> {
                             Text(
                                 text = m.text,
-                                color = if (fromMe) Color.White else AuroraChatsTokens.TextPrimary,
+                                color = if (fromMe) Color.White else UnsloppedChatTokens.TextPrimary,
                                 fontSize = 14.sp,
-                                lineHeight = 19.sp,
+                                lineHeight = 20.sp,
                             )
                         }
                     }
 
-                    Spacer(Modifier.height(3.dp))
+                    Spacer(Modifier.height(2.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -1252,10 +1189,9 @@ private fun HybridMessageBubble(
                         modifier = Modifier.align(Alignment.End),
                     ) {
                         Text(
-                            text = (if (m.type == com.sundram.weplay.data.MsgType.VOICE) "🎤 " else "") +
-                                formatMessageTime(m.ts),
-                            color = if (fromMe) Color.White.copy(alpha = 0.75f) else AuroraChatsTokens.TextSecondary,
-                            fontSize = 10.sp,
+                            text = formatMessageTime(m.ts),
+                            color = if (fromMe) Color.White.copy(alpha = 0.7f) else UnsloppedChatTokens.TextMuted,
+                            fontSize = 11.sp,
                         )
                         if (fromMe) {
                             Spacer(Modifier.width(4.dp))
@@ -1264,7 +1200,7 @@ private fun HybridMessageBubble(
                                     if (m.read) R.drawable.ap_chats_hybrid_ic_read else R.drawable.ap_chats_hybrid_ic_check
                                 ),
                                 contentDescription = if (m.read) "Read" else "Sent",
-                                modifier = Modifier.size(13.dp),
+                                modifier = Modifier.size(12.dp),
                             )
                         }
                     }
@@ -1275,7 +1211,7 @@ private fun HybridMessageBubble(
 }
 
 @Composable
-private fun HybridVoiceNoteRow(m: ChatMessage, fromMe: Boolean) {
+private fun UnsloppedVoiceNoteRow(m: ChatMessage, fromMe: Boolean) {
     var playing by remember { mutableStateOf(false) }
     var player by remember { mutableStateOf<android.media.MediaPlayer?>(null) }
 
@@ -1291,9 +1227,9 @@ private fun HybridVoiceNoteRow(m: ChatMessage, fromMe: Boolean) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .size(34.dp)
+                .size(32.dp)
                 .background(
-                    if (fromMe) Color.White.copy(alpha = 0.2f) else AuroraChatsTokens.ActiveCyan.copy(alpha = 0.25f),
+                    if (fromMe) Color.White.copy(alpha = 0.2f) else UnsloppedChatTokens.SurfaceRaised,
                     CircleShape,
                 )
                 .clickable {
@@ -1329,60 +1265,59 @@ private fun HybridVoiceNoteRow(m: ChatMessage, fromMe: Boolean) {
             Icon(
                 painter = painterResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play),
                 contentDescription = if (playing) "Pause" else "Play",
-                tint = if (fromMe) Color.White else AuroraChatsTokens.ActiveCyan,
-                modifier = Modifier.size(15.dp),
+                tint = if (fromMe) Color.White else UnsloppedChatTokens.TextPrimary,
+                modifier = Modifier.size(14.dp),
             )
         }
         Spacer(Modifier.width(8.dp))
         Text(
-            "${(m.durationMs / 1000).toInt()}s",
-            color = if (fromMe) Color.White else AuroraChatsTokens.TextPrimary,
+            text = "${(m.durationMs / 1000).toInt()}s",
+            color = if (fromMe) Color.White else UnsloppedChatTokens.TextPrimary,
             fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
         )
     }
 }
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-private fun GiftPickerSheet(
+private fun UnsloppedGiftPickerSheet(
     balance: Long,
     onDismiss: () -> Unit,
     onSelect: (com.sundram.weplay.data.GiftItem) -> Unit,
 ) {
     androidx.compose.material3.ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = AuroraChatsTokens.SurfaceElevated,
-        scrimColor = Color.Black.copy(alpha = 0.7f),
+        containerColor = UnsloppedChatTokens.SurfaceRaised,
+        scrimColor = Color.Black.copy(alpha = 0.6f),
     ) {
-        Column(Modifier.padding(20.dp)) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Send a celestial gift",
-                    color = AuroraChatsTokens.TextPrimary,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = "Send gift",
+                    color = UnsloppedChatTokens.TextPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                 )
                 Spacer(Modifier.weight(1f))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .background(AuroraChatsTokens.Surface, RoundedCornerShape(12.dp))
-                        .border(1.dp, AuroraChatsTokens.RoyalGold.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                        .background(UnsloppedChatTokens.Surface, RoundedCornerShape(8.dp))
+                        .border(1.dp, UnsloppedChatTokens.Hairline, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_coin),
                         contentDescription = null,
-                        tint = AuroraChatsTokens.RoyalGold,
-                        modifier = Modifier.size(16.dp),
+                        tint = UnsloppedChatTokens.GoldCoin,
+                        modifier = Modifier.size(14.dp),
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        "$balance",
-                        color = AuroraChatsTokens.RoyalGold,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
+                        text = "$balance",
+                        color = UnsloppedChatTokens.GoldCoin,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
                     )
                 }
             }
@@ -1391,8 +1326,8 @@ private fun GiftPickerSheet(
 
             androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
                 columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(com.sundram.weplay.data.DemoGifts.size) { idx ->
                     val gift = com.sundram.weplay.data.DemoGifts[idx]
@@ -1400,53 +1335,42 @@ private fun GiftPickerSheet(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .background(AuroraChatsTokens.Surface, RoundedCornerShape(14.dp))
-                            .border(
-                                1.dp,
-                                if (afford) AuroraChatsTokens.CardBorder else AuroraChatsTokens.CardBorder.copy(alpha = 0.2f),
-                                RoundedCornerShape(14.dp),
-                            )
+                            .background(UnsloppedChatTokens.Surface, RoundedCornerShape(10.dp))
+                            .border(1.dp, UnsloppedChatTokens.Hairline, RoundedCornerShape(10.dp))
                             .clickable(enabled = afford) { onSelect(gift) }
                             .padding(12.dp),
                     ) {
                         Image(
                             painter = painterResource(R.drawable.ap_chats_hybrid_ic_gift),
                             contentDescription = null,
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier.size(32.dp),
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            gift.name,
-                            color = if (afford) AuroraChatsTokens.TextPrimary else AuroraChatsTokens.TextSecondary.copy(alpha = 0.5f),
+                            text = gift.name,
+                            color = if (afford) UnsloppedChatTokens.TextPrimary else UnsloppedChatTokens.TextMuted,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Normal,
                             maxLines = 1,
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            "${gift.cost}c",
-                            color = if (afford) AuroraChatsTokens.RoyalGold else AuroraChatsTokens.TextSecondary.copy(alpha = 0.4f),
+                            text = "${gift.cost} coins",
+                            color = if (afford) UnsloppedChatTokens.GoldCoin else UnsloppedChatTokens.TextMuted,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
                         )
                     }
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
-            Text(
-                "Gifts transfer instant charm to your friend and appear in the conversation.",
-                color = AuroraChatsTokens.TextSecondary,
-                fontSize = 11.sp,
-            )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
         }
     }
 }
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-private fun PhotoPickerSheet(onDismiss: () -> Unit, onPick: (String) -> Unit) {
+private fun UnsloppedPhotoPickerSheet(onDismiss: () -> Unit, onPick: (String) -> Unit) {
     val context = LocalContext.current
     val store = remember { com.sundram.weplay.data.ProfileStore(context) }
     val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -1460,19 +1384,19 @@ private fun PhotoPickerSheet(onDismiss: () -> Unit, onPick: (String) -> Unit) {
 
     androidx.compose.material3.ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = AuroraChatsTokens.SurfaceElevated,
-        scrimColor = Color.Black.copy(alpha = 0.7f),
+        containerColor = UnsloppedChatTokens.SurfaceRaised,
+        scrimColor = Color.Black.copy(alpha = 0.6f),
     ) {
         LaunchedEffect(Unit) {
             launcher.launch("image/*")
         }
         Box(
-            modifier = Modifier.fillMaxWidth().padding(28.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                "Opening gallery…",
-                color = AuroraChatsTokens.TextPrimary,
+                text = "Opening media picker",
+                color = UnsloppedChatTokens.TextSecondary,
                 fontSize = 14.sp,
             )
         }
@@ -1485,9 +1409,9 @@ private fun customWallpaperOverlay(w: Int): Brush? {
     val p = WallPurple
     val m = WallMint
     return when (w) {
-        1 -> Brush.verticalGradient(listOf(b.copy(alpha = 0.35f), Color.Transparent))
-        2 -> Brush.verticalGradient(listOf(p.copy(alpha = 0.35f), Color.Transparent))
-        3 -> Brush.verticalGradient(listOf(m.copy(alpha = 0.35f), Color.Transparent))
+        1 -> Brush.verticalGradient(listOf(b.copy(alpha = 0.15f), Color.Transparent))
+        2 -> Brush.verticalGradient(listOf(p.copy(alpha = 0.15f), Color.Transparent))
+        3 -> Brush.verticalGradient(listOf(m.copy(alpha = 0.15f), Color.Transparent))
         else -> null
     }
 }
