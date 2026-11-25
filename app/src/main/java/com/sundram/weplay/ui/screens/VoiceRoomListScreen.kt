@@ -51,6 +51,7 @@ import com.sundram.weplay.R
 import com.sundram.weplay.data.Demo
 import com.sundram.weplay.data.RoomCard
 import com.sundram.weplay.data.UserPrefs
+import com.sundram.weplay.voiceroom.theme.RoomThemeServiceProvider
 import com.sundram.weplay.ui.components.InitialsAvatar
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.components.navigateSafe
@@ -114,6 +115,7 @@ private fun formatVisitedAgo(timestamp: Long): String {
 fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
     val context = LocalContext.current
     val prefs = remember { UserPrefs(context) }
+    val themeRepo = remember(context) { RoomThemeServiceProvider.repository(context) }
     var visitRefresh by remember { mutableStateOf(0) }
 
     var selectedLoungeTab by rememberSaveable { mutableStateOf("All") }
@@ -122,12 +124,34 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showGiftPackSheet by rememberSaveable { mutableStateOf(false) }
 
+    // Combine persisted created rooms with built-in sample rooms
+    val allRooms = remember(visitRefresh) {
+        val createdCards = themeRepo.getCreatedRooms().map { rec ->
+            RoomCard(
+                id = rec.id,
+                title = rec.title,
+                host = rec.hostName,
+                members = 1,
+                tag = rec.tag,
+                live = true,
+                coverRes = R.drawable.room_thumb_classic_lounge,
+                badges = emptyList(),
+                activityText = rec.announcement,
+                listeners = 1,
+                hostLevel = 1,
+                roomLevel = RoomThemeServiceProvider.crestStore(context).load(rec.id).level,
+                isPkActive = rec.modeTitle == "PK Battle",
+            )
+        }
+        createdCards + Demo.rooms
+    }
+
     // Multi-criteria room filtering & sorting (supporting Recent, All, Popular, Related, Following)
     val filteredRooms = remember(selectedLoungeTab, selectedCategory, searchQuery, visitRefresh) {
         when (selectedLoungeTab) {
             "Following" -> {
                 val followedIds = prefs.getFollowedRooms()
-                Demo.rooms.filter { it.id in followedIds }.filter { room ->
+                allRooms.filter { it.id in followedIds }.filter { room ->
                     if (searchQuery.isBlank()) true else {
                         room.title.contains(searchQuery, ignoreCase = true) ||
                                 room.host.contains(searchQuery, ignoreCase = true)
@@ -137,7 +161,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
             "Recent" -> {
                 val visitedPairs = prefs.getRecentVisitedRooms()
                 visitedPairs.mapNotNull { (roomId, timestamp) ->
-                    val found = Demo.rooms.find { it.id == roomId }
+                    val found = allRooms.find { it.id == roomId }
                     if (found != null) {
                         found.copy(activityText = "Visited ${formatVisitedAgo(timestamp)} • ${found.activityText ?: ""}")
                     } else null
@@ -149,7 +173,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                 }
             }
             "Popular" -> {
-                Demo.rooms
+                allRooms
                     .filter { room ->
                         val matchesCategory = when (selectedCategory) {
                             "All" -> true
@@ -171,7 +195,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                     .sortedByDescending { it.members }
             }
             "Related" -> {
-                Demo.rooms.filter { room ->
+                allRooms.filter { room ->
                     room.tag in listOf("Friends", "Music", "PK", "Game")
                 }.filter { room ->
                     if (searchQuery.isBlank()) true else {
@@ -181,7 +205,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                 }
             }
             else -> { // "All"
-                Demo.rooms.filter { room ->
+                allRooms.filter { room ->
                     val matchesCategory = when (selectedCategory) {
                         "All" -> true
                         "Friends" -> room.tag == "Friends" || room.tag == "Casual"

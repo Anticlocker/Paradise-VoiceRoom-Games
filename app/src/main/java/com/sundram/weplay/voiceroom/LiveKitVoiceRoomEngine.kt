@@ -42,6 +42,9 @@ class LiveKitVoiceRoomEngine(
     private var micOn = false
     private var messageSeq = 0L
     private val chat = ArrayDeque<RoomMessage>()
+    private var selfPhotoPath: String? = null
+    private var selfAvatarRes: Int? = null
+    private var selfFrameRes: Int? = null
 
     override suspend fun start(roomId: String, identity: String, displayName: String) {
         selfIdentity = identity
@@ -206,6 +209,9 @@ class LiveKitVoiceRoomEngine(
                 speaking = participant.isSpeaking && micEnabled,
                 isSelf = isSelf,
                 joinedAtMs = participant.joinedAt ?: System.currentTimeMillis(),
+                avatarRes = if (isSelf) selfAvatarRes else null,
+                photoPath = if (isSelf) selfPhotoPath else null,
+                frameRes = if (isSelf) selfFrameRes else null,
             )
         }
         _state.update { previous ->
@@ -245,6 +251,58 @@ class LiveKitVoiceRoomEngine(
     }
 
     private fun nextId(): Long = ++messageSeq
+
+    override suspend fun toggleFavorite() {
+        _state.update { it.copy(isFavorited = !it.isFavorited) }
+    }
+
+    override suspend fun setFavorited(favorited: Boolean) {
+        _state.update { it.copy(isFavorited = favorited) }
+    }
+
+    override suspend fun toggleEarpieceMode() {
+        val nextEarpiece = !_state.value.isEarpieceMode
+        runCatching {
+            val am = appContext.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+            am.mode = android.media.AudioManager.MODE_IN_COMMUNICATION
+            @Suppress("DEPRECATION")
+            am.isSpeakerphoneOn = !nextEarpiece
+        }
+        _state.update { it.copy(isEarpieceMode = nextEarpiece) }
+    }
+
+    override suspend fun toggleOutputMute() {
+        val nextMuted = !_state.value.isAudioMuted
+        runCatching {
+            room?.setSpeakerMute(nextMuted)
+        }
+        _state.update { it.copy(isAudioMuted = nextMuted) }
+    }
+
+    override suspend fun setLocalMuteMember(identity: String, muted: Boolean) {
+        _state.update { curr ->
+            val updated = if (muted) curr.locallyMutedIdentities + identity else curr.locallyMutedIdentities - identity
+            curr.copy(locallyMutedIdentities = updated)
+        }
+    }
+
+    override suspend fun setAnnouncement(text: String) {
+        val cleaned = text.trim()
+        if (cleaned.isNotEmpty()) {
+            _state.update { it.copy(announcement = cleaned) }
+        }
+    }
+
+    override suspend fun setRoomThemeId(themeId: String) {
+        _state.update { it.copy(roomThemeId = themeId) }
+    }
+
+    override suspend fun setSelfProfileVisuals(photoPath: String?, avatarRes: Int?, frameRes: Int?) {
+        selfPhotoPath = photoPath
+        selfAvatarRes = avatarRes
+        selfFrameRes = frameRes
+        publishSnapshot()
+    }
 
     private fun releaseRoom() {
         eventsJob?.cancel()

@@ -23,13 +23,18 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +43,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -50,6 +56,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
 import com.sundram.weplay.data.FrameTier
+import com.sundram.weplay.data.GiftPackRotationManager
+import com.sundram.weplay.data.MessagingStore
 import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.data.getAvatarById
 import com.sundram.weplay.ui.components.AnimatedAvatar
@@ -74,41 +82,59 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  1. Distinctive Aurora Paradise 3.0 Header with Premium Coins & Diamond Crystals
+//  1. Aurora Paradise 3.0 Compact Profile Header & Gold Coin Wallet
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun AuroraHomeHeader(nav: NavHostController, profile: UserProfile) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var unreadNotifications by remember(profile.id) {
+        mutableIntStateOf(MessagingStore(context) { profile }.unreadNotifications())
+    }
+    DisposableEffect(lifecycleOwner, profile.id) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                unreadNotifications = MessagingStore(context) { profile }.unreadNotifications()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     com.sundram.weplay.ui.theme.CelestialHeader(
         avatarRes = getAvatarById(profile.avatarId).drawableRes,
+        photoPath = profile.photoPath,
+        frameId = profile.frame,
         userName = profile.name,
         userLevel = profile.level,
         coins = profile.coins,
-        crystals = null, // Verified wallet balance: crystals safely omitted until supported by backend wallet
+        notificationCount = unreadNotifications,
         onAvatarClick = { nav.navigateSafe(Routes.ME) },
         onCoinsClick = { nav.navigateSafe(Routes.WALLET_SETTINGS) },
-        onCrystalsClick = { nav.navigateSafe(Routes.TOPUP) },
+        onTopUpClick = { nav.navigateSafe(Routes.TOPUP) },
         onEventsClick = { nav.navigateSafe(Routes.EVENT_CENTER) },
         onNotificationsClick = { nav.navigateSafe(Routes.NOTIFICATIONS) },
     )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  2. Rebalanced Quick Shortcuts with Celestial 3D Styling
+//  2. Focused Neon Shortcuts Row (Ranks, Tasks, Social)
 // ─────────────────────────────────────────────────────────────────────────────
 private data class AuroraShortcutItem(
     val title: String,
     val subtitle: String,
     val iconRes: Int,
     val route: String,
+    val accentBorderColor: Color,
     val badge: String? = null,
 )
 
 @Composable
 private fun AuroraShortcutsRow(nav: NavHostController) {
     val shortcuts = listOf(
-        AuroraShortcutItem("Ranks", "Leaderboard", R.drawable.ap_ic_trophy, Routes.RANKING),
-        AuroraShortcutItem("Tasks", "Daily", R.drawable.ap_ic_shield, Routes.TASKS),
-        AuroraShortcutItem("Social", "Chats", R.drawable.ap_ic_chat, Routes.MSG),
+        AuroraShortcutItem("Ranks", "", R.drawable.ap_home_rank_neon, Routes.RANKING, Color(0xFF66D9FF)),
+        AuroraShortcutItem("Tasks", "", R.drawable.ap_home_tasks_neon, Routes.TASKS, Color(0xFFC67CFF)),
+        AuroraShortcutItem("Social", "", R.drawable.ap_home_social_neon, Routes.MSG, Color(0xFFFA6DDE)),
     )
 
     Row(
@@ -121,69 +147,9 @@ private fun AuroraShortcutsRow(nav: NavHostController) {
                 subtitle = item.subtitle,
                 iconRes = item.iconRes,
                 badgeText = item.badge,
+                accentBorderColor = item.accentBorderColor,
                 onClick = { nav.navigateSafe(item.route) },
                 modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  3. Compact Glossy Game Rooms Banner
-// ─────────────────────────────────────────────────────────────────────────────
-@Composable
-private fun AuroraGameRoomsBanner(nav: NavHostController) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .shadow(2.dp, RoundedCornerShape(18.dp))
-            .clip(RoundedCornerShape(18.dp))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        Color(0xFF2B165C),
-                        Color(0xFF1B1242),
-                    )
-                )
-            )
-            .border(1.2.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
-            .bounceClick { nav.navigateSafe(Routes.GAME_ROOMS) }
-            .padding(horizontal = 14.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Image(
-            painter = painterResource(R.drawable.vb_room_door),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-        )
-        Spacer(Modifier.width(10.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Multiplayer Game Rooms",
-                color = com.sundram.weplay.ui.theme.CloudWhite,
-                fontSize = 13.5.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = "Custom lobbies, voice parties & competitions",
-                color = com.sundram.weplay.ui.theme.DreamLavender,
-                fontSize = 10.sp,
-            )
-        }
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(AuroraGradients.sunsetFantasy)
-                .border(0.8.dp, com.sundram.weplay.ui.theme.CloudWhite.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                .padding(horizontal = 12.dp, vertical = 5.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "Browse ›",
-                color = Color.White,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Black,
             )
         }
     }
@@ -202,9 +168,9 @@ private fun HeroFeaturedGameCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(156.dp)
-            .shadow(6.dp, RoundedCornerShape(22.dp))
-            .clip(RoundedCornerShape(22.dp))
+            .defaultMinSize(minHeight = 152.dp)
+            .height(154.dp)
+            .clip(RoundedCornerShape(20.dp))
             .background(
                 Brush.horizontalGradient(
                     listOf(
@@ -214,7 +180,7 @@ private fun HeroFeaturedGameCard(
                     )
                 )
             )
-            .border(1.2.dp, com.sundram.weplay.ui.theme.RoyalGold.copy(alpha = 0.65f), RoundedCornerShape(22.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(20.dp))
             .bounceClick(scaleDown = 0.98f, onClick = {
                 if (activeSlide == 0) onPlayClick() else onFestivalClick()
             }),
@@ -428,8 +394,7 @@ private fun PopularGamesRow(
             modifier = Modifier
                 .weight(1f)
                 .height(134.dp)
-                .shadow(3.dp, RoundedCornerShape(20.dp))
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(18.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
@@ -438,7 +403,7 @@ private fun PopularGamesRow(
                         )
                     )
                 )
-                .border(1.dp, com.sundram.weplay.ui.theme.CrystalBlue.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onSpyClick),
         ) {
             Column(
@@ -489,8 +454,7 @@ private fun PopularGamesRow(
             modifier = Modifier
                 .weight(1f)
                 .height(134.dp)
-                .shadow(3.dp, RoundedCornerShape(20.dp))
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(18.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
@@ -499,7 +463,7 @@ private fun PopularGamesRow(
                         )
                     )
                 )
-                .border(1.dp, com.sundram.weplay.ui.theme.SunsetRose.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
                 .bounceClick(scaleDown = 0.97f, onClick = onPaintClick),
         ) {
             Column(
@@ -564,10 +528,9 @@ private fun AuroraGameGridCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(116.dp)
-            .shadow(2.dp, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
             .background(AuroraGradients.celestialCard)
-            .border(1.dp, com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.30f), RoundedCornerShape(18.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(18.dp))
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
             .padding(12.dp),
     ) {
@@ -593,9 +556,10 @@ private fun AuroraGameGridCard(
             Text(
                 text = title,
                 color = com.sundram.weplay.ui.theme.CloudWhite,
-                fontSize = 14.sp,
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
-                maxLines = 1,
+                lineHeight = 16.sp,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
 
@@ -1086,6 +1050,9 @@ fun GamesHomeScreen(
     pad: PaddingValues,
     profile: UserProfile,
 ) {
+    val context = LocalContext.current
+    val giftPackManager = remember(profile.id) { GiftPackRotationManager(context, profile.id) }
+    val featuredOfferState = remember(profile.id) { giftPackManager.getFeaturedOffer() }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val showBackToTop by remember {
@@ -1131,16 +1098,13 @@ fun GamesHomeScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // ── Section 1: Distinctive Home Header with Wallet & Star Event Icon ──
+            // ── Section 1: Compact Profile Header & Gold Coin Wallet ──
             item { AuroraHomeHeader(nav = nav, profile = profile) }
 
-            // ── Section 2: Rebalanced 3-Action Shortcuts (Ranks, Tasks, Friends) ──
+            // ── Section 2: Focused Neon-Line Shortcuts (Ranks, Tasks, Social) ──
             item { AuroraShortcutsRow(nav = nav) }
 
-            // ── Section 3: B4: Compact Game Rooms Banner ──
-            item { AuroraGameRoomsBanner(nav = nav) }
-
-            // ── Section 4: Games Discovery Header + Search Toggle ──
+            // ── Section 3: Games Discovery Header + Event Center + Search Toggle ──
             item {
                 Row(
                     modifier = Modifier
@@ -1157,11 +1121,30 @@ fun GamesHomeScreen(
 
                     Spacer(Modifier.weight(1f))
 
+                    // Event Center Access Action
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(AuroraSurface)
+                            .border(1.dp, AuroraBorder, CircleShape)
+                            .bounceClick { nav.navigateSafe(Routes.EVENT_CENTER) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ap_home_event_star),
+                            contentDescription = "Events",
+                            modifier = Modifier.size(18.dp),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+
                     // In-page Game Search Toggle Button
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
-                            .shadow(1.dp, CircleShape)
+                            .size(34.dp)
                             .clip(CircleShape)
                             .background(AuroraSurface)
                             .border(1.dp, AuroraBorder, CircleShape)
@@ -1181,15 +1164,22 @@ fun GamesHomeScreen(
 
                     Spacer(Modifier.width(10.dp))
 
-                    Text(
-                        text = "All Games ›",
-                        color = AuroraOrchid,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
+                    Box(
                         modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(AuroraSurface.copy(alpha = 0.85f))
+                            .border(1.dp, AuroraBorder, RoundedCornerShape(16.dp))
                             .bounceClick { nav.navigateSafe(Routes.GAME_ROOMS) }
-                            .padding(vertical = 4.dp),
-                    )
+                            .padding(horizontal = 11.dp, vertical = 6.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "All Games ›",
+                            color = com.sundram.weplay.ui.theme.CloudWhite,
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
                 }
             }
 
@@ -1375,14 +1365,15 @@ fun GamesHomeScreen(
                     }
                 }
 
-                // ── Section 8: Premium 3D Gift Pack Treasure Chest ──
+                // ── Section 8: Persisted 48-Hour Gift Pack Offer ──
                 item {
                     com.sundram.weplay.ui.theme.PremiumGiftPack(
-                        countdownText = "47:59:12",
-                        offerTitle = "Royal Starter Chest",
-                        rewardAmount = "5,000",
-                        priceText = "$0.99 ›",
+                        countdownText = featuredOfferState.formattedTimeRemaining,
+                        offerTitle = featuredOfferState.offer.title,
+                        rewardAmount = "",
+                        priceText = "₹${featuredOfferState.offer.demoPriceRupees} ›",
                         onBuyClick = { showGiftPackSheet = true },
+                        subtitle = featuredOfferState.offer.description,
                     )
                 }
 

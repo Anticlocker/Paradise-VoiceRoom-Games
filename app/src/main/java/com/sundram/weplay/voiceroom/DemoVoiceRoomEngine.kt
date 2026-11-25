@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 /**
  * Offline simulation for [VoiceRoomEngine].
  *
- * Implements the full VYBORA Aurora Lounge 2.0 stage architecture:
+ * Implements the 10-seat Voice Lounge stage architecture:
  * - 1 Host seat (0)
  * - 8 Regular mic seats (1..8)
  * - 1 Optional Partner seat (9)
@@ -26,8 +26,9 @@ class DemoVoiceRoomEngine(
 
     private val _state = MutableStateFlow(
         VoiceRoomState(
-            transportLabel = "Aurora Lounge · Offline Preview",
+            transportLabel = "Offline Preview",
             connection = RoomConnection.SIMULATED,
+            roomThemeId = "classic_lounge",
         ),
     )
     override val state: StateFlow<VoiceRoomState> = _state
@@ -61,8 +62,8 @@ class DemoVoiceRoomEngine(
             level = 5,
         )
 
-        appendMessage(systemMessage("✨ Welcome to Aurora Lounge 2.0! Stage features 1 Host + 8 Regular Mic Seats (with Partner & Attach Seats)."))
-        appendMessage(scriptMessage(GHOSTS[0].name, "Hey everyone! Welcome to the lounge 🎙️ grab a regular mic seat to chat!"))
+        appendMessage(systemMessage("Welcome to the voice room. Grab an open mic seat to join the conversation."))
+        appendMessage(scriptMessage(GHOSTS[0].name, "Hey everyone! Welcome to the room — feel free to take an open seat!"))
 
         _state.update {
             it.copy(
@@ -317,7 +318,7 @@ class DemoVoiceRoomEngine(
             status = BondStatus.REQUESTED,
         )
 
-        chat.addLast(systemMessage("Host requested an Aurora Seat Bond between Seat $firstSeat (${occupantA.name}) and Seat $secondSeat (${occupantB.name}). Waiting for consent..."))
+        chat.addLast(systemMessage("Requested an Attached Seat link between Seat $firstSeat (${occupantA.name}) and Seat $secondSeat (${occupantB.name}). Waiting for confirmation."))
         publish()
 
         // If self is occupant B, trigger pending consent dialog
@@ -342,7 +343,7 @@ class DemoVoiceRoomEngine(
                 }
                 curr.copy(activeBonds = cleanBonds + activeBond)
             }
-            chat.addLast(systemMessage("✨ Seats $firstSeat & $secondSeat are now Aurora Bonded! 💕"))
+            chat.addLast(systemMessage("Seats $firstSeat & $secondSeat are now connected."))
             publish()
         }
     }
@@ -391,6 +392,119 @@ class DemoVoiceRoomEngine(
             }
             chat.addLast(systemMessage("Seat bond was detached as $occupantName left the seat."))
         }
+    }
+
+    override suspend fun moveMemberSeat(identity: String, targetSeat: Int) {
+        if (targetSeat !in 0 until VOICE_ROOM_STAGE_CAPACITY) return
+        if (_state.value.isSeatLocked(targetSeat)) return
+        if (members.any { it.seat == targetSeat }) return
+        val current = members.firstOrNull { it.identity == identity } ?: return
+        val oldSeat = current.seat
+        members.replaceAll {
+            if (it.identity == identity) {
+                it.copy(seat = targetSeat, speaking = false)
+            } else it
+        }
+        if (oldSeat != null && oldSeat != targetSeat) {
+            invalidateBondsForSeat(oldSeat, current.name)
+        }
+        chat.addLast(systemMessage("${current.name} moved to ${if (targetSeat == PARTNER_SEAT_INDEX) "Partner seat" else "Seat $targetSeat"}."))
+        publish()
+    }
+
+    override suspend fun toggleModerator(identity: String) {
+        val target = members.firstOrNull { it.identity == identity } ?: return
+        if (target.isHost) return
+        val nextIsMod = target.role != "moderator"
+        members.replaceAll {
+            if (it.identity == identity) {
+                it.copy(
+                    role = if (nextIsMod) "moderator" else if (it.hasSeat) "speaker" else "listener",
+                    frameRes = if (nextIsMod) R.drawable.vb_vr_frame_moderator else R.drawable.vb_vr_frame_speaker,
+                )
+            } else it
+        }
+        _state.update { curr ->
+            val mods = if (nextIsMod) curr.moderatorIdentities + identity else curr.moderatorIdentities - identity
+            curr.copy(moderatorIdentities = mods)
+        }
+        chat.addLast(systemMessage(if (nextIsMod) "${target.name} was assigned Moderator." else "${target.name} is no longer a Moderator."))
+        publish()
+    }
+
+    override suspend fun inviteToSeat(identity: String, seat: Int) {
+        if (seat !in 1..REGULAR_SEAT_END) return
+        if (_state.value.isSeatLocked(seat) || members.any { it.seat == seat }) return
+        val target = members.firstOrNull { it.identity == identity } ?: return
+        if (target.isSelf) {
+            takeSeat(seat)
+        } else {
+            members.replaceAll {
+                if (it.identity == identity) it.copy(seat = seat, micOn = false, role = if (it.role == "listener") "speaker" else it.role)
+                else it
+            }
+            chat.addLast(systemMessage("Invited ${target.name} to Seat $seat."))
+            publish()
+        }
+    }
+
+    override suspend fun setLocalMuteMember(identity: String, muted: Boolean) {
+        _state.update { curr ->
+            val updated = if (muted) curr.locallyMutedIdentities + identity else curr.locallyMutedIdentities - identity
+            curr.copy(locallyMutedIdentities = updated)
+        }
+        val targetName = members.firstOrNull { it.identity == identity }?.name ?: "participant"
+        chat.addLast(systemMessage(if (muted) "Muted $targetName locally for your device." else "Unmuted $targetName locally."))
+        publish()
+    }
+
+    override suspend fun moderatorMuteSeat(seat: Int, muted: Boolean) {
+        val occupant = members.firstOrNull { it.seat == seat } ?: return
+        members.replaceAll {
+            if (it.identity == occupant.identity) it.copy(micOn = !muted, speaking = false)
+            else it
+        }
+        chat.addLast(systemMessage(if (muted) "Moderator muted ${occupant.name} on Seat $seat." else "${occupant.name} on Seat $seat was unmuted."))
+        publish()
+    }
+
+    override suspend fun blockMember(identity: String) {
+        val target = members.firstOrNull { it.identity == identity } ?: return
+        if (target.isSelf) return
+        members.removeAll { it.identity == identity }
+        target.seat?.let { invalidateBondsForSeat(it, target.name) }
+        _state.update { it.copy(blockedIdentities = it.blockedIdentities + identity) }
+        chat.addLast(systemMessage("Blocked ${target.name} from your room session."))
+        publish()
+    }
+
+    override suspend fun setAnnouncement(text: String) {
+        val cleaned = text.trim()
+        if (cleaned.isEmpty()) return
+        _state.update { it.copy(announcement = cleaned) }
+        chat.addLast(systemMessage("Room announcement updated."))
+        publish()
+    }
+
+    override suspend fun setRoomThemeId(themeId: String) {
+        _state.update { it.copy(roomThemeId = themeId) }
+    }
+
+    override suspend fun setFavorited(favorited: Boolean) {
+        _state.update { it.copy(isFavorited = favorited) }
+    }
+
+    override suspend fun setSelfProfileVisuals(photoPath: String?, avatarRes: Int?, frameRes: Int?) {
+        members.replaceAll {
+            if (it.isSelf) {
+                it.copy(
+                    photoPath = photoPath,
+                    avatarRes = avatarRes ?: it.avatarRes,
+                    frameRes = frameRes ?: it.frameRes,
+                )
+            } else it
+        }
+        publish()
     }
 
     /** Cycles speaking highlights so the ring animation is visible without a server. */
@@ -528,10 +642,10 @@ class DemoVoiceRoomEngine(
 
         val SCRIPT_LINES = listOf(
             "Arjun" to "Next track is acoustic guitar jam, who wants to queue up next? 🎸",
-            "Neha" to "Welcome to tonight's Aurora Lounge session everyone! Drop some hearts! ✨",
-            "Vikram" to "Sent 3x roses to the host, amazing song! 🌹",
-            "Maya" to "The audio quality is crystal clear tonight! Loving this lounge.",
-            "Tara" to "Muted for a sec grabbing headphones, be right back!",
+            "Neha" to "Welcome everyone joining tonight! Grab an open mic seat anytime.",
+            "Vikram" to "Sent 3x roses to the host — great session tonight! 🌹",
+            "Maya" to "Audio sounds super clear on speakers tonight.",
+            "Tara" to "Muted for a moment while grabbing headphones, back shortly!",
         )
 
         val REPLIES = listOf(

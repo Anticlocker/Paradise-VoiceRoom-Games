@@ -388,6 +388,10 @@ fun MeScreen(
                     showShopSheet = false
                     nav.navigate(Routes.TOPUP)
                 },
+                onOpenRoomThemesShop = {
+                    showShopSheet = false
+                    nav.navigate("profile/gifts/themes")
+                },
                 onDismiss = { showShopSheet = false },
             )
         }
@@ -1195,6 +1199,7 @@ private fun RoyalVipBottomSheet(onDismiss: () -> Unit) {
 @Composable
 private fun RoyalShopBottomSheet(
     onTopUp: () -> Unit,
+    onOpenRoomThemesShop: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     Column(
@@ -1255,6 +1260,36 @@ private fun RoyalShopBottomSheet(
                     Text("Acquire", color = RoyalBackground, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
+        }
+
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(RoyalPanel)
+                .border(1.dp, RoyalCyan.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
+                .clickable(onClick = onOpenRoomThemesShop)
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(R.drawable.room_thumb_sakura_garden),
+                    contentDescription = "Room Themes",
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop,
+                )
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text("Voice Room Themes", color = RoyalTextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("Preview all 10 themes & Crest unlocks", color = RoyalTextSecondary, fontSize = 11.sp)
+                }
+            }
+            Text("Open ›", color = RoyalCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
 
         Spacer(Modifier.height(16.dp))

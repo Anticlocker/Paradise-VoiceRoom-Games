@@ -84,6 +84,9 @@ object Routes {
     const val TASKS = "hub/tasks"
     const val EVENT_CENTER = "events"
     const val EVENT_DETAIL = "event/{eventId}"
+    const val ROOM_THEMES = "room/{roomId}/themes"
+    const val ROOM_THEME_PREVIEW = "room/{roomId}/theme-preview/{themeId}"
+    const val ROOM_CREST = "room/{roomId}/crest"
     const val GAMES = HUB
     const val ROOMS = ROOM
     const val SETTINGS_EDIT = PROFILE_EDIT
@@ -113,6 +116,9 @@ object Routes {
     fun userDetailRoute(id: String) = "profile/detail/$id"
     fun roomRoute(id: String) = "room/$id"
     fun roomDetail(roomId: String) = "room/$roomId"
+    fun roomThemesRoute(roomId: String) = "room/$roomId/themes"
+    fun roomThemePreviewRoute(roomId: String, themeId: String) = "room/$roomId/theme-preview/$themeId"
+    fun roomCrestRoute(roomId: String) = "room/$roomId/crest"
     fun eventDetailRoute(id: String) = "event/$id"
     fun notificationsRoute() = NOTIFICATIONS
     fun searchRoute() = SEARCH

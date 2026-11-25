@@ -28,6 +28,8 @@ import { createRoomsService } from "./rooms/service.mjs";
 import { handleRoomsRequest } from "./rooms/routes.mjs";
 import { createSupportService } from "./support/service.mjs";
 import { handleSupportRequest } from "./support/routes.mjs";
+import { createRoomThemesService, seedRoomThemeCatalog } from "./room_themes/service.mjs";
+import { handleRoomThemesRequest } from "./room_themes/routes.mjs";
 
 const PORT = Number(process.env.PORT ?? 8080);
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -41,6 +43,7 @@ if (!DATABASE_URL) {
 // Economy's boot opener also applies the shared migrations and refreshes the
 // gift/coin-pack catalogue, so one call brings the whole database up to date.
 const db = await openEconomyDatabase(DATABASE_URL);
+await seedRoomThemeCatalog(db);
 
 const services = {
   "/identity": createIdentityService(db),
@@ -49,6 +52,7 @@ const services = {
   "/messaging": createMessagingService(db),
   "/notifications": createNotificationsService(db),
   "/rooms": createRoomsService(db),
+  "/room-themes": createRoomThemesService(db),
   "/support": createSupportService(db),
 };
 
@@ -59,6 +63,7 @@ const handlers = {
   "/messaging": handleMessagingRequest,
   "/notifications": handleNotificationsRequest,
   "/rooms": handleRoomsRequest,
+  "/room-themes": handleRoomThemesRequest,
   "/support": handleSupportRequest,
 };
 

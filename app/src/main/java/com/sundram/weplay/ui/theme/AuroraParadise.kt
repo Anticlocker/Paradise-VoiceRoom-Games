@@ -1,5 +1,7 @@
 package com.sundram.weplay.ui.theme
 
+import android.graphics.BitmapFactory
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -38,6 +41,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -48,11 +52,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +68,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sundram.weplay.R
+import com.sundram.weplay.data.FrameTier
+import com.sundram.weplay.ui.components.PhoenixAvatarFrame
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -833,9 +844,11 @@ fun AuroraChatBackground(
 
 /**
  * CelestialHeader:
- * Framed user avatar with level badge, gold currency pill (aurora3_ic_coin),
- * crystal diamond currency pill (aurora3_ic_diamond), and Event Center / Star shortcut.
+ * Compact user profile cluster with actual photo/avatar, equipped frame and level badge,
+ * "Welcome" greeting + truncated username, compact gold coin wallet pill with separate Top Up
+ * plus button, and right-aligned notification bell with real unread badge.
  */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun CelestialHeader(
     avatarRes: Int,
@@ -845,121 +858,201 @@ fun CelestialHeader(
     crystals: Long? = null,
     onAvatarClick: () -> Unit,
     onCoinsClick: () -> Unit,
-    onCrystalsClick: () -> Unit,
+    onCrystalsClick: () -> Unit = {},
     onEventsClick: () -> Unit,
     onNotificationsClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    photoPath: String? = null,
+    frameId: String? = null,
+    notificationCount: Int = 0,
+    onTopUpClick: () -> Unit = onCoinsClick,
 ) {
     val formattedCoins = remember(coins) {
         NumberFormat.getIntegerInstance().format(coins)
+    }
+    val userBitmap by produceState<ImageBitmap?>(initialValue = null, key1 = photoPath) {
+        value = if (!photoPath.isNullOrBlank()) {
+            withContext(Dispatchers.IO) {
+                runCatching { BitmapFactory.decodeFile(photoPath)?.asImageBitmap() }.getOrNull()
+            }
+        } else {
+            null
+        }
+    }
+    val isPhoenixFrame = frameId.equals("phoenix", ignoreCase = true) ||
+        frameId.equals("PHOENIX_REBIRTH", ignoreCase = true)
+    val ringFrameRes = remember(frameId) {
+        if (!frameId.isNullOrBlank() && !isPhoenixFrame) {
+            FrameTier.fromId(frameId).ringDrawableRes
+        } else {
+            R.drawable.aurora3_frame_gold
+        }
     }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 6.dp),
+            .padding(horizontal = 2.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // 1. Framed Avatar with Level Badge
-        Box(
+        // 1. User Avatar, Equipped Frame & Profile Greeting Trigger
+        Row(
             modifier = Modifier
-                .size(50.dp)
-                .clickable(onClick = onAvatarClick),
-            contentAlignment = Alignment.Center,
+                .weight(1f)
+                .clip(RoundedCornerShape(24.dp))
+                .clickable(onClick = onAvatarClick)
+                .padding(end = 6.dp, top = 2.dp, bottom = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painterResource(avatarRes),
-                contentDescription = userName,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop,
-            )
-            // Golden celestial frame overlay
-            Image(
-                painter = painterResource(R.drawable.aurora3_frame_gold),
-                contentDescription = null,
-                modifier = Modifier.size(50.dp),
-            )
-            // Level badge at bottom
             Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = 2.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(AuroraGradients.royalGold)
-                    .border(0.8.dp, CloudWhite, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 4.dp, vertical = 0.5.dp),
+                modifier = Modifier.size(50.dp),
                 contentAlignment = Alignment.Center,
             ) {
+                if (isPhoenixFrame) {
+                    PhoenixAvatarFrame(
+                        name = userName,
+                        photoPath = photoPath,
+                        size = 48.dp,
+                        animate = false,
+                        contentDescription = userName,
+                    )
+                } else {
+                    if (userBitmap != null) {
+                        Image(
+                            bitmap = userBitmap!!,
+                            contentDescription = userName,
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop,
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(avatarRes),
+                            contentDescription = userName,
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
+                    Image(
+                        painter = painterResource(ringFrameRes),
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset(y = 2.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(AuroraGradients.royalGold)
+                        .border(0.8.dp, CloudWhite, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 5.dp, vertical = 0.5.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "Lv.$userLevel",
+                        color = DeepInk,
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
+            }
+
+            Spacer(Modifier.width(10.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Lv.$userLevel",
-                    color = DeepInk,
-                    fontSize = 8.5.sp,
-                    fontWeight = FontWeight.Black,
+                    text = "Welcome",
+                    color = DreamLavender,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
                 )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = userName,
+                        color = CloudWhite,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.ic_chevron_right),
+                        contentDescription = "Open profile",
+                        tint = CloudWhite.copy(alpha = 0.92f),
+                        modifier = Modifier.size(14.dp),
+                    )
+                }
             }
         }
 
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(6.dp))
 
-        // 2. Welcome Greeting & Name
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Welcome",
-                color = DreamLavender,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-            )
-            Text(
-                text = userName,
-                color = CloudWhite,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-
-        Spacer(Modifier.width(8.dp))
-
-        // 3. Gold Currency Pill (Coins with + top-up action)
+        // 2. Compact Gold Coin Wallet Pill (coins -> Wallet, + -> Top Up)
         CrystalCurrencyPill(
-            iconRes = R.drawable.vb_coin,
+            iconRes = R.drawable.ap_home_gold_coin,
             amount = formattedCoins,
-            gradient = Brush.horizontalGradient(listOf(Color(0xFF38230D), Color(0xFF2A1608))),
+            gradient = Brush.horizontalGradient(listOf(Color(0xFF281948), Color(0xFF1F123A))),
             borderColor = RoyalGold,
             onClick = onCoinsClick,
+            onPlusClick = onTopUpClick,
         )
 
         Spacer(Modifier.width(8.dp))
 
-        // 4. Event Center Star Shortcut
+        // 3. Notification Bell Action with Real Unread Badge
+        val notifyAction = onNotificationsClick ?: onEventsClick
         Box(
             modifier = Modifier
-                .size(34.dp)
+                .size(38.dp)
                 .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        listOf(RoyalViolet, DeepInk)
-                    )
-                )
-                .border(1.2.dp, RoyalGold, CircleShape)
-                .clickable(onClick = onEventsClick),
+                .background(DeepInk.copy(alpha = 0.88f))
+                .border(1.dp, DreamLavender.copy(alpha = 0.30f), CircleShape)
+                .clickable(onClick = notifyAction),
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(R.drawable.aurora3_ic_nav_star),
-                contentDescription = "Event Center",
-                modifier = Modifier.size(18.dp),
+                painter = painterResource(R.drawable.ap_home_notification_bell),
+                contentDescription = "Notifications",
+                modifier = Modifier.size(20.dp),
+                contentScale = ContentScale.Fit,
             )
+
+            if (notificationCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-3).dp, y = 3.dp)
+                        .widthIn(min = 14.dp)
+                        .height(14.dp)
+                        .clip(CircleShape)
+                        .background(SunsetRose)
+                        .padding(horizontal = 3.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = if (notificationCount > 99) "99+" else "$notificationCount",
+                        color = Color.White,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
         }
     }
 }
 
 /**
  * CrystalCurrencyPill:
- * Dimensional coin or crystal counter pill with metallic border and "+" top-up button.
+ * Compact premium gold coin wallet pill with real coin balance (opens wallet)
+ * and a distinct circular "+" Top Up trigger.
  */
 @Composable
 fun CrystalCurrencyPill(
@@ -969,44 +1062,72 @@ fun CrystalCurrencyPill(
     borderColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onPlusClick: (() -> Unit)? = null,
 ) {
+    val plusInteraction = remember { MutableInteractionSource() }
+    val plusPressed by plusInteraction.collectIsPressedAsState()
+    val plusScale by animateFloatAsState(
+        targetValue = if (plusPressed) 0.90f else 1.0f,
+        animationSpec = tween(durationMillis = 120),
+        label = "CoinPlusScale",
+    )
+
     Row(
         modifier = modifier
-            .height(30.dp)
-            .clip(RoundedCornerShape(15.dp))
+            .height(36.dp)
+            .clip(RoundedCornerShape(18.dp))
             .background(gradient)
-            .border(1.dp, borderColor.copy(alpha = 0.7f), RoundedCornerShape(15.dp))
-            .clickable(onClick = onClick)
-            .padding(start = 5.dp, end = 4.dp),
+            .border(1.dp, borderColor.copy(alpha = 0.60f), RoundedCornerShape(18.dp)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            contentScale = ContentScale.Fit,
-        )
-        Spacer(Modifier.width(4.dp))
-        Text(
-            text = amount,
-            color = CloudWhite,
-            fontSize = 11.5.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-        )
-        Spacer(Modifier.width(4.dp))
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(topStart = 18.dp, bottomStart = 18.dp))
+                .clickable(onClick = onClick)
+                .padding(start = 8.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painter = painterResource(iconRes),
+                contentDescription = "Coins",
+                modifier = Modifier.size(20.dp),
+                contentScale = ContentScale.Fit,
+            )
+            Spacer(Modifier.width(5.dp))
+            Text(
+                text = amount,
+                color = CloudWhite,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
+
         Box(
             modifier = Modifier
-                .size(16.dp)
-                .clip(CircleShape)
-                .background(borderColor),
+                .width(1.dp)
+                .height(16.dp)
+                .background(DreamLavender.copy(alpha = 0.25f)),
+        )
+
+        Box(
+            modifier = Modifier
+                .scale(plusScale)
+                .clip(RoundedCornerShape(topEnd = 18.dp, bottomEnd = 18.dp))
+                .clickable(
+                    interactionSource = plusInteraction,
+                    indication = null,
+                    onClick = onPlusClick ?: onClick,
+                )
+                .padding(start = 7.dp, end = 7.dp, top = 6.dp, bottom = 6.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = "+",
-                color = DeepInk,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
+            Image(
+                painter = painterResource(R.drawable.ap_home_plus),
+                contentDescription = "Top up coins",
+                modifier = Modifier.size(22.dp),
+                contentScale = ContentScale.Fit,
             )
         }
     }
@@ -1179,7 +1300,7 @@ fun FantasyGameCard(
 
 /**
  * PremiumShortcut:
- * Illustrated circular / rounded shortcut tile with glowing border and label.
+ * Focused neon-line quick action card with controlled border glow and crisp label.
  */
 @Composable
 fun PremiumShortcut(
@@ -1189,42 +1310,52 @@ fun PremiumShortcut(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     badgeText: String? = null,
+    accentBorderColor: Color = DreamLavender,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1.0f,
+        animationSpec = tween(durationMillis = 120),
+        label = "ShortcutPressScale",
+    )
+
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(DeepInk.copy(alpha = 0.85f))
-            .border(1.dp, DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 6.dp),
+            .scale(scale)
+            .height(94.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF221658).copy(alpha = 0.92f),
+                        Color(0xFF1A1044).copy(alpha = 0.95f),
+                    )
+                )
+            )
+            .border(1.2.dp, accentBorderColor.copy(alpha = 0.65f), RoundedCornerShape(16.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick,
+            )
+            .padding(vertical = 10.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            listOf(MysticPurple.copy(alpha = 0.45f), Color.Transparent)
-                        )
-                    )
-                    .border(1.2.dp, CrystalBlue.copy(alpha = 0.6f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    painter = painterResource(iconRes),
-                    contentDescription = title,
-                    modifier = Modifier.size(26.dp),
-                    contentScale = ContentScale.Fit,
-                )
-            }
+            Image(
+                painter = painterResource(iconRes),
+                contentDescription = title,
+                modifier = Modifier.size(38.dp),
+                contentScale = ContentScale.Fit,
+            )
 
             if (!badgeText.isNullOrBlank()) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .offset(x = 6.dp, y = (-2).dp)
+                        .offset(x = 8.dp, y = (-2).dp)
                         .clip(RoundedCornerShape(6.dp))
                         .background(SunsetRose)
                         .padding(horizontal = 4.dp, vertical = 1.dp),
@@ -1243,15 +1374,20 @@ fun PremiumShortcut(
         Text(
             text = title,
             color = CloudWhite,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = subtitle,
-            color = DreamLavender,
-            fontSize = 9.5.sp,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.SemiBold,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
+        if (subtitle.isNotBlank()) {
+            Text(
+                text = subtitle,
+                color = DreamLavender,
+                fontSize = 10.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 
@@ -1556,6 +1692,7 @@ fun PremiumGiftPack(
     priceText: String,
     onBuyClick: () -> Unit,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
 ) {
     Box(
         modifier = modifier
@@ -1625,9 +1762,11 @@ fun PremiumGiftPack(
                     maxLines = 1,
                 )
                 Text(
-                    text = "Includes $rewardAmount Coins + VIP Frame",
+                    text = subtitle ?: "Includes $rewardAmount Coins + VIP Frame",
                     color = DreamLavender,
                     fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -1689,7 +1828,7 @@ fun AuroraNavigationDock(
                 .padding(horizontal = 12.dp, vertical = 6.dp)
                 .clip(RoundedCornerShape(26.dp))
                 .background(AuroraGradients.floatingDock)
-                .border(1.2.dp, DreamLavender.copy(alpha = 0.35f), RoundedCornerShape(26.dp))
+                .border(0.8.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(26.dp))
                 .padding(vertical = 6.dp, horizontal = 4.dp),
         ) {
             Row(
@@ -1699,6 +1838,11 @@ fun AuroraNavigationDock(
                 tabs.forEach { tab ->
                     val isSelected = currentRoute == tab.route
                     val activeColor = if (tab.route == "tab_hub") RoyalGold else CrystalBlue
+                    val pillColor by animateColorAsState(
+                        targetValue = if (isSelected) activeColor.copy(alpha = 0.22f) else Color.Transparent,
+                        animationSpec = tween(durationMillis = 200),
+                        label = "DockTabPill_${tab.route}",
+                    )
 
                     Column(
                         modifier = Modifier
@@ -1711,23 +1855,13 @@ fun AuroraNavigationDock(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            // Active glowing halo: smooth radiant aura pill, zero black shadow
-                            if (isSelected) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(44.dp)
-                                        .height(30.dp)
-                                        .clip(RoundedCornerShape(15.dp))
-                                        .background(
-                                            Brush.verticalGradient(
-                                                listOf(
-                                                    activeColor.copy(alpha = 0.38f),
-                                                    Color(0xFF7042D9).copy(alpha = 0.18f),
-                                                )
-                                            )
-                                        ),
-                                )
-                            }
+                            Box(
+                                modifier = Modifier
+                                    .width(44.dp)
+                                    .height(30.dp)
+                                    .clip(RoundedCornerShape(15.dp))
+                                    .background(pillColor),
+                            )
                             Icon(
                                 painter = painterResource(tab.iconRes),
                                 contentDescription = tab.label,

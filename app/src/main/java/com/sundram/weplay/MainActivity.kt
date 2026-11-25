@@ -8,19 +8,45 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -71,6 +97,12 @@ import com.sundram.weplay.ui.screens.SearchScreen
 import com.sundram.weplay.ui.screens.VoiceRoomListScreen
 import com.sundram.weplay.ui.theme.ThemeMode
 import com.sundram.weplay.ui.theme.WePlayTheme
+import com.sundram.weplay.voiceroom.VoiceRoomSessionHolder
+import com.sundram.weplay.voiceroom.theme.CLASSIC_LOUNGE_ID
+import com.sundram.weplay.voiceroom.theme.RoomCrestCenterScreen
+import com.sundram.weplay.voiceroom.theme.RoomThemePreviewScreen
+import com.sundram.weplay.voiceroom.theme.RoomThemeServiceProvider
+import com.sundram.weplay.voiceroom.theme.RoomThemesGalleryScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -145,10 +177,71 @@ private fun WePlayApp(
     val profileState = rememberUpdatedState(profile)
     val store = remember(profile.id) { MessagingStore(context) { profileState.value } }
     var msgUnread by remember(profile.id) { mutableStateOf(store.unreadTotal()) }
+    val minimizedRoom by VoiceRoomSessionHolder.minimizedSummary.collectAsState()
 
     Scaffold(
         bottomBar = {
-            if (showBottom) WePlayBottomBar(nav, route, msgBadge = msgUnread)
+            Column {
+                val mini = minimizedRoom
+                if (mini != null && route != Routes.ROOM_DETAIL) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .then(if (!showBottom) Modifier.navigationBarsPadding() else Modifier)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0xEE221B3A))
+                            .border(1.dp, Color(0xFF4B3F75), RoundedCornerShape(16.dp))
+                            .clickable { nav.navigate(Routes.roomRoute(mini.roomId)) }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF332954)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (mini.selfMicOn) R.drawable.vb_vr_ic_mic else R.drawable.vb_vr_ic_mic_off
+                                ),
+                                contentDescription = "Active Voice Room",
+                                tint = Color(0xFFF7F4FF),
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = mini.title,
+                                color = Color(0xFFF7F4FF),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = "In room · ${mini.participantCount} active · Tap to return",
+                                color = Color(0xFFB8B0CC),
+                                fontSize = 10.5.sp,
+                                maxLines = 1,
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0x33EF5578))
+                                .clickable { VoiceRoomSessionHolder.leaveAndRelease() }
+                                .padding(horizontal = 10.dp, vertical = 5.dp),
+                        ) {
+                            Text("Leave", color = Color(0xFFFF8BA3), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+                if (showBottom) WePlayBottomBar(nav, route, msgBadge = msgUnread)
+            }
         },
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
     ) { pad ->
@@ -230,7 +323,10 @@ private fun WePlayApp(
                 ProfileEditScreen(nav, profile, onSaveProfile)
             }
             composable(Routes.GIFTS) {
-                GiftsScreen(nav, profile)
+                GiftsScreen(nav, profile, initialShowRoomThemes = false)
+            }
+            composable("profile/gifts/themes") {
+                GiftsScreen(nav, profile, initialShowRoomThemes = true)
             }
             composable(Routes.FAMILY) {
                 FamilyScreen(nav, profile, onSaveProfile)
@@ -302,6 +398,56 @@ private fun WePlayApp(
                 com.sundram.weplay.ui.screens.EventDetailScreen(
                     eventId = entry.arguments?.getString("eventId") ?: "",
                     nav = nav,
+                )
+            }
+            composable(Routes.ROOM_THEMES) { entry ->
+                val targetRoomId = entry.arguments?.getString("roomId") ?: "r1"
+                RoomThemesGalleryScreen(
+                    roomId = targetRoomId,
+                    profile = profile,
+                    isHostOrAuthorized = true,
+                    onOpenPreview = { themeId ->
+                        nav.navigate(Routes.roomThemePreviewRoute(targetRoomId, themeId))
+                    },
+                    onOpenCrestCenter = {
+                        nav.navigate(Routes.roomCrestRoute(targetRoomId))
+                    },
+                    onEquipFeedback = { },
+                    onClose = { nav.popBackStack() },
+                )
+            }
+            composable(Routes.ROOM_THEME_PREVIEW) { entry ->
+                val targetRoomId = entry.arguments?.getString("roomId") ?: "r1"
+                val themeId = entry.arguments?.getString("themeId") ?: CLASSIC_LOUNGE_ID
+                RoomThemePreviewScreen(
+                    themeId = themeId,
+                    roomId = targetRoomId,
+                    profile = profile,
+                    isHostOrAuthorized = true,
+                    onClose = { nav.popBackStack() },
+                    onEquippedSuccess = {
+                        nav.popBackStack()
+                    },
+                    onOpenCrestCenter = {
+                        nav.navigate(Routes.roomCrestRoute(targetRoomId))
+                    },
+                )
+            }
+            composable(Routes.ROOM_CREST) { entry ->
+                val targetRoomId = entry.arguments?.getString("roomId") ?: "r1"
+                val created = RoomThemeServiceProvider.repository(context).getCreatedRooms()
+                    .firstOrNull { it.id == targetRoomId }
+                val demoRoom = com.sundram.weplay.data.Demo.rooms.firstOrNull { it.id == targetRoomId }
+                RoomCrestCenterScreen(
+                    roomId = targetRoomId,
+                    roomName = created?.title ?: demoRoom?.title ?: "Voice Lounge",
+                    hostId = "ghost-host",
+                    currentUserId = profile.id,
+                    isHostOrMod = true,
+                    onPreviewTheme = { themeId ->
+                        nav.navigate(Routes.roomThemePreviewRoute(targetRoomId, themeId))
+                    },
+                    onClose = { nav.popBackStack() },
                 )
             }
         }

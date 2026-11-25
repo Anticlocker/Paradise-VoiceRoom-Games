@@ -1,7 +1,7 @@
 package com.sundram.weplay.voiceroom
 
 /**
- * Seat layout constants for the VYBORA Aurora Lounge stage.
+ * Seat layout constants for the Voice Lounge stage.
  * Invariants:
  * - Exactly ONE Host seat (index 0).
  * - Exactly EIGHT regular numbered mic seats (indices 1 to 8, rendered in a 4x2 grid).
@@ -100,6 +100,7 @@ data class RoomMemberVo(
     val joinedAtMs: Long,
     val role: String = "speaker", // "host", "partner", "moderator", "vip", "speaker", "listener"
     val avatarRes: Int? = null,
+    val photoPath: String? = null,
     val frameRes: Int? = null,
     val level: Int = 1,
     val isFollowed: Boolean = false,
@@ -132,7 +133,13 @@ data class VoiceRoomState(
     val seatCount: Int = VOICE_ROOM_STAGE_CAPACITY,
     val lockedSeats: Set<Int> = emptySet(),
     val isFavorited: Boolean = false,
-    val selectedTheme: String = "aurora", // "aurora" or "celestial"
+    val selectedTheme: String = "aurora", // Legacy engine test toggle
+    val roomThemeId: String = "classic_lounge",
+    val announcement: String = "Welcome! Grab an open mic seat to join the conversation.",
+    val roomPrivacy: String = "Public",
+    val locallyMutedIdentities: Set<String> = emptySet(),
+    val blockedIdentities: Set<String> = emptySet(),
+    val moderatorIdentities: Set<String> = emptySet(),
     val isEarpieceMode: Boolean = false,
     val isAudioMuted: Boolean = false,
     val partnerEnabled: Boolean = false,

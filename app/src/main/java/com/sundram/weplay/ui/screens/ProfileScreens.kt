@@ -29,11 +29,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -51,6 +54,9 @@ import com.sundram.weplay.data.DemoGifts
 import com.sundram.weplay.data.GiftItem
 import com.sundram.weplay.data.UserPrefs
 import com.sundram.weplay.data.UserProfile
+import com.sundram.weplay.data.Demo
+import com.sundram.weplay.voiceroom.theme.RoomThemesGalleryScreen
+import com.sundram.weplay.voiceroom.theme.RoomThemeTab
 import com.sundram.weplay.data.ageFromDob
 import com.sundram.weplay.data.formatDob
 import com.sundram.weplay.ui.components.DobFieldRow
@@ -294,16 +300,108 @@ private fun ProfileSelectRow(value: String, placeholder: String, onClick: () -> 
 }
 
 @Composable
-fun GiftsScreen(nav: NavHostController, profile: UserProfile) {
+fun GiftsScreen(
+    nav: NavHostController,
+    profile: UserProfile,
+    initialShowRoomThemes: Boolean = false,
+) {
     val context = LocalContext.current
     val prefs = remember { UserPrefs(context) }
+    var activeShopTab by rememberSaveable { mutableIntStateOf(if (initialShowRoomThemes) 1 else 0) }
     var counts by remember {
         mutableStateOf(DemoGifts.associate { it.id to prefs.giftCount(it.id) })
     }
     var claimed by remember { mutableStateOf(prefs.claimedToday()) }
     var selected by remember { mutableStateOf<GiftItem?>(null) }
 
-    SubScreen(nav, "My gifts", "Gifts you can send in rooms") {
+    if (activeShopTab == 1) {
+        val defaultRoomId = Demo.rooms.first().id
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF151226)),
+        ) {
+            // Switcher bar between Gifts and Room Themes inside Shop
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF231D3D))
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                listOf("Gifts", "Room Themes").forEachIndexed { idx, label ->
+                    val sel = idx == activeShopTab
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (sel) Color(0xFF9B82E9) else Color.Transparent)
+                            .clickable { activeShopTab = idx }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = label,
+                            color = Color(0xFFF7F4FF),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            }
+            RoomThemesGalleryScreen(
+                roomId = defaultRoomId,
+                profile = profile,
+                isHostOrAuthorized = true,
+                initialTab = RoomThemeTab.ALL,
+                onOpenPreview = { themeId ->
+                    nav.navigate(Routes.roomThemePreviewRoute(defaultRoomId, themeId))
+                },
+                onOpenCrestCenter = {
+                    nav.navigate(Routes.roomCrestRoute(defaultRoomId))
+                },
+                onEquipFeedback = { },
+                onClose = { nav.popBackStack() },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        return
+    }
+
+    SubScreen(nav, "Shop & Gifts", "Gifts and voice room themes") {
+        // Category Toggle: Gifts vs Room Themes
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(CardWhite)
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            listOf("Gifts", "Room Themes").forEachIndexed { idx, label ->
+                val sel = idx == activeShopTab
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (sel) CyanBrand else Color.Transparent)
+                        .clickable { activeShopTab = idx }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = label,
+                        color = if (sel) OnBrand else TextBody,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
         Row(
             Modifier
                 .fillMaxWidth()

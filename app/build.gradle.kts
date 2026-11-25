@@ -23,7 +23,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.sundram.weplay"
+        applicationId = "com.paradise.play"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

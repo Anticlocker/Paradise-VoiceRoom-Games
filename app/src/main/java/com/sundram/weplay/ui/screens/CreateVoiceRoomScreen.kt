@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -62,9 +63,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
 import com.sundram.weplay.data.Demo
+import com.sundram.weplay.data.ProfileStore
 import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.nav.Routes
 import com.sundram.weplay.ui.theme.CyanBrand
+import com.sundram.weplay.voiceroom.theme.CLASSIC_LOUNGE_ID
+import com.sundram.weplay.voiceroom.theme.CreatedRoomRecord
+import com.sundram.weplay.voiceroom.theme.RoomThemeServiceProvider
 import kotlinx.coroutines.delay
 
 private val BgPearl = Color(0xFFF8F7FF)
@@ -112,15 +117,35 @@ fun CreateVoiceRoomScreen(nav: NavHostController) {
     var isLoading by remember { mutableStateOf(false) }
     var hasAttemptedSubmit by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
     val isTitleValid = roomTitle.trim().length in 3..40
     val isFormValid = isTitleValid && (!passwordEnabled || roomPassword.length >= 4)
 
-    // Creation simulation effect
+    // Create room locally with Classic Lounge default and navigate straight into it
     LaunchedEffect(isLoading) {
         if (isLoading) {
-            delay(1200)
-            val targetRoomId = Demo.rooms.firstOrNull()?.id ?: "room_1"
-            nav.navigate(Routes.roomRoute(targetRoomId)) {
+            delay(650)
+            val createdId = "room_${System.currentTimeMillis()}"
+            val hostName = ProfileStore(context).load()?.name ?: "Host"
+            val tag = RoomTags.getOrElse(selectedTagIndex) { "Friends" }
+            val modeTitle = RoomModes.getOrElse(selectedModeIndex) { RoomModes.first() }.title
+            RoomThemeServiceProvider.repository(context).registerCreatedRoom(
+                CreatedRoomRecord(
+                    id = createdId,
+                    title = roomTitle.trim(),
+                    tag = tag,
+                    modeTitle = modeTitle,
+                    hostName = hostName,
+                    announcement = announcement.trim().ifBlank {
+                        "Welcome to ${roomTitle.trim()}! Grab a mic seat and keep chat friendly."
+                    },
+                    isPrivate = isPrivate,
+                    hasPasscode = passwordEnabled,
+                    themeId = CLASSIC_LOUNGE_ID,
+                    createdAtMillis = System.currentTimeMillis(),
+                )
+            )
+            nav.navigate(Routes.roomRoute(createdId)) {
                 popUpTo(Routes.CREATE_ROOM) { inclusive = true }
             }
         }

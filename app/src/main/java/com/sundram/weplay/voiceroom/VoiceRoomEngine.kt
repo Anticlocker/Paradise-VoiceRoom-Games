@@ -79,4 +79,34 @@ interface VoiceRoomEngine {
 
     /** Host or Participant action: detach an existing seat bond. */
     suspend fun detachSeatBond(bondId: String) {}
+
+    /** Host or moderator action: move a seated participant to an open target seat. */
+    suspend fun moveMemberSeat(identity: String, targetSeat: Int) {}
+
+    /** Host action: promote or demote a moderator. */
+    suspend fun toggleModerator(identity: String) {}
+
+    /** Host or moderator action: invite a listener to take a specific open stage seat. */
+    suspend fun inviteToSeat(identity: String, seat: Int) {}
+
+    /** Local client-side mute/unmute for an individual remote participant's audio. */
+    suspend fun setLocalMuteMember(identity: String, muted: Boolean) {}
+
+    /** Host or moderator action: server-side mute/unmute a stage seat. */
+    suspend fun moderatorMuteSeat(seat: Int, muted: Boolean) {}
+
+    /** Block a room participant locally (hides messages / leaves stage interactions blocked). */
+    suspend fun blockMember(identity: String) {}
+
+    /** Update persistent room announcement notice. */
+    suspend fun setAnnouncement(text: String) {}
+
+    /** Apply active theme ID for room rendering. */
+    suspend fun setRoomThemeId(themeId: String) {}
+
+    /** Sync favorite toggle explicitly from persistent storage. */
+    suspend fun setFavorited(favorited: Boolean) {}
+
+    /** Apply local user's avatar photo / drawable / frame so real visuals replace initials. */
+    suspend fun setSelfProfileVisuals(photoPath: String?, avatarRes: Int?, frameRes: Int?) {}
 }

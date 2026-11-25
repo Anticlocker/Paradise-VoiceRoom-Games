@@ -24,15 +24,19 @@ class VoiceRoomViewModel(
     private val roomId: String,
     private val identity: String,
     private val displayName: String,
+    private val roomTitle: String = "Classic Lounge",
 ) : ViewModel() {
 
     private val context = appContext.applicationContext
+    private var explicitLeft = false
 
-    private val engine: VoiceRoomEngine = if (VoiceRoomServer.isConfigured) {
-        LiveKitVoiceRoomEngine(context, viewModelScope)
-    } else {
-        DemoVoiceRoomEngine(viewModelScope)
-    }
+    private val engine: VoiceRoomEngine = VoiceRoomSessionHolder.acquireEngine(
+        appContext = context,
+        roomId = roomId,
+        roomTitle = roomTitle,
+        identity = identity,
+        displayName = displayName,
+    )
 
     val state: StateFlow<VoiceRoomState> = engine.state
 
@@ -43,12 +47,6 @@ class VoiceRoomViewModel(
 
     /** LiveKit only unblocks mic publishing after the runtime permission exists. */
     val usesLiveServer: Boolean get() = VoiceRoomServer.isConfigured
-
-    init {
-        viewModelScope.launch {
-            engine.start(roomId, identity, displayName)
-        }
-    }
 
     /**
      * Turns the microphone on, asking for the permission first when needed.
@@ -136,6 +134,51 @@ class VoiceRoomViewModel(
         viewModelScope.launch { engine.detachSeatBond(bondId) }
     }
 
+    fun moveMemberSeat(identity: String, targetSeat: Int) {
+        viewModelScope.launch { engine.moveMemberSeat(identity, targetSeat) }
+    }
+
+    fun toggleModerator(identity: String) {
+        viewModelScope.launch { engine.toggleModerator(identity) }
+    }
+
+    fun inviteToSeat(identity: String, seat: Int) {
+        viewModelScope.launch { engine.inviteToSeat(identity, seat) }
+    }
+
+    fun setLocalMuteMember(identity: String, muted: Boolean) {
+        viewModelScope.launch { engine.setLocalMuteMember(identity, muted) }
+    }
+
+    fun moderatorMuteSeat(seat: Int, muted: Boolean) {
+        viewModelScope.launch { engine.moderatorMuteSeat(seat, muted) }
+    }
+
+    fun blockMember(identity: String) {
+        viewModelScope.launch { engine.blockMember(identity) }
+    }
+
+    fun setAnnouncement(text: String) {
+        viewModelScope.launch { engine.setAnnouncement(text) }
+    }
+
+    fun setRoomThemeId(themeId: String) {
+        viewModelScope.launch { engine.setRoomThemeId(themeId) }
+    }
+
+    fun setFavorited(favorited: Boolean) {
+        viewModelScope.launch { engine.setFavorited(favorited) }
+    }
+
+    fun setSelfProfileVisuals(photoPath: String?, avatarRes: Int?, frameRes: Int?) {
+        viewModelScope.launch { engine.setSelfProfileVisuals(photoPath, avatarRes, frameRes) }
+    }
+
+    /** Minimizes the active session so returning keeps the single connection alive. */
+    fun minimizeRoom() {
+        VoiceRoomSessionHolder.minimizeCurrentRoom()
+    }
+
     /** Retries a failed connection without leaving the screen. */
     fun reconnect() {
         viewModelScope.launch {
@@ -144,17 +187,15 @@ class VoiceRoomViewModel(
         }
     }
 
-    /** Explicitly disconnects the room engine. */
+    /** Explicitly disconnects the room engine and clears any minimized bar. */
     fun disconnect() {
-        viewModelScope.launch {
-            engine.stop()
-        }
+        explicitLeft = true
+        VoiceRoomSessionHolder.leaveAndRelease()
     }
 
     override fun onCleared() {
-        // viewModelScope is cancelled here, so release on a detached scope.
-        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-            engine.stop()
+        if (explicitLeft) {
+            VoiceRoomSessionHolder.leaveAndRelease()
         }
     }
 
@@ -164,6 +205,7 @@ class VoiceRoomViewModel(
             roomId: String,
             identity: String,
             displayName: String,
+            roomTitle: String = "Classic Lounge",
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(
@@ -174,6 +216,7 @@ class VoiceRoomViewModel(
                 roomId = roomId,
                 identity = identity,
                 displayName = displayName,
+                roomTitle = roomTitle,
             ) as T
         }
     }
