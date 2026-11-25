@@ -3,22 +3,23 @@
 **Author:** Principal Android UI Engineer & Jetpack Compose Architect  
 **Design Reference:** `previews/APPROVED_DISCOVER_LAYOUT.jpg` (`Aurora_Discover_Approved_Kit`)  
 **Package:** `com.sundram.weplay`  
-**Build Status:** BUILD SUCCESSFUL (Unit Tests: 3m 22s, Assemble APK: 1m 29s)  
-**APK Output:** `app/build/outputs/apk/debug/app-debug.apk` (84.8 MB)  
+**Build Status:** BUILD SUCCESSFUL (Unit Tests: 3m 20s, Assemble APK: 1m 30s)  
+**APK Output:** `app/build/outputs/apk/debug/app-debug.apk` (86.5 MB)  
+**Updated:** November 25, 2026  
 
 ---
 
 ## 1. Executive Summary
 
-The Discover Community Hub has been completely redesigned and implemented in native Jetpack Compose to match the approved **Aurora Paradise 3.0** design direction (`previews/APPROVED_DISCOVER_LAYOUT.jpg`).
-
-All 23 original transparent WebP artwork and icon assets have been imported into `app/src/main/res/drawable-nodpi/`. The screen hierarchy strictly follows the approved arrangement:
-1. **Restrained Moonlit Palace Header:** Displays high-contrast "Discover" title with lavender subtitle and the illuminated moonlit palace artwork (`ap_discover_header_palace`) positioned on the top right with transparent status bar integration.
-2. **Community Moments Strip:** Horizontal `LazyRow` of rounded thumbnail media cards with "More >" action opening a full moments gallery sheet, and thumbnail taps opening an interactive Moment Viewer.
-3. **Four Quick-Access Shortcut Tiles:** `Families`, `Nearby`, `Clubs & Spaces`, and `Live Events` featuring original transparent illustrated icons on translucent dark-violet glass plates with zero clipped labels.
-4. **Compact Community Activity Feed:** A unified dark violet translucent glass card featuring 2 compact rows (`Ankit Lv.19 beat Sundram at Ludo 🎲` and `Priya Lv.28 found the spy in round one — 3 votes`) with pulse icon (`ap_discover_ic_activity`) and "Today >" action opening full activity history.
-5. **Moments Feed Preview:** Two large side-by-side media cards (left: video preview with circular play badge; right: twilight evening landscape) with "Community >" action launching a post composer with Android Photo Picker support.
-6. **Fixed Shared Navigation Dock:** Preserves the 5-tab `WePlayBottomBar` with proper navigation insets.
+The Discover Community Hub has been refined to resolve visual asset discrepancies and layout alignment to achieve exact pixel-level fidelity with the user's approved reference screenshot:
+1. **Real Artwork Integration:** Extracted native-resolution artwork assets for all 4 Community Moments cards (Singer on stage, 3 smiling friends, vintage microphone, sunset heart silhouette) and both Moments preview cards (Girl smiling with headphones + play icon, twilight sunset with glowing moon).
+2. **Restrained Moonlit Palace Header:** Displays high-contrast "Discover" title with lavender subtitle and the illuminated moonlit palace & glowing moon artwork (`ap_discover_palace_moon.png`) positioned on the top right.
+3. **Refined Spacing & Card Proportions:**
+   - Community Moments cards resized to 78dp × 98dp (14dp rounded corners, 8dp spacing), allowing all 4 cards to be visible across standard viewports without clipping.
+   - Shortcut tiles resized to 82dp height with 36dp icons and single-line labels.
+   - Community Activity grouped card updated with 38dp avatars, gold level badges, and 10dp dividers.
+   - Moments Preview cards adjusted to 138dp height with custom vector play button badge.
+4. **Shared Bottom Dock Preserved:** Uses shared `WePlayBottomBar` with 16dp navigation bottom padding.
 
 ---
 

@@ -1136,7 +1136,7 @@ private fun FrameShopSheetContent(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = "Unlock for 🪙 ${activePreviewFrame.priceCoins} (Balance: $userCoins)",
+                            text = "Unlock · ${activePreviewFrame.priceCoins} Coins (Balance: $userCoins)",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -1226,7 +1226,7 @@ private fun FrameShopSheetContent(
                         text = when {
                             equipped -> "Active"
                             unlocked -> "Owned"
-                            frame.isShopPurchasable -> "🪙 ${frame.priceCoins}"
+                            frame.isShopPurchasable -> "${frame.priceCoins} Coins"
                             else -> "Lv.${frame.minLevel}"
                         },
                         fontSize = 9.sp,

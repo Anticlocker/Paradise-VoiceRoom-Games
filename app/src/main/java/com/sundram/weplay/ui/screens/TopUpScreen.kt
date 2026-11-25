@@ -195,18 +195,23 @@ fun TopUpScreen(
                     .padding(14.dp),
             ) {
                 Row(verticalAlignment = Alignment.Top) {
-                    Text("🛡️", fontSize = 16.sp)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_verified),
+                        contentDescription = null,
+                        tint = VyboraPurple,
+                        modifier = Modifier.size(18.dp),
+                    )
                     Spacer(Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "Google Play Billing Notice",
+                            text = "Test Mode Billing Notice",
                             color = VyboraPurple,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            text = "This application operates in development preview mode. Packs and pricing are demonstrative; simulated purchases credit test coins locally with zero real money charged.",
+                            text = "Play Billing is not connected in this build. Packages simulate test coin credits locally with no real charges.",
                             color = VyboraTextSecondary,
                             fontSize = 11.sp,
                             lineHeight = 16.sp,
@@ -271,7 +276,7 @@ fun TopUpScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Demo checkout. Tapping Pay will simulate test fulfillment locally.",
+                        text = "Test checkout — credits coins locally without billing.",
                         color = VyboraTextSecondary,
                         fontSize = 11.sp,
                     )
@@ -299,7 +304,7 @@ fun TopUpScreen(
                         }
                     }
                 ) {
-                    Text("Pay ₹${packToBuy.price} [Demo]", color = VyboraPurple, fontWeight = FontWeight.Bold)
+                    Text("Confirm ₹${packToBuy.price} (Test)", color = VyboraPurple, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -343,7 +348,7 @@ fun TopUpScreen(
             containerColor = VyboraSurface,
             title = {
                 Text(
-                    text = "🎉 Top Up Successful!",
+                    text = "Coins Added",
                     color = VyboraTextPrimary,
                     fontWeight = FontWeight.Bold,
                 )
@@ -408,14 +413,14 @@ fun TopUpScreen(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                     )
-                    Text(
-                        text = "✕",
-                        color = VyboraTextSecondary,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Close",
+                        tint = VyboraTextSecondary,
                         modifier = Modifier
+                            .size(20.dp)
                             .clickable { showHistorySheet = false }
-                            .padding(4.dp),
+                            .padding(2.dp),
                     )
                 }
                 Spacer(Modifier.height(12.dp))
@@ -595,7 +600,12 @@ private fun TopUpHeader(
                 .clickable(onClick = onHistoryClick),
             contentAlignment = Alignment.Center,
         ) {
-            Text("📜", fontSize = 14.sp)
+            Icon(
+                painter = painterResource(R.drawable.ic_bag),
+                contentDescription = "Purchase history",
+                tint = VyboraTextSecondary,
+                modifier = Modifier.size(16.dp),
+            )
         }
     }
 }
@@ -621,11 +631,10 @@ private fun WalletBalanceCard(coins: Long) {
         ) {
             Column {
                 Text(
-                    text = "CURRENT COIN BALANCE",
+                    text = "Current coin balance",
                     color = Color(0xFFD1C4E9),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.8.sp,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {

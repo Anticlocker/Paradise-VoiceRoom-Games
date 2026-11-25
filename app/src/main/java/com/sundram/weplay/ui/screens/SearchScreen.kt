@@ -168,7 +168,12 @@ fun SearchScreen(nav: NavHostController) {
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("🔍", fontSize = 42.sp)
+                    androidx.compose.material3.Icon(
+                        painter = androidx.compose.ui.res.painterResource(id = com.sundram.weplay.R.drawable.ic_search),
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.size(40.dp),
+                    )
                     Spacer(Modifier.height(8.dp))
                     Text("Type to discover games & voice rooms", color = TextMuted, fontSize = 14.sp)
                 }
@@ -179,7 +184,12 @@ fun SearchScreen(nav: NavHostController) {
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("😕", fontSize = 42.sp)
+                    androidx.compose.material3.Icon(
+                        painter = androidx.compose.ui.res.painterResource(id = com.sundram.weplay.R.drawable.ic_search),
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.size(40.dp),
+                    )
                     Spacer(Modifier.height(8.dp))
                     Text("No results for \"$query\"", color = TextMain, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     Text("Try searching for 'Ludo', 'Spy', or 'Casual'", color = TextMuted, fontSize = 13.sp)
@@ -193,7 +203,7 @@ fun SearchScreen(nav: NavHostController) {
             ) {
                 if (matchingGames.isNotEmpty()) {
                     item {
-                        Text("GAMES (${matchingGames.size})", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Games (${matchingGames.size})", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                     items(matchingGames, key = { "game_${it.id}" }) { game ->
                         Row(
@@ -218,7 +228,7 @@ fun SearchScreen(nav: NavHostController) {
                                 Text(game.desc, color = TextMuted, fontSize = 12.sp)
                             }
                             Text(
-                                if (game.playable) "PLAY" else "LOBBY",
+                                if (game.playable) "Play" else "Lobby",
                                 color = CyanBrand,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
@@ -229,7 +239,7 @@ fun SearchScreen(nav: NavHostController) {
 
                 if (matchingRooms.isNotEmpty()) {
                     item {
-                        Text("VOICE ROOMS (${matchingRooms.size})", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Voice rooms (${matchingRooms.size})", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                     items(matchingRooms, key = { "room_${it.id}" }) { room ->
                         Row(
@@ -247,7 +257,7 @@ fun SearchScreen(nav: NavHostController) {
                                 Text(room.title, color = TextMain, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                                 Text("Host: ${room.host} · ${room.members} listeners", color = TextMuted, fontSize = 12.sp)
                             }
-                            Text("JOIN", color = CyanBrand, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Join", color = CyanBrand, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

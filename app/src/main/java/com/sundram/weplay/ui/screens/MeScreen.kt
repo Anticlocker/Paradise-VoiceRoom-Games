@@ -169,7 +169,7 @@ fun MeScreen(
                     onCopyId = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("User ID", profile.id))
-                        Toast.makeText(context, "ID copied to clipboard!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "ID copied", Toast.LENGTH_SHORT).show()
                     },
                 )
             }
@@ -405,7 +405,7 @@ fun MeScreen(
                 onSave = { updatedProfile ->
                     onSaveProfile(updatedProfile)
                     showAvatarStudioSheet = false
-                    Toast.makeText(context, "Avatar updated successfully!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Avatar updated", Toast.LENGTH_SHORT).show()
                 },
                 onDismiss = { showAvatarStudioSheet = false },
             )
@@ -500,7 +500,7 @@ fun MeScreen(
                 offer = featuredOfferState.offer,
                 timeRemaining = featuredOfferState.formattedTimeRemaining,
                 onClaim = {
-                    Toast.makeText(context, "Starter Offer Claimed! [DEMO]", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Offer preview saved", Toast.LENGTH_SHORT).show()
                     showGiftPackSheet = false
                 },
                 onDismiss = { showGiftPackSheet = false },
@@ -1108,7 +1108,7 @@ private fun RoyalPromotionalOfferBanner(
                     fontSize = 14.sp,
                 )
                 Text(
-                    text = "Limited 48h Offer • $timeRemaining left",
+                    text = "Limited offer · $timeRemaining left",
                     color = RoyalTextSecondary,
                     fontSize = 11.sp,
                 )
@@ -1441,7 +1441,7 @@ private fun RoyalAvatarStudioBottomSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                if (showMultiSizePreview) "Hide Multi-Size Preview ▲" else "View Multi-Size Frame Preview (64/96/128dp) ▼",
+                if (showMultiSizePreview) "Hide size preview" else "Preview frame sizes",
                 color = RoyalCyan,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -1938,12 +1938,18 @@ private fun RoyalGiftPackOfferBottomSheet(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "Claim Offer (₹${offer.demoPriceRupees}) [DEMO]",
+                text = "Preview Pack (₹${offer.demoPriceRupees})",
                 color = RoyalBackground,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Simulated offer preview — billing is not active",
+            color = RoyalTextSecondary,
+            fontSize = 11.sp,
+        )
 
         Spacer(Modifier.height(16.dp))
     }

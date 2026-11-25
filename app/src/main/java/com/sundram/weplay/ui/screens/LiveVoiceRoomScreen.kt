@@ -2472,7 +2472,7 @@ private fun AuroraGiftSheet(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Send (${selectedGift.coins * selectedMultiplier} 🪙)",
+                    text = "Send · ${selectedGift.coins * selectedMultiplier} Coins",
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -2484,8 +2484,8 @@ private fun AuroraGiftSheet(
 
         // Preview Mode Tag
         Text(
-            text = "⚡ PREVIEW MODE: Client simulation only. No real balance deducted.",
-            color = Color(0xFFFFB74D),
+            text = "Simulation mode — no coins are deducted",
+            color = Color(0xFFB39DDB),
             fontSize = 10.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
@@ -2533,7 +2533,7 @@ private fun GiftCelebrationOverlay(data: GiftAnimationData, onDismiss: () -> Uni
                     .padding(horizontal = 20.dp, vertical = 8.dp),
             ) {
                 Text(
-                    text = "🎉 ${data.giftName} x${data.count} to ${data.recipientName}!",
+                    text = "${data.giftName} x${data.count} sent to ${data.recipientName}",
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,

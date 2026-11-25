@@ -247,11 +247,10 @@ private fun HeroFeaturedGameCard(
                         .padding(horizontal = 8.dp, vertical = 2.dp),
                 ) {
                     Text(
-                        text = "⚡ FEATURED GAME",
+                        text = "Featured",
                         color = com.sundram.weplay.ui.theme.DeepInk,
                         fontSize = 9.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
 
@@ -281,11 +280,18 @@ private fun HeroFeaturedGameCard(
                         .padding(horizontal = 14.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_play),
+                        contentDescription = null,
+                        tint = com.sundram.weplay.ui.theme.DeepInk,
+                        modifier = Modifier.size(11.dp),
+                    )
+                    Spacer(Modifier.width(5.dp))
                     Text(
-                        text = "▶ Play Now",
+                        text = "Play now",
                         color = com.sundram.weplay.ui.theme.DeepInk,
                         fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -335,11 +341,10 @@ private fun HeroFeaturedGameCard(
                         .padding(horizontal = 8.dp, vertical = 2.dp),
                 ) {
                     Text(
-                        text = "✨ CELESTIAL FESTIVAL",
+                        text = "Seasonal event",
                         color = Color.White,
                         fontSize = 9.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
 
@@ -353,7 +358,7 @@ private fun HeroFeaturedGameCard(
                     )
                     Spacer(Modifier.height(3.dp))
                     Text(
-                        text = "Celebrate starlight week with royal dice challenges",
+                        text = "Weekly dice matches and shared rewards",
                         color = com.sundram.weplay.ui.theme.DreamLavender,
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
@@ -370,10 +375,10 @@ private fun HeroFeaturedGameCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "★ Join Gala",
+                        text = "View gala",
                         color = Color.White,
                         fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -449,7 +454,7 @@ private fun PopularGamesRow(
                         .border(0.8.dp, com.sundram.weplay.ui.theme.CrystalBlue, RoundedCornerShape(6.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text("🔍 Mystery", color = com.sundram.weplay.ui.theme.CrystalBlue, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("Mystery", color = com.sundram.weplay.ui.theme.CrystalBlue, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Column(modifier = Modifier.fillMaxWidth(0.62f)) {
@@ -510,7 +515,7 @@ private fun PopularGamesRow(
                         .border(0.8.dp, com.sundram.weplay.ui.theme.SunsetRose, RoundedCornerShape(6.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text("🎨 New", color = com.sundram.weplay.ui.theme.SunsetRose, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("New", color = com.sundram.weplay.ui.theme.SunsetRose, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Column(modifier = Modifier.fillMaxWidth(0.62f)) {
@@ -756,18 +761,18 @@ data class ExploreUser(
 )
 
 private val exploreUsers = listOf(
-    ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Aurora explorer seeking great conversations!", frameTier = FrameTier.EPIC),
-    ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Always up for a quick casual Ludo match!", frameTier = FrameTier.LEGENDARY),
-    ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music lover & trivia enthusiast 🎵", frameTier = FrameTier.RARE),
-    ExploreUser("4", "Siddhi", "F", "avatar_lunar_artist", 42, false, "", "Offline", false, "Artist & midnight listener in celestial lounges", frameTier = FrameTier.MYTHIC),
-    ExploreUser("5", "K O H L I", "M", "avatar_diamond_crown", 48, true, "", "Playing Spy", false, "Master of Who's the Spy. Can you guess?", frameTier = FrameTier.CELESTIAL),
-    ExploreUser("6", "T!wariji", "M", "avatar_neon_musician", 16, true, "", "In Voice Room", false, "DJ in the house! Playing chill lo-fi beats", frameTier = FrameTier.COMMON),
-    ExploreUser("7", "K!RAN", "F", "avatar_star_captain", 33, false, "", "Offline", false, "Silence is the best answer. Good vibes only.", frameTier = FrameTier.COMMON),
-    ExploreUser("8", "Aanya", "F", "avatar_royal_dreamer", 29, true, "< 85km", "In Voice Room", false, "Royal lounge regular & friendly host", frameTier = FrameTier.EPIC),
-    ExploreUser("9", "Rohan", "M", "avatar_celestial_wanderer", 21, true, "< 140km", "Playing Ludo", false, "Rolling sixes and taking over the board!", frameTier = FrameTier.RARE),
-    ExploreUser("10", "Meera", "F", "avatar_crystal_guardian", 25, true, "< 60km", "In Voice Room", false, "Spreading peace and positivity in voice rooms ✨", frameTier = FrameTier.LEGENDARY),
-    ExploreUser("11", "Simran", "F", "avatar_cosmic_bunny", 14, false, "", "Offline", false, "New to the community! Say hi 👋", frameTier = FrameTier.COMMON),
-    ExploreUser("12", "Aryan", "M", "avatar_galaxy_dj", 37, true, "< 95km", "Playing Spy", false, "Catching the imposter every single round 🕵️", frameTier = FrameTier.MYTHIC),
+    ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Looking for late night music rooms", frameTier = FrameTier.EPIC),
+    ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Up for a quick Ludo match", frameTier = FrameTier.LEGENDARY),
+    ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music rooms and weekend trivia", frameTier = FrameTier.RARE),
+    ExploreUser("4", "Siddhi", "F", "avatar_lunar_artist", 42, false, "", "Offline", false, "Sketching and listening to acoustic sets", frameTier = FrameTier.MYTHIC),
+    ExploreUser("5", "K O H L I", "M", "avatar_diamond_crown", 48, true, "", "Playing Spy", false, "Usually hosting Who's the Spy tables", frameTier = FrameTier.CELESTIAL),
+    ExploreUser("6", "T!wariji", "M", "avatar_neon_musician", 16, true, "", "In Voice Room", false, "Spinning chill beats in voice chat", frameTier = FrameTier.COMMON),
+    ExploreUser("7", "K!RAN", "F", "avatar_star_captain", 33, false, "", "Offline", false, "Quiet listener, occasional Ludo partner", frameTier = FrameTier.COMMON),
+    ExploreUser("8", "Aanya", "F", "avatar_royal_dreamer", 29, true, "< 85km", "In Voice Room", false, "Regular host for evening chill rooms", frameTier = FrameTier.EPIC),
+    ExploreUser("9", "Rohan", "M", "avatar_celestial_wanderer", 21, true, "< 140km", "Playing Ludo", false, "Down for Ludo and casual dice", frameTier = FrameTier.RARE),
+    ExploreUser("10", "Meera", "F", "avatar_crystal_guardian", 25, true, "< 60km", "In Voice Room", false, "Hanging out in music and chat lounges", frameTier = FrameTier.LEGENDARY),
+    ExploreUser("11", "Simran", "F", "avatar_cosmic_bunny", 14, false, "", "Offline", false, "Joined this week, still learning Spy", frameTier = FrameTier.COMMON),
+    ExploreUser("12", "Aryan", "M", "avatar_galaxy_dj", 37, true, "< 95km", "Playing Spy", false, "Always picking Spy when the lobby fills", frameTier = FrameTier.MYTHIC),
 )
 
 @Composable
@@ -910,7 +915,12 @@ private fun ExploreFeedItem(
                     .clickable(onClick = onMessageClick),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("💬", fontSize = 12.sp)
+                Icon(
+                    painter = painterResource(R.drawable.ic_comment),
+                    contentDescription = "Message",
+                    tint = com.sundram.weplay.ui.theme.CrystalBlue,
+                    modifier = Modifier.size(15.dp),
+                )
             }
         }
     }
@@ -1089,7 +1099,7 @@ fun GamesHomeScreen(
 
     fun comingSoon(name: String) {
         scope.launch {
-            snackbarHostState.showSnackbar("Coming soon – $name is currently in development [DEMO]")
+            snackbarHostState.showSnackbar("$name is not available yet")
         }
     }
 
@@ -1400,7 +1410,7 @@ fun GamesHomeScreen(
                             )
                         }
 
-                        // "See All ›" action pill navigating to Friends / Social
+                        // "See All ›" action pill navigating to Chats / People
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
@@ -1410,7 +1420,7 @@ fun GamesHomeScreen(
                                     com.sundram.weplay.ui.theme.DreamLavender.copy(alpha = 0.35f),
                                     RoundedCornerShape(12.dp),
                                 )
-                                .bounceClick { nav.navigateSafe(Routes.FRIENDS) }
+                                .bounceClick { nav.navigateSafe(Routes.MSG) }
                                 .padding(horizontal = 11.dp, vertical = 5.dp),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -1454,34 +1464,6 @@ fun GamesHomeScreen(
                         }
                     }
                 }
-            }
-        }
-
-        // ── B7: Floating 3D Gift Pack Widget (Bottom-Right, opens Celebration Sheet) ──
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 14.dp, bottom = pad.calculateBottomPadding() + 8.dp)
-                .shadow(4.dp, RoundedCornerShape(18.dp))
-                .clip(RoundedCornerShape(18.dp))
-                .background(AuroraSurface)
-                .border(1.5.dp, AuroraGold, RoundedCornerShape(18.dp))
-                .bounceClick { showGiftPackSheet = true }
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = painterResource(R.drawable.ic_gift_box_3d),
-                    contentDescription = "3D Gift Pack",
-                    modifier = Modifier.size(30.dp),
-                )
-                Text(
-                    text = "Gift Pack",
-                    color = Color(0xFFE65100),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                )
             }
         }
 

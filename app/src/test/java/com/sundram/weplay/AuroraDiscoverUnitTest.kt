@@ -47,6 +47,13 @@ class AuroraDiscoverUnitTest {
             "ap_discover_frame_gold.webp",
             "ap_discover_fx_sparkle.webp",
             "ap_discover_media_fallback.webp",
+            "ap_discover_moment_singer.png",
+            "ap_discover_moment_friends.png",
+            "ap_discover_moment_mic.png",
+            "ap_discover_moment_heart.png",
+            "ap_discover_preview_girl.png",
+            "ap_discover_preview_twilight.png",
+            "ap_discover_palace_moon.png",
         )
 
         for (asset in requiredAssets) {

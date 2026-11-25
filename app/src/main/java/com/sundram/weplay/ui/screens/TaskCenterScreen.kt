@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -143,13 +144,13 @@ fun TaskCenterScreen(
                         val success = taskStore.claimDailyCheckIn { coins, xp ->
                             val updatedProfile = profile.copy(coins = profile.coins + coins)
                             onSaveProfile(updatedProfile)
-                            rewardCelebrationText = "Claimed Daily Check-In: +$coins Coins & +$xp XP!"
+                            rewardCelebrationText = "Claimed Daily Check-In: +$coins Coins and +$xp XP"
                             checkInDays = taskStore.getCheckInDays()
                             streakDays = taskStore.getStreakDays()
                             isTodayClaimed = taskStore.isTodayCheckedIn()
                         }
                         if (!success) {
-                            Toast.makeText(context, "Already checked in today!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Already checked in today.", Toast.LENGTH_SHORT).show()
                         }
                     },
                 )
@@ -174,7 +175,7 @@ fun TaskCenterScreen(
                         val success = taskStore.claimTaskReward(itemVo.definition.id) { coins, xp ->
                             val updatedProfile = profile.copy(coins = profile.coins + coins)
                             onSaveProfile(updatedProfile)
-                            rewardCelebrationText = "Task '${itemVo.definition.title}' Completed! +$coins Coins & +$xp XP!"
+                            rewardCelebrationText = "${itemVo.definition.title} completed — +$coins Coins and +$xp XP"
                         }
                         if (!success) {
                             Toast.makeText(context, "Reward already claimed.", Toast.LENGTH_SHORT).show()
@@ -196,7 +197,7 @@ fun TaskCenterScreen(
             containerColor = VyboraSurface,
             title = {
                 Text(
-                    text = "🎉 Mission Reward Claimed!",
+                    text = "Reward Claimed",
                     color = VyboraTextPrimary,
                     fontWeight = FontWeight.Bold,
                 )
@@ -227,7 +228,7 @@ fun TaskCenterScreen(
             },
             confirmButton = {
                 TextButton(onClick = { rewardCelebrationText = null }) {
-                    Text("Awesome!", color = VyboraPurple, fontWeight = FontWeight.Bold)
+                    Text("Done", color = VyboraPurple, fontWeight = FontWeight.Bold)
                 }
             },
         )
@@ -361,7 +362,12 @@ private fun UserProfileProgressCard(
 
             // Streak Pill
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🔥", fontSize = 22.sp)
+                Icon(
+                    painter = painterResource(id = com.sundram.weplay.R.drawable.ic_star),
+                    contentDescription = null,
+                    tint = Color(0xFFFFA000),
+                    modifier = Modifier.size(22.dp),
+                )
                 Text(
                     text = "${streakDays}d Streak",
                     color = VyboraGold,
@@ -416,7 +422,7 @@ private fun DailyCheckInSection(
                     .padding(horizontal = 12.dp, vertical = 7.dp),
             ) {
                 Text(
-                    text = if (!isTodayClaimed) "Check In 🎁" else "Claimed ✓",
+                    text = if (!isTodayClaimed) "Check In" else "Claimed",
                     color = if (!isTodayClaimed) Color.White else Color(0xFF757575),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -474,9 +480,21 @@ private fun DailyCheckInDayCard(dayVo: CheckInDayVo) {
 
         Spacer(Modifier.height(4.dp))
 
-        Text(
-            text = if (dayVo.isRoyalBonus) "👑" else if (isClaimed) "✓" else "🪙",
-            fontSize = if (dayVo.isRoyalBonus) 16.sp else 14.sp,
+        Icon(
+            painter = painterResource(
+                id = when {
+                    dayVo.isRoyalBonus -> com.sundram.weplay.R.drawable.ic_crown
+                    isClaimed -> com.sundram.weplay.R.drawable.ic_check
+                    else -> com.sundram.weplay.R.drawable.ic_coin
+                },
+            ),
+            contentDescription = null,
+            tint = when {
+                dayVo.isRoyalBonus -> Color(0xFFFFD54F)
+                isClaimed -> Color(0xFF66BB6A)
+                else -> Color(0xFFFFB300)
+            },
+            modifier = Modifier.size(if (dayVo.isRoyalBonus) 16.dp else 15.dp),
         )
 
         Spacer(Modifier.height(4.dp))
@@ -603,7 +621,7 @@ private fun TaskMissionCard(
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "+${item.definition.coinReward} 🪙",
+                        text = "+${item.definition.coinReward} Coins",
                         color = Color(0xFFFFA000),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -645,7 +663,7 @@ private fun TaskMissionCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Claim 🎉",
+                        text = "Claim",
                         color = Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -661,7 +679,7 @@ private fun TaskMissionCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Claimed ✓",
+                        text = "Claimed",
                         color = VyboraTextSecondary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,

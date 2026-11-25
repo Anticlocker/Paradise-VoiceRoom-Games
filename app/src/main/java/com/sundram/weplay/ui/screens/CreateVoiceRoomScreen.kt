@@ -85,7 +85,7 @@ private data class CreateRoomMode(
 private val RoomModes = listOf(
     CreateRoomMode("Normal", R.drawable.vb_rs_create_room),
     CreateRoomMode("Music/KTV", R.drawable.vb_rs_mode_music),
-    CreateRoomMode("Games", R.drawable.vb_rs_mode_games, badge = "HOT"),
+    CreateRoomMode("Games", R.drawable.vb_rs_mode_games),
     CreateRoomMode("PK Battle", R.drawable.vb_rs_mode_pk),
     CreateRoomMode("Dice Party", R.drawable.vb_rs_mode_dice),
 )
@@ -175,21 +175,6 @@ fun CreateVoiceRoomScreen(nav: NavHostController) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                 )
-
-                // Demo Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(BorderLavender)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
-                ) {
-                    Text(
-                        text = "LOCAL DEMO",
-                        color = PurpleBrand,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -501,7 +486,7 @@ fun CreateVoiceRoomScreen(nav: NavHostController) {
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
-                            text = if (isPrivate) "Invite-only [DEMO]" else "Anyone can discover & join [DEMO]",
+                            text = if (isPrivate) "Invite-only" else "Anyone can discover and join",
                             color = TextSecondary,
                             fontSize = 12.sp,
                         )
@@ -587,7 +572,7 @@ fun CreateVoiceRoomScreen(nav: NavHostController) {
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = if (passwordVisible) "HIDE" else "SHOW",
+                                    text = if (passwordVisible) "Hide" else "Show",
                                     color = PurpleBrand,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,

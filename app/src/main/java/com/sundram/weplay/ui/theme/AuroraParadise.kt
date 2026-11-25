@@ -1149,7 +1149,7 @@ fun FantasyGameCard(
                 )
 
                 Text(
-                    text = "👥 $playersCount playing",
+                    text = "$playersCount playing",
                     color = DreamLavender,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
@@ -1610,10 +1610,10 @@ fun PremiumGiftPack(
                 // Countdown Badge
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "⏳ $countdownText",
+                        text = "Ends in $countdownText",
                         color = RoyalGold,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
                 Spacer(Modifier.height(2.dp))
@@ -1625,7 +1625,7 @@ fun PremiumGiftPack(
                     maxLines = 1,
                 )
                 Text(
-                    text = "Includes $rewardAmount Crystals + VIP Frame",
+                    text = "Includes $rewardAmount Coins + VIP Frame",
                     color = DreamLavender,
                     fontSize = 11.sp,
                 )

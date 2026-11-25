@@ -30,8 +30,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material3.Icon
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -171,6 +174,7 @@ fun EventDetailScreen(
 
                             Spacer(Modifier.weight(1f))
 
+                            val clipboardManager = LocalClipboardManager.current
                             // Share Action Button
                             Box(
                                 modifier = Modifier
@@ -180,13 +184,19 @@ fun EventDetailScreen(
                                     .background(Color(0x66000000))
                                     .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape)
                                     .bounceClick {
+                                        clipboardManager.setText(AnnotatedString("${event.title} — ${event.subtitle}"))
                                         scope.launch {
-                                            snackbarHostState.showSnackbar("Event invite copied to clipboard!")
+                                            snackbarHostState.showSnackbar("Event invite copied to clipboard")
                                         }
                                     },
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Text("🔗", fontSize = 14.sp)
+                                Icon(
+                                    painter = painterResource(id = com.sundram.weplay.R.drawable.ic_send),
+                                    contentDescription = "Share event",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp),
+                                )
                             }
                         }
 
@@ -286,11 +296,21 @@ fun EventDetailScreen(
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("🏆", fontSize = 14.sp)
+                                    Icon(
+                                        painter = painterResource(id = com.sundram.weplay.R.drawable.ic_crown),
+                                        contentDescription = null,
+                                        tint = AuroraOrchid,
+                                        modifier = Modifier.size(15.dp),
+                                    )
                                     Spacer(Modifier.width(8.dp))
                                     Text("View Live Event Leaderboard", color = AuroraOrchid, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                     Spacer(Modifier.weight(1f))
-                                    Text("›", color = AuroraOrchid, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                    Icon(
+                                        painter = painterResource(id = com.sundram.weplay.R.drawable.ic_chevron_right),
+                                        contentDescription = null,
+                                        tint = AuroraOrchid,
+                                        modifier = Modifier.size(16.dp),
+                                    )
                                 }
                             }
                         }
@@ -492,7 +512,7 @@ private fun TaskRowCard(
                     .border(1.dp, AuroraBorder, RoundedCornerShape(12.dp))
                     .padding(horizontal = 10.dp, vertical = 6.dp),
             ) {
-                Text("+${task.rewardCoins} 🪙", color = AuroraOrchid, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("+${task.rewardCoins} Coins", color = AuroraOrchid, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

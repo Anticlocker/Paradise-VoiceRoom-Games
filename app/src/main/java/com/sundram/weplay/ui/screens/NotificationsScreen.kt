@@ -32,10 +32,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
+import com.sundram.weplay.R
 import com.sundram.weplay.data.Demo
 import com.sundram.weplay.data.NotificationItem
 import com.sundram.weplay.ui.components.TopBackBar
+import com.sundram.weplay.ui.components.navigateSafe
 import com.sundram.weplay.ui.theme.CyanBrand
 import com.sundram.weplay.ui.theme.PageWhite
 import com.sundram.weplay.ui.theme.TextMain
@@ -71,7 +75,12 @@ fun NotificationsScreen(nav: NavHostController) {
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("🔔", fontSize = 48.sp)
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_bell),
+                        contentDescription = null,
+                        tint = androidx.compose.ui.graphics.Color(0xFFB39DDB),
+                        modifier = Modifier.size(44.dp),
+                    )
                     Spacer(Modifier.height(12.dp))
                     Text(
                         "No notifications yet",
@@ -100,7 +109,7 @@ fun NotificationsScreen(nav: NavHostController) {
                                 if (it.id == item.id) it.copy(read = true) else it
                             }
                             item.destinationRoute?.let { route ->
-                                nav.navigate(route)
+                                nav.navigateSafe(route)
                             }
                         },
                     )
@@ -115,12 +124,12 @@ private fun NotificationRow(
     item: NotificationItem,
     onClick: () -> Unit,
 ) {
-    val icon = when (item.type) {
-        "friend_request" -> "👥"
-        "room_invite" -> "🎙️"
-        "ranking_reward" -> "🏆"
-        "family_invite" -> "🛡️"
-        else -> "💬"
+    val iconRes = when (item.type) {
+        "friend_request" -> R.drawable.ic_users
+        "room_invite" -> R.drawable.ic_mic
+        "ranking_reward" -> R.drawable.ic_crown
+        "family_invite" -> R.drawable.ic_verified
+        else -> R.drawable.ic_comment
     }
 
     Row(
@@ -139,7 +148,12 @@ private fun NotificationRow(
                 .background(Color(0x1A00CCF9)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(icon, fontSize = 20.sp)
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                tint = androidx.compose.ui.graphics.Color.White,
+                modifier = Modifier.size(20.dp),
+            )
         }
 
         Spacer(Modifier.width(12.dp))

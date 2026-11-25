@@ -85,15 +85,15 @@ import com.sundram.weplay.ui.theme.SunsetRose
 private data class LoungeTabItem(
     val id: String,
     val label: String,
-    val iconPrefix: String? = null,
+    val iconRes: Int? = null,
 )
 
 private val LoungeTabItems = listOf(
     LoungeTabItem("Recent", "Recent"),
     LoungeTabItem("All", "All"),
-    LoungeTabItem("Popular", "Popular", "🔥 "),
-    LoungeTabItem("Related", "Related", "🔗 "),
-    LoungeTabItem("Following", "Following", "♡ "),
+    LoungeTabItem("Popular", "Popular", R.drawable.ic_star),
+    LoungeTabItem("Related", "Related", R.drawable.ic_send),
+    LoungeTabItem("Following", "Following", R.drawable.ic_heart),
 )
 
 private val CategoryPills = listOf("All", "Friends", "PK", "Music", "Video", "Game", "Chats")
@@ -221,6 +221,7 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
                     isSearchActive = !isSearchActive
                     if (!isSearchActive) searchQuery = ""
                 },
+                onOpenGiftPack = { showGiftPackSheet = true },
             )
 
             // Search Bar (if active)
@@ -294,15 +295,6 @@ fun VoiceRoomListScreen(nav: NavHostController, pad: PaddingValues) {
             }
         }
 
-        // ── Floating Gift Pack Widget (Bottom-Right) ──
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = pad.calculateBottomPadding() + 16.dp),
-        ) {
-            CompactGiftPackWidget(onClick = { showGiftPackSheet = true })
-        }
-
         // ── Gift Pack Offers Sheet ──
         if (showGiftPackSheet) {
             VoiceGiftPackSheet(onDismiss = { showGiftPackSheet = false })
@@ -318,6 +310,7 @@ private fun VoiceLoungeHeader(
     nav: NavHostController,
     isSearchActive: Boolean,
     onToggleSearch: () -> Unit,
+    onOpenGiftPack: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -340,25 +333,50 @@ private fun VoiceLoungeHeader(
             Text(
                 text = "Voice Lounge",
                 color = CloudWhite,
-                fontSize = 25.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = (-0.3).sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.height(1.dp))
             Text(
-                text = "Find your people · Join the vibe",
+                text = "Find your people · Join a room",
                 color = DreamLavender,
                 fontSize = 11.5.sp,
                 fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
 
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(6.dp))
+
+        // Circular Gift Pack Action Button
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .shadow(2.dp, CircleShape)
+                .clip(CircleShape)
+                .background(Brush.verticalGradient(listOf(Color(0xFF2E1B5B), Color(0xFF1F1243))))
+                .border(1.dp, RoyalGold.copy(alpha = 0.55f), CircleShape)
+                .bounceClick(onClick = onOpenGiftPack),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.vb_voice_gift_pack),
+                contentDescription = "Voice gift pack",
+                modifier = Modifier.size(20.dp),
+                contentScale = ContentScale.Fit,
+            )
+        }
+
+        Spacer(Modifier.width(6.dp))
 
         // Circular Search Action Button
         Box(
             modifier = Modifier
-                .size(38.dp)
+                .size(36.dp)
                 .shadow(2.dp, CircleShape)
                 .clip(CircleShape)
                 .background(Brush.verticalGradient(listOf(Color(0xFF2E1B5B), Color(0xFF1F1243))))
@@ -370,35 +388,35 @@ private fun VoiceLoungeHeader(
                 painter = painterResource(R.drawable.ic_search),
                 contentDescription = "Search rooms",
                 tint = if (isSearchActive) SunsetRose else CloudWhite,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(17.dp),
             )
         }
 
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(6.dp))
 
         // "+ Create Room" Pill Button (Sunset Fantasy)
         Row(
             modifier = Modifier
-                .height(38.dp)
-                .shadow(3.dp, RoundedCornerShape(19.dp))
-                .clip(RoundedCornerShape(19.dp))
+                .height(36.dp)
+                .shadow(3.dp, RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(18.dp))
                 .background(AuroraGradients.sunsetFantasy)
-                .border(1.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(19.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
                 .bounceClick { nav.navigateSafe(Routes.CREATE_ROOM) }
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_plus),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(13.dp),
             )
             Spacer(Modifier.width(4.dp))
             Text(
-                text = "Create Room",
+                text = "Create",
                 color = Color.White,
-                fontSize = 12.5.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -514,14 +532,25 @@ private fun LoungeNavPills(
                     .padding(horizontal = 16.dp, vertical = 7.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = "${tab.iconPrefix ?: ""}${tab.label}",
-                    color = if (active) Color.White else Color(0xFFD6C7F8),
-                    fontSize = 13.sp,
-                    fontWeight = if (active) FontWeight.Bold else FontWeight.SemiBold,
-                    maxLines = 1,
-                    softWrap = false,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (tab.iconRes != null) {
+                        Icon(
+                            painter = painterResource(tab.iconRes),
+                            contentDescription = null,
+                            tint = if (active) Color.White else Color(0xFFD6C7F8),
+                            modifier = Modifier.size(12.dp),
+                        )
+                        Spacer(Modifier.width(5.dp))
+                    }
+                    Text(
+                        text = tab.label,
+                        color = if (active) Color.White else Color(0xFFD6C7F8),
+                        fontSize = 13.sp,
+                        fontWeight = if (active) FontWeight.Bold else FontWeight.SemiBold,
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
             }
         }
     }
@@ -608,8 +637,12 @@ private fun FeaturedRoomBanner(
                     .padding(horizontal = 7.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("👑", fontSize = 10.sp)
-                Spacer(Modifier.width(3.dp))
+                Image(
+                    painter = painterResource(R.drawable.ap_voice_crest_royal),
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                )
+                Spacer(Modifier.width(4.dp))
                 Text(
                     text = "Featured Room",
                     color = RoyalGold,
@@ -620,7 +653,7 @@ private fun FeaturedRoomBanner(
 
             Column {
                 Text(
-                    text = "Melody Night Lounge 🎵",
+                    text = "Melody Night Lounge",
                     color = CloudWhite,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -829,7 +862,7 @@ private fun AuroraRoomCard(
                             .padding(horizontal = 4.dp, vertical = 2.dp),
                     ) {
                         Text(
-                            text = "⚡ PK",
+                            text = "PK",
                             color = Color.White,
                             fontSize = 7.5.sp,
                             fontWeight = FontWeight.ExtraBold,
@@ -908,7 +941,7 @@ private fun AuroraRoomCard(
                         .padding(horizontal = 4.dp, vertical = 1.dp),
                 ) {
                     Text(
-                        text = "👑 Crest Lv.${room.roomLevel}",
+                        text = "Crest Lv.${room.roomLevel}",
                         color = DreamLavender,
                         fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold,
@@ -1007,31 +1040,7 @@ private fun AuroraRoomCard(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  7. Compact Floating Gift Pack Widget
-// ─────────────────────────────────────────────────────────────────────────────
-@Composable
-private fun CompactGiftPackWidget(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(50.dp)
-            .shadow(4.dp, CircleShape)
-            .clip(CircleShape)
-            .background(AuroraSurface)
-            .border(1.5.dp, AuroraGold, CircleShape)
-            .bounceClick(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            painter = painterResource(R.drawable.vb_voice_gift_pack),
-            contentDescription = "Voice Gift Pack offers",
-            modifier = Modifier.size(34.dp),
-            contentScale = ContentScale.Fit,
-        )
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  8. Voice Gift Pack Offers Bottom Sheet
+//  7. Voice Gift Pack Offers Bottom Sheet
 // ─────────────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1053,7 +1062,7 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
             Image(
                 painter = painterResource(R.drawable.vb_voice_gift_pack),
                 contentDescription = null,
-                modifier = Modifier.size(68.dp),
+                modifier = Modifier.size(64.dp),
             )
 
             Spacer(Modifier.height(10.dp))
@@ -1061,14 +1070,14 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
             Text(
                 text = "Voice Lounge Gift Pack",
                 color = AuroraTextPrimary,
-                fontSize = 19.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
             )
 
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = "Exclusive perks, animated badges & voice flair",
+                text = "Entrance effects, stage frames, and coin perks",
                 color = AuroraTextSecondary,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center,
@@ -1077,10 +1086,10 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
             Spacer(Modifier.height(16.dp))
 
             val perks = listOf(
-                "👑 3D Crown Entrance Animation",
-                "🎙️ High-Definition Voice Room Mic Frame",
-                "💎 500 Bonus Diamond Showcase Credits",
-                "🎁 3x Free Daily Rose Stage Gifts",
+                "Animated crown room entrance",
+                "Highlighted speaker mic frame",
+                "500 Bonus Coins included",
+                "3 daily rose stage gifts",
             )
             Column(
                 modifier = Modifier
@@ -1089,30 +1098,30 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
                     .background(AuroraBackground)
                     .border(1.dp, AuroraBorder, RoundedCornerShape(14.dp))
                     .padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 perks.forEach { perk ->
-                    Text(text = perk, color = AuroraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(RoyalGold),
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(text = perk, color = AuroraTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    }
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(12.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFFFF3E0))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-            ) {
-                Text(
-                    text = "⚡ PREVIEW MODE: Live billing & payment gateway are currently disconnected. No real charges will occur.",
-                    color = Color(0xFFE65100),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                )
-            }
+            Text(
+                text = "Simulated preview — no billing or real charges are active",
+                color = AuroraTextSecondary,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+            )
 
             Spacer(Modifier.height(16.dp))
 
@@ -1126,7 +1135,7 @@ private fun VoiceGiftPackSheet(onDismiss: () -> Unit) {
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Got it",
+                    text = "Done",
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -1164,7 +1173,7 @@ private fun RecentEmptyRoomsState(onExploreClick: () -> Unit) {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "You haven't visited any voice rooms yet. Join a lounge to start listening!",
+            text = "You haven't visited any voice rooms yet. Join one to start listening.",
             color = DreamLavender,
             fontSize = 12.sp,
             textAlign = TextAlign.Center,

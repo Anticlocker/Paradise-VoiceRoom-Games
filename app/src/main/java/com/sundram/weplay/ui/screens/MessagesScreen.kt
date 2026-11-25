@@ -322,13 +322,13 @@ fun MessagesScreen(
                         },
                     )
                     if (query.isNotEmpty()) {
-                        Text(
-                            text = "✕",
-                            color = AuroraChatsTokens.TextSecondary,
-                            fontSize = 14.sp,
+                        Image(
+                            painter = painterResource(R.drawable.ap_chats_hybrid_ic_clear),
+                            contentDescription = "Clear",
                             modifier = Modifier
+                                .size(18.dp)
                                 .clickable { query = "" }
-                                .padding(horizontal = 4.dp),
+                                .padding(2.dp),
                         )
                     }
                 }

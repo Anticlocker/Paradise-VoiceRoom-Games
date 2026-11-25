@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -149,7 +150,7 @@ fun GiftPackOffersSheet(
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier.weight(1f),
                 )
-                // Dismiss '✕' Button
+                // Dismiss Button
                 Box(
                     modifier = Modifier
                         .size(32.dp)
@@ -159,7 +160,12 @@ fun GiftPackOffersSheet(
                         .clickable(onClick = onDismiss),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("✕", color = AuroraTextSecondary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Close",
+                        tint = AuroraTextSecondary,
+                        modifier = Modifier.size(14.dp),
+                    )
                 }
             }
 
@@ -264,10 +270,8 @@ fun GiftPackOffersSheet(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("⏳", fontSize = 13.sp)
-                            Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "Rotating 48h Offer:",
+                                text = "Rotating 48h Offer",
                                 color = AuroraTextPrimary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
@@ -303,7 +307,7 @@ fun GiftPackOffersSheet(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = "⭐ Active Offer",
+                            text = "Active Offer",
                             color = if (selectedTab == 0) AuroraOrchid else AuroraTextSecondary,
                             fontSize = 12.sp,
                             fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium,
@@ -319,7 +323,7 @@ fun GiftPackOffersSheet(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = "🎁 All Packs (${ALL_GIFT_PACK_OFFERS.size})",
+                            text = "All Packs (${ALL_GIFT_PACK_OFFERS.size})",
                             color = if (selectedTab == 1) AuroraOrchid else AuroraTextSecondary,
                             fontSize = 12.sp,
                             fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium,
@@ -357,7 +361,7 @@ fun GiftPackOffersSheet(
                     ) {
                         Column {
                             Text(
-                                text = "⚡ Billing Verification Notice",
+                                text = "Billing notice",
                                 color = Color(0xFFE65100),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
