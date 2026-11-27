@@ -23,8 +23,11 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import com.sundram.weplay.data.LegalDocuments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -188,6 +191,19 @@ private fun SignInStep(
     onEmail: () -> Unit,
     onUserPass: () -> Unit,
 ) {
+    var acceptedLegal by rememberSaveable { mutableStateOf(true) }
+    var showConsentHint by remember { mutableStateOf(false) }
+    var legalDocKey by remember { mutableStateOf<String?>(null) }
+
+    fun guarded(action: () -> Unit) {
+        if (acceptedLegal) {
+            showConsentHint = false
+            action()
+        } else {
+            showConsentHint = true
+        }
+    }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -199,7 +215,7 @@ private fun SignInStep(
         Row(verticalAlignment = Alignment.CenterVertically) {
             BrandMark(46.dp)
             Spacer(Modifier.width(11.dp))
-            Text("WePlay", color = TextMain, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+            Text("Paradise", color = TextMain, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
         }
 
         Spacer(Modifier.weight(1f))
@@ -219,23 +235,118 @@ private fun SignInStep(
         )
         Spacer(Modifier.weight(1f))
 
-        GoogleButton(onGoogle)
+        GoogleButton { guarded(onGoogle) }
         Spacer(Modifier.height(12.dp))
-        OptionButton("Continue with phone", R.drawable.ic_phone, onPhone)
+        OptionButton("Continue with phone", R.drawable.ic_phone) { guarded(onPhone) }
         Spacer(Modifier.height(12.dp))
-        OptionButton("Continue with email", R.drawable.ic_mail, onEmail)
+        OptionButton("Continue with email", R.drawable.ic_mail) { guarded(onEmail) }
         Spacer(Modifier.height(12.dp))
-        OptionButton("Log in with username", R.drawable.ic_users, onUserPass)
-        Spacer(Modifier.height(20.dp))
-        Text(
-            "By continuing you agree to our Terms of Service and Privacy Policy.",
-            color = TextMuted,
-            fontSize = 11.sp,
-            lineHeight = 16.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        OptionButton("Log in with username", R.drawable.ic_users) { guarded(onUserPass) }
         Spacer(Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(CardWhite, RoundedCornerShape(12.dp))
+                .border(
+                    1.dp,
+                    if (acceptedLegal) Stroke else PinkGift,
+                    RoundedCornerShape(12.dp),
+                )
+                .clickable {
+                    acceptedLegal = !acceptedLegal
+                    if (acceptedLegal) showConsentHint = false
+                }
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .background(
+                        if (acceptedLegal) CyanBrand else Color.Transparent,
+                        RoundedCornerShape(6.dp),
+                    )
+                    .border(
+                        1.5.dp,
+                        if (acceptedLegal) CyanBrand else TextMuted,
+                        RoundedCornerShape(6.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (acceptedLegal) {
+                    Text("✓", color = OnBrand, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            }
+            Spacer(Modifier.width(10.dp))
+            Text(
+                "I confirm I am 13+ and agree to the Terms of Service & Privacy Policy.",
+                color = TextBody,
+                fontSize = 11.5.sp,
+                lineHeight = 16.sp,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        if (showConsentHint) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "Please accept the Terms of Service & Privacy Policy above to continue.",
+                color = PinkGift,
+                fontSize = 11.sp,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+        ) {
+            Text(
+                "Terms of Service",
+                color = CyanInk,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable { legalDocKey = "terms" }
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            )
+            Text("·", color = TextMuted, fontSize = 11.sp, modifier = Modifier.padding(vertical = 4.dp))
+            Text(
+                "Privacy Policy",
+                color = CyanInk,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable { legalDocKey = "privacy" }
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+    }
+
+    legalDocKey?.let { key ->
+        val doc = LegalDocuments.firstOrNull { it.key == key } ?: LegalDocuments.first()
+        AlertDialog(
+            onDismissRequest = { legalDocKey = null },
+            containerColor = CardWhite,
+            title = { Text(doc.title, color = TextMain, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    Text(doc.updated, color = TextMuted, fontSize = 11.sp)
+                    Spacer(Modifier.height(8.dp))
+                    doc.sections.forEach { section ->
+                        Text(section.heading, color = TextMain, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.height(3.dp))
+                        Text(section.body, color = TextBody, fontSize = 12.sp, lineHeight = 18.sp)
+                        Spacer(Modifier.height(10.dp))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { legalDocKey = null }) {
+                    Text("Close", color = CyanBrand, fontWeight = FontWeight.Bold)
+                }
+            },
+        )
     }
 }
 
@@ -418,7 +529,7 @@ private fun UserPassStep(
     AuthFormColumn {
         RoundIconButton(painter = painterResource(R.drawable.ic_back), onClick = onBack, contentDescription = "Back")
         Spacer(Modifier.height(26.dp))
-        Text("Log in to WePlay", color = TextMain, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        Text("Log in to Paradise", color = TextMain, fontSize = 26.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         Text(
             "Use any username and password to get in. Accounts are confirmed on the device until the server goes live.",
@@ -661,7 +772,7 @@ private fun ProfileStep(
         if (dobValid && !ageValid) {
             Spacer(Modifier.height(8.dp))
             Text(
-                "You need to be at least 13 years old to join.",
+                "Paradise requires players to be at least 13 years old (18+ recommended for public live voice rooms).",
                 color = PinkGift,
                 fontSize = 12.sp,
             )
@@ -750,7 +861,7 @@ private fun BrandMark(size: androidx.compose.ui.unit.Dp) {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            "W",
+            "P",
             color = OnBrand,
             fontSize = (size.value * 0.5f).sp,
             fontWeight = FontWeight.ExtraBold,

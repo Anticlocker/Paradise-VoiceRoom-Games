@@ -1,9 +1,8 @@
 <resources>
-    <style name="Theme.WePlay" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/white</item>
-        <item name="android:statusBarColor">@android:color/white</item>
-        <item name="android:navigationBarColor">@android:color/white</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+    <style name="Theme.WePlay" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_brand_window</item>
+        <item name="android:statusBarColor">#10052D</item>
+        <item name="android:navigationBarColor">#10052D</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

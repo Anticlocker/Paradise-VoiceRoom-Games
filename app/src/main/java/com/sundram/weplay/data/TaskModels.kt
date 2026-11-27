@@ -99,7 +99,7 @@ val STARTER_ACHIEVEMENTS: List<TaskDefinition> = listOf(
     TaskDefinition("ach_03", "Room Explorer", "Join 3 different voice rooms", TaskCategory.ACHIEVEMENT, "🚀", 120, 120, 3, Routes.ROOM, "Explore"),
     TaskDefinition("ach_04", "Gifting Novice", "Send your first in-room gift", TaskCategory.ACHIEVEMENT, "💝", 100, 100, 1, Routes.ROOM, "Visit"),
     TaskDefinition("ach_05", "7-Day Streak Master", "Complete a full 7-day check-in streak", TaskCategory.ACHIEVEMENT, "🔥", 300, 500, 7, Routes.TASKS, "Check In"),
-    TaskDefinition("ach_06", "Level 5 Achiever", "Reach level 5 in VYBORA", TaskCategory.ACHIEVEMENT, "👑", 250, 300, 5, Routes.TASKS, "View"),
+    TaskDefinition("ach_06", "Level 5 Achiever", "Reach level 5 in Paradise", TaskCategory.ACHIEVEMENT, "👑", 250, 300, 5, Routes.TASKS, "View"),
     TaskDefinition("ach_07", "Community Star", "Receive 10 messages from friends", TaskCategory.ACHIEVEMENT, "⭐", 200, 200, 10, Routes.MSG, "Chats"),
 )
 

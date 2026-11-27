@@ -81,6 +81,7 @@ object Routes {
     const val NOTIFICATIONS = "notifications"
     const val SEARCH = "search"
     const val GAME_ROOMS = "game/rooms"
+    const val ALL_GAMES = "game/all"
     const val TASKS = "hub/tasks"
     const val EVENT_CENTER = "events"
     const val EVENT_DETAIL = "event/{eventId}"
@@ -93,8 +94,11 @@ object Routes {
     const val SUPPORT = SUPPORT_SETTINGS
     const val FEEDBACK = "settings/feedback"
     const val ROOM_CREATE = CREATE_ROOM
-    const val VIP = TOPUP
-    const val SHOP = GIFTS
+    const val VIP = "profile/vip"
+    const val SHOP = "profile/shop"
+    const val MY_SPACE = "profile/myspace"
+    const val NEARBY = "discover/nearby"
+    const val CLUBS = "discover/clubs"
     const val FAMILY_DISCOVERY = "family/discovery"
     const val FAMILY_CREATION = "family/creation"
     const val FAMILY_DETAIL = "family/detail"

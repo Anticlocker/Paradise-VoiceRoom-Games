@@ -17,10 +17,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sundram.weplay.ui.theme.CyanBrand
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.CrystalBlue
 import com.sundram.weplay.ui.theme.TextBody
 import com.sundram.weplay.ui.theme.TextMain
 import com.sundram.weplay.ui.theme.TextMuted
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun <T> StateContent(
@@ -45,14 +51,20 @@ fun <T> StateContent(
 @Composable
 fun LoadingState(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = CyanBrand, strokeWidth = 2.dp)
+        CircularProgressIndicator(color = CrystalBlue, strokeWidth = 2.5.dp)
     }
 }
 
 @Composable
 fun EmptyState(message: String? = null, modifier: Modifier = Modifier) {
     Column(
-        modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp),
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 24.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(AuroraSurface.copy(alpha = 0.72f))
+            .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
+            .padding(horizontal = 24.dp, vertical = 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -72,15 +84,21 @@ fun ErrorState(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp),
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 24.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(AuroraSurface.copy(alpha = 0.72f))
+            .border(1.dp, AuroraBorder, RoundedCornerShape(18.dp))
+            .padding(horizontal = 24.dp, vertical = 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Could not load", color = TextMain, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text("Something went wrong", color = TextMain, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(6.dp))
         Text(message, color = TextMuted, fontSize = 13.sp, textAlign = TextAlign.Center)
         if (retryable && onRetry != null) {
-            Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onRetry) { Text("Retry", color = CyanBrand, fontWeight = FontWeight.Bold) }
+            Spacer(Modifier.height(10.dp))
+            TextButton(onClick = onRetry) { Text("Retry", color = CrystalBlue, fontWeight = FontWeight.Bold) }
         }
     }
 }

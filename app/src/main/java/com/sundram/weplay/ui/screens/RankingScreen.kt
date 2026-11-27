@@ -71,14 +71,14 @@ import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.ui.components.AvatarWithFrame
 import com.sundram.weplay.ui.nav.Routes
 
-private val PageCanvas = Color(0xFFFAF9FF)
-private val SurfaceWhite = Color(0xFFFFFFFF)
-private val InkDark = Color(0xFF26233C)
-private val InkMuted = Color(0xFF88849E)
-private val BorderSoft = Color(0xFFECE8F5)
-private val PurpleBrand = Color(0xFF7B52E8)
-private val CyanBrandColor = Color(0xFF31CAD9)
-private val GoldAccent = Color(0xFFF5BD62)
+private val PageCanvas = Color(0xFF11134A)
+private val SurfaceWhite = Color(0xFF211448)
+private val InkDark = Color(0xFFF8F1FF)
+private val InkMuted = Color(0xD9B89BFF)
+private val BorderSoft = Color(0x47B89BFF)
+private val PurpleBrand = Color(0xFF7435D9)
+private val CyanBrandColor = Color(0xFF54CFFF)
+private val GoldAccent = Color(0xFFFFD36B)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -337,8 +337,8 @@ private fun TopLeaderboardBar(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFF4EFFE))
-                .border(1.dp, Color(0xFFDDD2F9), CircleShape)
+                .background(Color(0xFF2C195E))
+                .border(1.dp, Color(0x47B89BFF), CircleShape)
                 .clickable(onClick = onOpenShop),
             contentAlignment = Alignment.Center,
         ) {
@@ -443,7 +443,7 @@ private fun PeriodChipsRow(
         supportedPeriods.forEach { period ->
             val isSelected = period == selectedPeriod
             val animBg by animateColorAsState(
-                targetValue = if (isSelected) Color(0xFFEEE8FC) else SurfaceWhite,
+                targetValue = if (isSelected) Color(0xFF3A2376) else SurfaceWhite,
                 animationSpec = tween(200),
                 label = "PeriodBg",
             )
@@ -488,8 +488,8 @@ private fun CategoryBannerCard(category: LeaderboardCategory) {
             .background(
                 Brush.horizontalGradient(
                     listOf(
-                        Color(category.bannerBgColor),
-                        Color(0xFFFAF9FF),
+                        Color(category.bannerBgColor).copy(alpha = 0.24f),
+                        Color(0xFF1A1242),
                     ),
                 ),
             )
@@ -519,7 +519,8 @@ private fun CategoryBannerCard(category: LeaderboardCategory) {
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.8f)),
+                    .background(Color(0xFF241A47))
+                    .border(1.dp, BorderSoft, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -606,9 +607,9 @@ private fun PodiumPedestal(
     }
 
     val pedestalGradient = when (rank) {
-        1 -> listOf(Color(0xFFFFF7E3), Color(0xFFFFECC0))
-        2 -> listOf(Color(0xFFF3F7FC), Color(0xFFE2ECFA))
-        else -> listOf(Color(0xFFFAF3EC), Color(0xFFF1E4D6))
+        1 -> listOf(Color(0xFF473316), Color(0xFF281746))
+        2 -> listOf(Color(0xFF23335A), Color(0xFF1B1442))
+        else -> listOf(Color(0xFF3C2522), Color(0xFF1E1340))
     }
 
     val frameTier = when (rank) {
@@ -681,7 +682,7 @@ private fun PodiumPedestal(
                 modifier = Modifier
                     .size(avatarSize)
                     .clip(CircleShape)
-                    .background(Color(0xFFEDE9F5)),
+                    .background(Color(0xFF2C195E)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -806,14 +807,14 @@ private fun RankRowItem(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFEDE9F8))
+                            .background(Color(0xFF2C195E))
                             .padding(horizontal = 4.dp, vertical = 1.dp),
                     ) {
                         Text(
                             text = "Lv.${entry.level}",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            color = PurpleBrand,
+                            color = Color(0xFF54CFFF),
                         )
                     }
                     if (!entry.subtitle.isNullOrBlank()) {
@@ -873,14 +874,14 @@ private fun StickyCurrentUserBar(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFF3EEFC)),
+                    .background(Color(0xFF2C195E)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = summary.rank?.let { "#$it" } ?: "--",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = PurpleBrand,
+                    color = GoldAccent,
                 )
             }
 
@@ -945,6 +946,9 @@ private fun RankingRulesDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = SurfaceWhite,
+        titleContentColor = InkDark,
+        textContentColor = InkMuted,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(rules.category.iconGlyph, fontSize = 20.sp)
@@ -956,7 +960,7 @@ private fun RankingRulesDialog(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(rules.summary, fontSize = 13.sp, color = InkDark)
                 HorizontalDivider(color = BorderSoft)
-                Text("Calculation Basis:", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PurpleBrand)
+                Text("Calculation Basis:", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CyanBrandColor)
                 rules.calculationRules.forEach { rule ->
                     Text("• $rule", fontSize = 12.sp, color = InkMuted)
                 }
@@ -967,7 +971,7 @@ private fun RankingRulesDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Got It", color = PurpleBrand, fontWeight = FontWeight.Bold)
+                Text("Got It", color = CyanBrandColor, fontWeight = FontWeight.Bold)
             }
         },
     )
@@ -1019,7 +1023,7 @@ private fun FrameShopSheetContent(
             modifier = Modifier
                 .size(130.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFF6F3FB)),
+                .background(Color(0xFF2C195E)),
             contentAlignment = Alignment.Center,
         ) {
             AvatarWithFrame(
@@ -1081,7 +1085,7 @@ private fun FrameShopSheetContent(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFEBF8FA))
+                    .background(Color(0xFF19324A))
                     .padding(8.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -1101,7 +1105,7 @@ private fun FrameShopSheetContent(
                             .weight(1f)
                             .height(44.dp)
                             .clip(RoundedCornerShape(22.dp))
-                            .background(Color(0xFFEDE9F5))
+                            .background(Color(0xFF2C195E))
                             .clickable(onClick = onUnequip),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -1149,7 +1153,7 @@ private fun FrameShopSheetContent(
                             .weight(1f)
                             .height(44.dp)
                             .clip(RoundedCornerShape(22.dp))
-                            .background(Color(0xFFF0EDF7)),
+                            .background(Color(0xFF2A1C54)),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -1192,10 +1196,10 @@ private fun FrameShopSheetContent(
                     modifier = Modifier
                         .width(76.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) Color(0xFFF1EBFC) else SurfaceWhite)
+                        .background(if (isSelected) Color(0xFF3A2376) else Color(0xFF1A1242))
                         .border(
                             1.5.dp,
-                            if (isSelected) PurpleBrand else BorderSoft,
+                            if (isSelected) CyanBrandColor else BorderSoft,
                             RoundedCornerShape(14.dp),
                         )
                         .clickable { onSelectPreview(frame.id) }
@@ -1231,7 +1235,7 @@ private fun FrameShopSheetContent(
                         },
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (equipped) PurpleBrand else InkMuted,
+                        color = if (equipped) CyanBrandColor else InkMuted,
                     )
                 }
             }

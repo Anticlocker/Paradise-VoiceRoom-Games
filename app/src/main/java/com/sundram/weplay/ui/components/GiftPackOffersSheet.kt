@@ -258,7 +258,7 @@ fun GiftPackOffersSheet(
                         .clip(RoundedCornerShape(14.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(Color(0xFFFFECE5), Color(0xFFF0ECFF))
+                                listOf(Color(0xFF3A1A36), Color(0xFF28194E))
                             )
                         )
                         .border(1.dp, AuroraBorder, RoundedCornerShape(14.dp))
@@ -355,21 +355,21 @@ fun GiftPackOffersSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFFFF9E6))
-                            .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(12.dp))
+                            .background(Color(0xFF2D1E4F))
+                            .border(1.dp, Color(0xFFFFD54F).copy(alpha = 0.55f), RoundedCornerShape(12.dp))
                             .padding(10.dp),
                     ) {
                         Column {
                             Text(
                                 text = "Billing notice",
-                                color = Color(0xFFE65100),
+                                color = Color(0xFFFFD36B),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
                                 text = "Real Google Play store billing is not connected. Package contents and ₹ pricing are demonstrated for UI preview without charging real money.",
-                                color = Color(0xFF5D4037),
+                                color = Color(0xFFD0C2EE),
                                 fontSize = 10.sp,
                             )
                             Spacer(Modifier.height(4.dp))
@@ -570,7 +570,7 @@ private fun AllPacksList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(if (isFeatured) Color(0xFFF3E5F5) else AuroraSurface)
+                    .background(if (isFeatured) Color(0xFF331D66) else AuroraSurface)
                     .border(
                         1.dp,
                         if (isFeatured) AuroraOrchid else AuroraBorder,

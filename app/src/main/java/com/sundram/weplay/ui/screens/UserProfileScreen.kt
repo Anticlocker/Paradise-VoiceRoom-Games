@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +42,7 @@ import com.sundram.weplay.ui.components.SectionHeader
 import com.sundram.weplay.ui.theme.CardWhite
 import com.sundram.weplay.ui.theme.CyanBrand
 import com.sundram.weplay.ui.theme.MintGreen
+import com.sundram.weplay.ui.theme.OnBrand
 import com.sundram.weplay.ui.theme.KtvRed
 import com.sundram.weplay.ui.theme.TextMain
 import com.sundram.weplay.ui.theme.BgSoft
@@ -63,6 +66,8 @@ fun UserProfileScreen(nav: NavController, userId: String, store: MessagingStore)
         modifier = Modifier
             .fillMaxSize()
             .background(PageWhite)
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
@@ -246,7 +251,7 @@ private fun ActionButton(label: String, bg: Color, onClick: () -> Unit) {
     ) {
         Text(
             label,
-            color = if (bg == CyanBrand) Color.White else TextMain,
+            color = if (bg == CyanBrand) OnBrand else TextMain,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
         )

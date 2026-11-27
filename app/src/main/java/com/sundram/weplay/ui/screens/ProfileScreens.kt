@@ -724,7 +724,7 @@ private fun BackpackTile(
 fun AboutScreen(nav: NavHostController) {
     var dialog by remember { mutableStateOf<String?>(null) }
 
-    SubScreen(nav, "About", "WePlay 0.1.0") {
+    SubScreen(nav, "About", "Paradise 0.1.0") {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -741,19 +741,19 @@ fun AboutScreen(nav: NavHostController) {
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("W", color = OnBrand, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
+                Text("P", color = OnBrand, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
             }
             Spacer(Modifier.height(12.dp))
-            Text("WePlay", color = TextMain, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text("Party games and voice rooms", color = TextBody, fontSize = 12.sp)
+            Text("Paradise", color = TextMain, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("Voice Room & Social Party Games", color = TextBody, fontSize = 12.sp)
             Spacer(Modifier.height(4.dp))
             Text("Version 0.1.0", color = TextMuted, fontSize = 11.sp)
         }
 
         Spacer(Modifier.height(18.dp))
         Text(
-            "WePlay brings voice rooms and party games together. Games run on the device, " +
-                "so rooms are simulated and nothing leaves your phone.",
+            "Paradise brings live voice rooms and multiplayer party games together in a celestial lounge. " +
+                "In this local preview, rooms, players, and purchases are simulated on your device.",
             color = TextBody,
             fontSize = 13.sp,
             lineHeight = 20.sp,
@@ -771,8 +771,8 @@ fun AboutScreen(nav: NavHostController) {
     dialog?.let { kind ->
         val (title, body) = when (kind) {
             "terms" -> "Terms of Service" to
-                "WePlay is a local demo. Rooms, players and games are simulated on this device. " +
-                "Do not use it for real-money trading or anything illegal."
+                "Paradise is currently running in local preview mode. Rooms, players and games are simulated on this device. " +
+                "Do not use this app for real-money trading or prohibited conduct."
             "privacy" -> "Privacy Policy" to
                 "Nothing is uploaded. Your name, birthday, photo and settings stay in this app's " +
                 "private storage and are removed when you log out."

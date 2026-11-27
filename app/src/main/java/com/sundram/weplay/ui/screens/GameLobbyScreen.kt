@@ -724,7 +724,7 @@ data class ExploreUser(
     val frameTier: FrameTier = FrameTier.COMMON,
 )
 
-private val exploreUsers = listOf(
+internal val exploreUsers = listOf(
     ExploreUser("1", "Madiha", "F", "avatar_aurora_explorer", 28, true, "< 194km", "In Voice Room", false, "Looking for late night music rooms", frameTier = FrameTier.EPIC),
     ExploreUser("2", "L4ZYK!D!!", "M", "avatar_cyber_gamer", 35, true, "< 213km", "Playing Ludo", false, "Up for a quick Ludo match", frameTier = FrameTier.LEGENDARY),
     ExploreUser("3", "Scooby", "F", "avatar_mystic_fox", 19, true, "< 110km", "In Voice Room", false, "Music rooms and weekend trivia", frameTier = FrameTier.RARE),
@@ -1164,21 +1164,42 @@ fun GamesHomeScreen(
 
                     Spacer(Modifier.width(10.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(AuroraSurface.copy(alpha = 0.85f))
-                            .border(1.dp, AuroraBorder, RoundedCornerShape(16.dp))
-                            .bounceClick { nav.navigateSafe(Routes.GAME_ROOMS) }
-                            .padding(horizontal = 11.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center,
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = "All Games ›",
-                            color = com.sundram.weplay.ui.theme.CloudWhite,
-                            fontSize = 11.5.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(AuroraSurface.copy(alpha = 0.85f))
+                                .border(1.dp, AuroraBorder, RoundedCornerShape(16.dp))
+                                .bounceClick { nav.navigateSafe(Routes.GAME_ROOMS) }
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "Rooms ›",
+                                color = com.sundram.weplay.ui.theme.CrystalBlue,
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(AuroraSurface.copy(alpha = 0.85f))
+                                .border(1.dp, AuroraBorder, RoundedCornerShape(16.dp))
+                                .bounceClick { nav.navigateSafe(Routes.ALL_GAMES) }
+                                .padding(horizontal = 11.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "All Games ›",
+                                color = com.sundram.weplay.ui.theme.CloudWhite,
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     }
                 }
             }

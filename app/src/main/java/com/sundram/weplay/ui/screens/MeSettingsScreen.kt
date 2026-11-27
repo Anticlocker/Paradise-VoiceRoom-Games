@@ -21,18 +21,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.sundram.weplay.R
+import com.sundram.weplay.data.ProfileStore
+import com.sundram.weplay.ui.theme.AuroraBackground
+import com.sundram.weplay.ui.theme.AuroraElevated
+import com.sundram.weplay.ui.theme.AuroraSurface
 import com.sundram.weplay.ui.theme.CardWhite
 import com.sundram.weplay.ui.theme.CyanBrand
 import com.sundram.weplay.ui.theme.Gold
@@ -47,9 +53,9 @@ import com.sundram.weplay.ui.theme.TextMuted
 import com.sundram.weplay.ui.theme.WarnOrange
 import com.sundram.weplay.ui.nav.Routes
 
-private val MeBg = Color(0xFFF5F6FA)
-private val HeaderBg = Color(0xFFE8EAF2)
-private val ProfileBrown = Color(0xFF7A5C53)
+private val MeBg = AuroraBackground
+private val HeaderBg = AuroraSurface
+private val ProfileBrown = AuroraElevated
 private val QuickVip = Color(0xFFFFD54A)
 private val QuickShop = Color(0xFFFF6F91)
 private val QuickPlay = Color(0xFF4FB8FF)
@@ -96,6 +102,11 @@ private fun buildMenuItems(muted: Color, card: Color, brand: Color) = listOf(
 fun MeSettingsScreen(
     nav: NavHostController,
 ) {
+    val context = LocalContext.current
+    val activeProfile = remember { ProfileStore(context).load() }
+    val displayName = activeProfile?.name ?: "Paradise Player"
+    val initial = displayName.firstOrNull()?.uppercase() ?: "P"
+    val level = activeProfile?.level ?: 1
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -117,7 +128,7 @@ fun MeSettingsScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "0",
+                        initial,
                         color = Color.White,
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
@@ -126,7 +137,7 @@ fun MeSettingsScreen(
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
-                        "Osama bin Moham...",
+                        displayName,
                         color = TextMain,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -137,7 +148,7 @@ fun MeSettingsScreen(
                             Modifier
                                 .height(6.dp)
                                 .width(180.dp)
-                                .background(Color(0xFFD9D9D9), RoundedCornerShape(3.dp)),
+                                .background(AuroraElevated, RoundedCornerShape(3.dp)),
                         ) {
                             Box(
                                 Modifier
@@ -147,8 +158,8 @@ fun MeSettingsScreen(
                             )
                         }
                         Spacer(Modifier.width(6.dp))
-                        Text("Lv.1", color = TextBody, fontSize = 12.sp)
-                        Text("5/60", color = TextBody, fontSize = 12.sp)
+                        Text("Lv.$level", color = TextBody, fontSize = 12.sp)
+                        Text(" · Preview", color = TextBody, fontSize = 12.sp)
                     }
                 }
                 Spacer(Modifier.weight(1f))
@@ -178,10 +189,10 @@ fun MeSettingsScreen(
                     newBadge = item.newBadge,
                     onClick = {
                         when (item.label) {
-                            "VIP Center" -> nav.navigate(Routes.TOPUP)
-                            "Shop" -> nav.navigate(Routes.GIFTS)
+                            "VIP Center" -> nav.navigate(Routes.VIP)
+                            "Shop" -> nav.navigate(Routes.SHOP)
                             "PLAY Show" -> nav.navigate(Routes.DISCOVER)
-                            "My Home" -> nav.navigate(Routes.ME)
+                            "My Home" -> nav.navigate(Routes.MY_SPACE)
                             else -> nav.navigate(Routes.SETTINGS)
                         }
                     },
@@ -327,10 +338,11 @@ private fun SettingsRow(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "4 d 4 h",
-                    color = Color.White,
-                    fontSize = 8.sp,
+                    "Preview",
+                    color = TextMain,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                 )
             }
         }

@@ -1,0 +1,32 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Luminous outer celestial medallion ring -->
+    <path
+        android:fillColor="#26135B"
+        android:fillAlpha="0.88"
+        android:strokeColor="#FFD464"
+        android:strokeAlpha="0.75"
+        android:strokeWidth="1.8"
+        android:pathData="M54,28 A26,26 0 1,0 54,80 A26,26 0 1,0 54,28 Z" />
+    <!-- Aurora crescent moon -->
+    <path
+        android:fillColor="#FFD464"
+        android:pathData="M48,33 C39,34 33,42 34,51 C35,58 41,63 48,64 C41,61 38,54 39,46 C40,39 44,35 48,33 Z" />
+    <!-- Celestial aurora prism star -->
+    <path
+        android:fillColor="#B88BFF"
+        android:pathData="M57,36 L62.5,47.5 L74,53 L62.5,58.5 L57,70 L51.5,58.5 L40,53 L51.5,47.5 Z" />
+    <path
+        android:fillColor="#66E6FF"
+        android:pathData="M57,41 L60.5,49.5 L69,53 L60.5,56.5 L57,65 L53.5,56.5 L45,53 L53.5,49.5 Z" />
+    <path
+        android:fillColor="#FFF5C8"
+        android:pathData="M57,47 L59,51 L63,53 L59,55 L57,59 L55,55 L51,53 L55,51 Z" />
+    <!-- Harmonic voice wave ribbon -->
+    <path
+        android:fillColor="#FFE082"
+        android:pathData="M37,69 Q45.5,64 54,69 Q62.5,74 71,69 L71,72.5 Q62.5,77.5 54,72.5 Q45.5,67.5 37,72.5 Z" />
+</vector>

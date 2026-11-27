@@ -72,14 +72,14 @@ import com.sundram.weplay.voiceroom.theme.CreatedRoomRecord
 import com.sundram.weplay.voiceroom.theme.RoomThemeServiceProvider
 import kotlinx.coroutines.delay
 
-private val BgPearl = Color(0xFFF8F7FF)
-private val TextDark = Color(0xFF211B38)
-private val TextSecondary = Color(0xFF6C628A)
-private val BorderLavender = Color(0xFFECE9FE)
-private val CardWhite = Color(0xFFFFFFFF)
-private val PurpleBrand = Color(0xFF8058E9)
-private val ChipInactiveBg = Color(0xFFF0EDFF)
-private val ErrorRed = Color(0xFFE53935)
+private val BgPearl = Color(0xFF11134A)
+private val TextDark = Color(0xFFF8F1FF)
+private val TextSecondary = Color(0xD9B89BFF)
+private val BorderLavender = Color(0x47B89BFF)
+private val CardWhite = Color(0xFF211448)
+private val PurpleBrand = Color(0xFF7435D9)
+private val ChipInactiveBg = Color(0xFF2C195E)
+private val ErrorRed = Color(0xFFFF6B6B)
 
 private data class CreateRoomMode(
     val title: String,
@@ -547,7 +547,7 @@ fun CreateVoiceRoomScreen(nav: NavHostController) {
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
-                            text = if (passwordEnabled) "Protected by 4-digit code" else "No password required",
+                            text = if (passwordEnabled) "Protected by 4-12 char passcode" else "No passcode required",
                             color = TextSecondary,
                             fontSize = 12.sp,
                         )
@@ -598,7 +598,7 @@ fun CreateVoiceRoomScreen(nav: NavHostController) {
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = if (passwordVisible) "Hide" else "Show",
-                                    color = PurpleBrand,
+                                    color = Color(0xFF54CFFF),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.clickable { passwordVisible = !passwordVisible },

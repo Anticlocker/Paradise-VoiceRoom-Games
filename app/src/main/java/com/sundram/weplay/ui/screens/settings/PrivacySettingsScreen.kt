@@ -55,13 +55,13 @@ private val ReportReasons = listOf(
 )
 
 private val DmChoices = listOf(
-    SettingsChoice("everyone", "Everyone", "Any WePlay user can message you"),
+    SettingsChoice("everyone", "Everyone", "Any Paradise player can message you"),
     SettingsChoice("followers", "Followers only", "Only people who follow you can message you"),
     SettingsChoice("nobody", "Nobody", "No one can start a new direct message"),
 )
 
 private val InviteChoices = listOf(
-    SettingsChoice("everyone", "Everyone", "Any WePlay user can invite you to a room"),
+    SettingsChoice("everyone", "Everyone", "Any Paradise player can invite you to a room"),
     SettingsChoice("following", "Following only", "Only people you follow can invite you"),
 )
 

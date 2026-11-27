@@ -92,14 +92,14 @@ import com.sundram.weplay.ui.nav.Routes
 // ─────────────────────────────────────────────────────────────────────────────
 //  Color Palette — White + Lavender + Cyan + Soft Gold
 // ─────────────────────────────────────────────────────────────────────────────
-private val FamilyCanvas     = Color(0xFFFAF9FF)
-private val FamilyWhite      = Color(0xFFFFFFFF)
-private val FamilyInk        = Color(0xFF26233C)
-private val FamilySecondary  = Color(0xFF8D8AA3)
-private val FamilyLavender   = Color(0xFFEFE9FF)
-private val FamilyCyan       = Color(0xFF31CAD9)
-private val FamilyGold       = Color(0xFFF5BD62)
-private val FamilyHairline   = Color(0xFFF0ECF9)
+private val FamilyCanvas     = Color(0xFF11134A)
+private val FamilyWhite      = Color(0xFF211448)
+private val FamilyInk        = Color(0xFFF8F1FF)
+private val FamilySecondary  = Color(0xD9B89BFF)
+private val FamilyLavender   = Color(0xFF2C195E)
+private val FamilyCyan       = Color(0xFF54CFFF)
+private val FamilyGold       = Color(0xFFFFD36B)
+private val FamilyHairline   = Color(0x47B89BFF)
 private val FamilyDanger     = Color(0xFFFF4D4F)
 
 /**
@@ -620,9 +620,9 @@ private fun FamilyDiscoveryHub(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Create Your Own Guild", color = FamilyWhite, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text("Create Your Own Guild", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Spacer(Modifier.height(4.dp))
-                    Text("Gather friends, unlock exclusive voice rooms, and share weekly chests.", color = FamilyWhite.copy(alpha = 0.85f), fontSize = 12.sp)
+                    Text("Gather friends, unlock exclusive voice rooms, and share weekly chests.", color = Color.White.copy(alpha = 0.88f), fontSize = 12.sp)
                     Spacer(Modifier.height(12.dp))
                     Box(
                         modifier = Modifier
@@ -631,7 +631,7 @@ private fun FamilyDiscoveryHub(
                             .bounceClick(onClick = onCreateClick)
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     ) {
-                        Text("Create Family", color = Color(0xFF7B52E8), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("Create Family", color = FamilyCyan, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                 }
                 Spacer(Modifier.width(8.dp))
@@ -683,7 +683,7 @@ private fun FamilyDiscoveryHub(
                                         .background(FamilyLavender)
                                         .padding(horizontal = 6.dp, vertical = 1.dp),
                                 ) {
-                                    Text("[${fam.tag}]", color = Color(0xFF7B52E8), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text("[${fam.tag}]", color = FamilyCyan, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                             Spacer(Modifier.height(3.dp))
@@ -703,7 +703,7 @@ private fun FamilyDiscoveryHub(
                                 .bounceClick { onJoinClick(fam) }
                                 .padding(horizontal = 14.dp, vertical = 8.dp),
                         ) {
-                            Text("Join", color = FamilyWhite, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("Join", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
@@ -730,8 +730,8 @@ private fun FamilyHeroSection(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFE9DEFF),
-                        Color(0xFFE4F8FA),
+                        Color(0xFF2D1A66),
+                        Color(0xFF1D134B),
                         FamilyCanvas,
                     )
                 )
@@ -809,7 +809,7 @@ private fun FamilyHeroSection(
                                 .background(FamilyLavender)
                                 .padding(horizontal = 6.dp, vertical = 2.dp),
                         ) {
-                            Text("[${family.tag}]", color = Color(0xFF7B52E8), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+                            Text("[${family.tag}]", color = FamilyCyan, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
                         }
                     }
 
@@ -1144,7 +1144,7 @@ private fun FamilyOverviewTab(
                     Spacer(Modifier.width(8.dp))
                     Column {
                         Text("Family Room", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = FamilyInk)
-                        Text("Private Lounge", color = Color(0xFF7B52E8), fontSize = 10.sp)
+                        Text("Private Lounge", color = FamilyCyan, fontSize = 10.sp)
                     }
                 }
             }
@@ -1176,7 +1176,7 @@ private fun FamilyOverviewTab(
                             .background(if (idx == 0) FamilyGold else if (idx == 1) Color(0xFFC0C0C0) else Color(0xFFCD7F32)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text("${idx + 1}", color = FamilyWhite, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        Text("${idx + 1}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                     }
                     Spacer(Modifier.width(10.dp))
                     Text(member.name, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = FamilyInk)
@@ -1259,7 +1259,7 @@ private fun FamilyQuestsTab(
                     ) {
                         Text(
                             text = if (quest.isClaimed) "Claimed" else if (quest.isCompleted) "Claim" else "+${quest.rewardCoins}c",
-                            color = if (quest.isClaimed) FamilySecondary else if (quest.isCompleted) FamilyWhite else Color(0xFF7B52E8),
+                            color = if (quest.isClaimed) FamilySecondary else if (quest.isCompleted) Color.White else FamilyCyan,
                             fontWeight = FontWeight.Bold,
                             fontSize = 11.sp,
                         )
@@ -1299,7 +1299,7 @@ private fun FamilyMembersTab(
                     .bounceClick(onClick = onInviteClick)
                     .padding(horizontal = 12.dp, vertical = 6.dp),
             ) {
-                Text("+ Invite Friends", color = Color(0xFF7B52E8), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                Text("+ Invite Friends", color = FamilyCyan, fontWeight = FontWeight.Bold, fontSize = 11.sp)
             }
         }
 
@@ -1446,7 +1446,7 @@ private fun FamilyManageTab(
                     .bounceClick { onUpdateAnnouncement(newAnnouncement) }
                     .padding(horizontal = 14.dp, vertical = 6.dp),
             ) {
-                Text("Save Notice", color = FamilyWhite, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("Save Notice", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             }
 
             Spacer(Modifier.height(16.dp))
@@ -1550,7 +1550,7 @@ private fun TreasuryDonationDialog(
                         ) {
                             Text(
                                 "$amt",
-                                color = if (selectedAmount == amt) FamilyWhite else Color(0xFF7B52E8),
+                                color = if (selectedAmount == amt) Color.White else FamilyCyan,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
                             )
@@ -1679,13 +1679,13 @@ private fun FamilyShopBottomSheet(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (item.isOwned) Color(0xFF7B52E8) else FamilyCyan)
+                        .background(if (item.isOwned) Color(0xFF5423B7) else Color(0xFF1F3E68))
                         .clickable { if (item.isOwned) onEquip(item) else onPurchase(item) }
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
                     Text(
                         text = if (item.isEquipped) "Equipped" else if (item.isOwned) "Equip" else "${item.priceCoins} Coins",
-                        color = FamilyWhite,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.sp,
                     )

@@ -15,7 +15,7 @@ data class DirectoryUser(
     val id: String,          // username, e.g. "priya"
     val name: String,        // display name
     val level: Int = 1,
-    val bio: String = "Hey there, I am using WePlay.",
+    val bio: String = "Hey there, I am playing on Paradise.",
     val online: Boolean = false,
 )
 

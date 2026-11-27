@@ -128,6 +128,14 @@ fun SettingsHomeScreen(
                 subtitle = "Version, terms and licenses",
                 onClick = { nav.navigate(Routes.ABOUT) },
             )
+            SettingsRowDivider()
+            SettingsRow(
+                icon = R.drawable.ic_star,
+                tint = CyanBrand,
+                title = "Paradise guide",
+                subtitle = "Rooms, party games and safety overview",
+                onClick = { nav.navigate(Routes.ONBOARDING) },
+            )
         }
 
         SettingsGroup("Account access") {
@@ -151,7 +159,7 @@ fun SettingsHomeScreen(
         }
 
         Text(
-            "WePlay ${appVersion(context)} · local build",
+            "Paradise ${appVersion(context)} · local preview build",
             color = TextMuted,
             fontSize = 11.sp,
             modifier = Modifier.padding(start = 2.dp),

@@ -69,8 +69,8 @@ val LegalDocuments = listOf(
         updated = "Last updated 5 November 2026",
         sections = listOf(
             LegalSection(
-                "Local demo",
-                "WePlay is a local demo application. Voice rooms, players, games, gifts and payments " +
+                "Local preview",
+                "Paradise is currently running in local preview mode. Voice rooms, players, games, gifts and payments " +
                     "are simulated on this device. No real-money transaction takes place.",
             ),
             LegalSection(
@@ -164,7 +164,7 @@ val LegalDocuments = listOf(
             LegalSection(
                 "Full license text",
                 "The Apache License 2.0 is available at apache.org/licenses/LICENSE-2.0. This app " +
-                    "does not include code or assets copied from the WePlay APK.",
+                    "contains original code and independently sourced or generated assets for Paradise.",
             ),
         ),
     ),

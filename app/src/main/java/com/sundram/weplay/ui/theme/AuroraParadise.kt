@@ -39,9 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -870,8 +871,9 @@ fun CelestialHeader(
     val formattedCoins = remember(coins) {
         NumberFormat.getIntegerInstance().format(coins)
     }
-    val userBitmap by produceState<ImageBitmap?>(initialValue = null, key1 = photoPath) {
-        value = if (!photoPath.isNullOrBlank()) {
+    val decodedBitmapState = remember(photoPath) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(photoPath) {
+        decodedBitmapState.value = if (!photoPath.isNullOrBlank()) {
             withContext(Dispatchers.IO) {
                 runCatching { BitmapFactory.decodeFile(photoPath)?.asImageBitmap() }.getOrNull()
             }
@@ -879,6 +881,7 @@ fun CelestialHeader(
             null
         }
     }
+    val userBitmap = decodedBitmapState.value
     val isPhoenixFrame = frameId.equals("phoenix", ignoreCase = true) ||
         frameId.equals("PHOENIX_REBIRTH", ignoreCase = true)
     val ringFrameRes = remember(frameId) {

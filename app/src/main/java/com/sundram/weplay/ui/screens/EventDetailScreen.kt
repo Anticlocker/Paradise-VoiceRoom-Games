@@ -489,10 +489,10 @@ private fun TaskRowCard(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFE8F5E9))
+                    .background(Color(0xFF17362A))
                     .padding(horizontal = 12.dp, vertical = 6.dp),
             ) {
-                Text("Claimed", color = Color(0xFF2E7D32), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Claimed", color = Color(0xFF50DCA2), fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         } else if (task.isCompleted) {
             Box(

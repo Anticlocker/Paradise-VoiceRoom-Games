@@ -52,6 +52,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import com.sundram.weplay.data.MessagingStore
 import com.sundram.weplay.data.ProfileStore
 import com.sundram.weplay.data.UserProfile
@@ -73,6 +75,7 @@ import com.sundram.weplay.ui.screens.LiveVoiceRoomScreen
 import com.sundram.weplay.ui.screens.LudoScreen
 import com.sundram.weplay.ui.screens.MeScreen
 import com.sundram.weplay.ui.screens.MessagesScreen
+import com.sundram.weplay.ui.screens.OnboardingScreen
 import com.sundram.weplay.ui.screens.ProfileEditScreen
 import com.sundram.weplay.ui.screens.SpyScreen
 import com.sundram.weplay.ui.screens.TopUpScreen
@@ -90,10 +93,16 @@ import com.sundram.weplay.ui.screens.settings.SupportSettingsScreen
 import com.sundram.weplay.ui.screens.settings.TransactionsScreen
 import com.sundram.weplay.ui.screens.settings.VoiceSettingsScreen
 import com.sundram.weplay.ui.screens.settings.WalletSettingsScreen
+import com.sundram.weplay.ui.screens.AllGamesScreen
+import com.sundram.weplay.ui.screens.ClubsSpacesScreen
 import com.sundram.weplay.ui.screens.GameLobbyScreen
 import com.sundram.weplay.ui.screens.GameRoomsScreen
+import com.sundram.weplay.ui.screens.MySpaceScreen
+import com.sundram.weplay.ui.screens.NearbyScreen
 import com.sundram.weplay.ui.screens.NotificationsScreen
 import com.sundram.weplay.ui.screens.SearchScreen
+import com.sundram.weplay.ui.screens.ShopScreen
+import com.sundram.weplay.ui.screens.VipCenterScreen
 import com.sundram.weplay.ui.screens.VoiceRoomListScreen
 import com.sundram.weplay.ui.theme.ThemeMode
 import com.sundram.weplay.ui.theme.WePlayTheme
@@ -249,6 +258,52 @@ private fun WePlayApp(
             navController = nav,
             startDestination = Routes.HUB,
             modifier = Modifier.fillMaxSize(),
+            // Keep top-level tab swaps instant to avoid ghost double-renders,
+            // while pushed destinations get a clean subtle fade transition.
+            enterTransition = {
+                val target = targetState.destination.route
+                val initial = initialState.destination.route
+                if (target in Routes.tabs && initial in Routes.tabs) {
+                    EnterTransition.None
+                } else {
+                    androidx.compose.animation.fadeIn(
+                        animationSpec = androidx.compose.animation.core.tween(180)
+                    )
+                }
+            },
+            exitTransition = {
+                val target = targetState.destination.route
+                val initial = initialState.destination.route
+                if (target in Routes.tabs && initial in Routes.tabs) {
+                    ExitTransition.None
+                } else {
+                    androidx.compose.animation.fadeOut(
+                        animationSpec = androidx.compose.animation.core.tween(140)
+                    )
+                }
+            },
+            popEnterTransition = {
+                val target = targetState.destination.route
+                val initial = initialState.destination.route
+                if (target in Routes.tabs && initial in Routes.tabs) {
+                    EnterTransition.None
+                } else {
+                    androidx.compose.animation.fadeIn(
+                        animationSpec = androidx.compose.animation.core.tween(180)
+                    )
+                }
+            },
+            popExitTransition = {
+                val target = targetState.destination.route
+                val initial = initialState.destination.route
+                if (target in Routes.tabs && initial in Routes.tabs) {
+                    ExitTransition.None
+                } else {
+                    androidx.compose.animation.fadeOut(
+                        animationSpec = androidx.compose.animation.core.tween(140)
+                    )
+                }
+            },
         ) {
             composable(Routes.HUB) {
                 GameLobbyScreen(nav, pad, profile)
@@ -305,7 +360,16 @@ private fun WePlayApp(
                 )
             }
             composable(Routes.ME_SETTINGS) {
-                MeSettingsScreen(nav = nav)
+                SettingsHomeScreen(nav, profile)
+            }
+            composable(Routes.VIP) {
+                VipCenterScreen(nav)
+            }
+            composable(Routes.SHOP) {
+                ShopScreen(nav)
+            }
+            composable(Routes.MY_SPACE) {
+                MySpaceScreen(nav)
             }
             composable(Routes.CREATE_ROOM) {
                 CreateVoiceRoomScreen(nav = nav)
@@ -330,6 +394,42 @@ private fun WePlayApp(
             }
             composable(Routes.FAMILY) {
                 FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_DISCOVERY) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_CREATION) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_DETAIL) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_CHAT) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_VOICE_ROOM) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_MANAGEMENT) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_LEADERBOARD) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_SHOP) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_ROSTER) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.FAMILY_QUESTS) {
+                FamilyScreen(nav, profile, onSaveProfile)
+            }
+            composable(Routes.NEARBY) {
+                NearbyScreen(nav)
+            }
+            composable(Routes.CLUBS) {
+                ClubsSpacesScreen(nav)
             }
             composable(Routes.BACKPACK) {
                 BackpackScreen(nav, profile, onSaveProfile)
@@ -379,6 +479,21 @@ private fun WePlayApp(
             composable(Routes.SUPPORT_SETTINGS) {
                 SupportSettingsScreen(nav, profile)
             }
+            composable(Routes.FEEDBACK) {
+                SupportSettingsScreen(nav, profile)
+            }
+            composable(Routes.ONBOARDING) {
+                OnboardingScreen(nav)
+            }
+            composable(Routes.SPLASH) {
+                OnboardingScreen(nav)
+            }
+            composable(Routes.AUTH) {
+                AuthScreen { created ->
+                    onSaveProfile(created)
+                    nav.popBackStack(Routes.HUB, inclusive = false)
+                }
+            }
             composable(Routes.ABOUT) {
                 AboutScreen(nav)
             }
@@ -390,6 +505,9 @@ private fun WePlayApp(
             }
             composable(Routes.GAME_ROOMS) {
                 GameRoomsScreen(nav)
+            }
+            composable(Routes.ALL_GAMES) {
+                AllGamesScreen(nav)
             }
             composable(Routes.EVENT_CENTER) {
                 com.sundram.weplay.ui.screens.EventCenterScreen(nav = nav)

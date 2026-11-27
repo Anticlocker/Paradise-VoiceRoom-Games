@@ -9,103 +9,73 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-private val LightPalette = WePlayPalette(
+// Unified Aurora Paradise 3.0 dark palette so nested screens never render mixed light/dark chrome.
+private val AuroraDarkPalette = WePlayPalette(
     page = AuroraBackground,
-    bgSoft = Color(0xFFF9F5FF),
-    bgSection = Color(0xFFF6F2FC),
-    chipBg = Color(0xFFF3EEFA),
+    bgSoft = Color(0xFF1A1242),
+    bgSection = Color(0xFF231651),
+    chipBg = AuroraElevated,
     card = AuroraSurface,
     divider = AuroraDivider,
     stroke = AuroraBorder,
     textMain = AuroraTextPrimary,
-    textBody = Color(0xFF4A4462),
+    textBody = Color(0xFFDCD0F5),
     textMuted = AuroraTextSecondary,
-    overlaySoft = Color(0xB3F9F5FF),
-    authSky = Color(0xFFF0ECFF),
-    wallBlue = Color(0xFFF2EFFF),
-    wallPurple = Color(0xFFF6EDFF),
-    wallMint = Color(0xFFE8FAF2),
-    accentInk = AuroraOrchid,
+    overlaySoft = Color(0xCC100A2E),
+    authSky = Color(0xFF170E3B),
+    wallBlue = Color(0xFF1E1752),
+    wallPurple = Color(0xFF2B1759),
+    wallMint = Color(0xFF142A3E),
+    accentInk = CrystalBlue,
 )
 
-private val DarkPalette = WePlayPalette(
-    page = Color(0xFF0F1420),
-    bgSoft = Color(0xFF151B2A),
-    bgSection = Color(0xFF1A2132),
-    chipBg = Color(0xFF222A3D),
-    card = Color(0xFF171E2C),
-    divider = Color(0xFF252D40),
-    stroke = Color(0xFF2C3550),
-    textMain = Color(0xFFF2F5FF),
-    textBody = Color(0xFFC3CBDE),
-    textMuted = Color(0xFF8D98B2),
-    overlaySoft = Color(0xB30B0F19),
-    authSky = Color(0xFF10283A),
-    wallBlue = Color(0xFF122234),
-    wallPurple = Color(0xFF1B1630),
-    wallMint = Color(0xFF10241F),
-    accentInk = Color(0xFF66D9FF),
+private val LightPalette = AuroraDarkPalette
+
+private val DarkPalette = AuroraDarkPalette
+
+private val LightScheme = darkColorScheme(
+    primary = RoyalViolet,
+    onPrimary = CloudWhite,
+    secondary = CrystalBlue,
+    onSecondary = CelestialNavy,
+    tertiary = RoyalGold,
+    onTertiary = CelestialNavy,
+    background = AuroraDarkPalette.page,
+    onBackground = AuroraDarkPalette.textMain,
+    surface = AuroraDarkPalette.card,
+    onSurface = AuroraDarkPalette.textMain,
+    surfaceVariant = AuroraDarkPalette.bgSection,
+    onSurfaceVariant = AuroraDarkPalette.textBody,
+    surfaceBright = AuroraDarkPalette.bgSoft,
+    surfaceDim = AuroraDarkPalette.page,
+    surfaceContainerLowest = AuroraDarkPalette.page,
+    surfaceContainerLow = AuroraDarkPalette.bgSoft,
+    surfaceContainer = AuroraDarkPalette.bgSection,
+    surfaceContainerHigh = AuroraDarkPalette.bgSection,
+    surfaceContainerHighest = AuroraDarkPalette.chipBg,
+    outline = AuroraDarkPalette.stroke,
+    outlineVariant = AuroraDarkPalette.divider,
+    error = AuroraError,
 )
 
-private val LightScheme = lightColorScheme(
-    primary = CyanBrand,
-    onPrimary = OnBrand,
-    secondary = PinkGift,
-    onSecondary = OnBrand,
-    background = LightPalette.page,
-    onBackground = LightPalette.textMain,
-    surface = LightPalette.card,
-    onSurface = LightPalette.textMain,
-    surfaceVariant = LightPalette.bgSection,
-    onSurfaceVariant = LightPalette.textBody,
-    surfaceBright = LightPalette.page,
-    surfaceDim = LightPalette.bgSection,
-    surfaceContainerLowest = LightPalette.page,
-    surfaceContainerLow = LightPalette.bgSoft,
-    surfaceContainer = LightPalette.bgSection,
-    surfaceContainerHigh = LightPalette.bgSection,
-    surfaceContainerHighest = LightPalette.chipBg,
-    outline = LightPalette.stroke,
-    outlineVariant = LightPalette.divider,
-    error = WarnOrange,
-)
+private val DarkScheme = LightScheme
 
-private val DarkScheme = darkColorScheme(
-    primary = CyanBrand,
-    onPrimary = OnBrand,
-    secondary = PinkGift,
-    onSecondary = OnBrand,
-    background = DarkPalette.page,
-    onBackground = DarkPalette.textMain,
-    surface = DarkPalette.card,
-    onSurface = DarkPalette.textMain,
-    surfaceVariant = DarkPalette.bgSection,
-    onSurfaceVariant = DarkPalette.textBody,
-    surfaceBright = DarkPalette.bgSoft,
-    surfaceDim = DarkPalette.page,
-    surfaceContainerLowest = DarkPalette.page,
-    surfaceContainerLow = DarkPalette.bgSoft,
-    surfaceContainer = DarkPalette.bgSection,
-    surfaceContainerHigh = DarkPalette.bgSection,
-    surfaceContainerHighest = DarkPalette.chipBg,
-    outline = DarkPalette.stroke,
-    outlineVariant = DarkPalette.divider,
-    error = WarnOrange,
-)
-
-internal val LocalWePlayPalette = staticCompositionLocalOf { LightPalette }
+internal val LocalWePlayPalette = staticCompositionLocalOf { AuroraDarkPalette }
 
 @Composable
 fun WePlayTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
+    // Keep all screens consistently anchored to the Aurora Paradise 3.0 dark visual system.
+    @Suppress("UNUSED_VARIABLE")
+    val ignoredSystemTheme = darkTheme
     CompositionLocalProvider(
-        LocalWePlayPalette provides if (darkTheme) DarkPalette else LightPalette,
+        LocalWePlayPalette provides AuroraDarkPalette,
         LocalAuroraColors provides AuroraColors(),
     ) {
         MaterialTheme(
-            colorScheme = if (darkTheme) DarkScheme else LightScheme,
+            colorScheme = DarkScheme,
             typography = WePlayTypography,
             content = content,
         )

@@ -15,34 +15,27 @@ import androidx.navigation.NavHostController
 import com.sundram.weplay.R
 import com.sundram.weplay.data.UserPrefs
 import com.sundram.weplay.ui.screens.SubScreen
-import com.sundram.weplay.ui.theme.CyanBrand
+import com.sundram.weplay.ui.theme.CrystalBlue
 import com.sundram.weplay.ui.theme.MintGreen
 import com.sundram.weplay.ui.theme.TextMuted
 import com.sundram.weplay.ui.theme.Gold
-import com.sundram.weplay.ui.theme.ThemeMode
 
 @Composable
 fun GeneralSettingsScreen(nav: NavHostController) {
     val context = nav.context
     val prefs = remember { UserPrefs(context) }
     var showLanguage by remember { mutableStateOf(false) }
-    var showTheme by remember { mutableStateOf(false) }
 
     val languageLabel = if (prefs.language == "hi") "Hindi" else "English"
-    val themeLabel = when (ThemeMode.value) {
-        "light" -> "Light"
-        "dark" -> "Dark"
-        else -> "System"
-    }
     val localSize = remember { directorySize(context.filesDir) }
 
     SubScreen(nav, "General", "Language, storage and data") {
         SettingsGroup("App") {
             SettingsRow(
                 icon = R.drawable.ic_comment,
-                tint = CyanBrand,
+                tint = CrystalBlue,
                 title = "Language",
-                subtitle = "Text shown in date and time formats",
+                subtitle = "Format used for dates, alerts and labels",
                 value = languageLabel,
                 onClick = { showLanguage = true },
             )
@@ -50,17 +43,17 @@ fun GeneralSettingsScreen(nav: NavHostController) {
             SettingsRow(
                 icon = R.drawable.ic_theme,
                 tint = MintGreen,
-                title = "Theme",
-                subtitle = "System, light or dark palette",
-                value = themeLabel,
-                onClick = { showTheme = true },
+                title = "Appearance",
+                subtitle = "Unified dark celestial theme across Paradise",
+                value = "Aurora Dark",
+                enabled = false,
             )
             SettingsRowDivider()
             SettingsSwitchRow(
                 icon = R.drawable.ic_bolt,
                 tint = Gold,
                 title = "Data saver",
-                subtitle = "Lower audio quality on mobile data",
+                subtitle = "Lower audio bitrate on cellular data",
                 checked = prefs.dataSaver,
             ) { prefs.dataSaver = it }
         }
@@ -71,8 +64,8 @@ fun GeneralSettingsScreen(nav: NavHostController) {
             SettingsRow(
                 icon = R.drawable.ic_bag,
                 tint = MintGreen,
-                title = "Local data",
-                subtitle = "Profile photos, logs and reports stored on this device",
+                title = "Local cache & data",
+                subtitle = "Profile photos, logs and local preview state on this device",
                 value = if (localSize > 0L) formatBytes(localSize) else "—",
                 enabled = false,
             )
@@ -81,7 +74,7 @@ fun GeneralSettingsScreen(nav: NavHostController) {
         Spacer(Modifier.height(14.dp))
 
         Text(
-            "System follows the device setting. Light and dark palettes use the same screens.",
+            "Paradise uses the unified Aurora Paradise 3.0 dark palette so contrast and highlights stay consistent everywhere.",
             color = TextMuted,
             fontSize = 11.sp,
             lineHeight = 16.sp,
@@ -98,20 +91,6 @@ fun GeneralSettingsScreen(nav: NavHostController) {
             selected = prefs.language,
             onSelect = { prefs.language = it },
             onDismiss = { showLanguage = false },
-        )
-    }
-
-    if (showTheme) {
-        SettingsChoiceDialog(
-            title = "Theme",
-            options = listOf(
-                SettingsChoice("system", "System", "Follow the device setting"),
-                SettingsChoice("light", "Light", "Always use the light palette"),
-                SettingsChoice("dark", "Dark", "Always use the dark palette"),
-            ),
-            selected = ThemeMode.value,
-            onSelect = { ThemeMode.save(context, it) },
-            onDismiss = { showTheme = false },
         )
     }
 }

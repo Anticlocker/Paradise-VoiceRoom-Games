@@ -67,14 +67,24 @@ import com.sundram.weplay.data.getAvatarById
 import com.sundram.weplay.ui.components.AnimatedAvatar
 import com.sundram.weplay.ui.components.RoundIconButton
 import com.sundram.weplay.ui.components.navigateSafe
-import com.sundram.weplay.ui.theme.VyboraBg
-import com.sundram.weplay.ui.theme.VyboraBorder
-import com.sundram.weplay.ui.theme.VyboraGold
-import com.sundram.weplay.ui.theme.VyboraLavender
-import com.sundram.weplay.ui.theme.VyboraPurple
-import com.sundram.weplay.ui.theme.VyboraSurface
-import com.sundram.weplay.ui.theme.VyboraTextPrimary
-import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraElevated
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.CelestialNavy
+import com.sundram.weplay.ui.theme.CloudWhite
+import com.sundram.weplay.ui.theme.CrystalBlue
+import com.sundram.weplay.ui.theme.DreamLavender
+import com.sundram.weplay.ui.theme.MysticPurple
+import com.sundram.weplay.ui.theme.RoyalGold
+
+private val VyboraBg = CelestialNavy
+private val VyboraBorder = AuroraBorder
+private val VyboraGold = RoyalGold
+private val VyboraLavender = AuroraElevated
+private val VyboraPurple = MysticPurple
+private val VyboraSurface = AuroraSurface
+private val VyboraTextPrimary = CloudWhite
+private val VyboraTextSecondary = DreamLavender
 
 @Composable
 fun TaskCenterScreen(
@@ -417,13 +427,13 @@ private fun DailyCheckInSection(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(if (!isTodayClaimed) VyboraPurple else Color(0xFFE0E0E0))
+                    .background(if (!isTodayClaimed) VyboraPurple else Color(0xFF2D2152))
                     .clickable(enabled = !isTodayClaimed, onClick = onClaimClick)
                     .padding(horizontal = 12.dp, vertical = 7.dp),
             ) {
                 Text(
                     text = if (!isTodayClaimed) "Check In" else "Claimed",
-                    color = if (!isTodayClaimed) Color.White else Color(0xFF757575),
+                    color = if (!isTodayClaimed) Color.White else DreamLavender.copy(alpha = 0.72f),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -454,8 +464,8 @@ private fun DailyCheckInDayCard(dayVo: CheckInDayVo) {
             .clip(RoundedCornerShape(12.dp))
             .background(
                 when {
-                    isClaimed -> Color(0xFFEDE7F6)
-                    isAvailable -> Color(0xFFFFF9C4)
+                    isClaimed -> Color(0xFF2A1D54)
+                    isAvailable -> Color(0xFF3E2A12)
                     else -> VyboraBg
                 }
             )
@@ -473,7 +483,7 @@ private fun DailyCheckInDayCard(dayVo: CheckInDayVo) {
     ) {
         Text(
             text = "Day ${dayVo.dayNumber}",
-            color = if (isAvailable) Color(0xFFE65100) else VyboraTextSecondary,
+            color = if (isAvailable) RoyalGold else VyboraTextSecondary,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -501,7 +511,7 @@ private fun DailyCheckInDayCard(dayVo: CheckInDayVo) {
 
         Text(
             text = "+${dayVo.coinReward}",
-            color = if (isAvailable) Color(0xFFE65100) else VyboraTextPrimary,
+            color = if (isAvailable) RoyalGold else VyboraTextPrimary,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -645,7 +655,7 @@ private fun TaskMissionCard(
                 ) {
                     Text(
                         text = item.definition.actionLabel,
-                        color = VyboraPurple,
+                        color = CrystalBlue,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                     )

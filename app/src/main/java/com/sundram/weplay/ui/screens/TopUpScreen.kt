@@ -61,19 +61,30 @@ import com.sundram.weplay.data.TopUpRecord
 import com.sundram.weplay.data.TopUpStore
 import com.sundram.weplay.data.UserProfile
 import com.sundram.weplay.ui.components.RoundIconButton
-import com.sundram.weplay.ui.theme.VyboraBg
-import com.sundram.weplay.ui.theme.VyboraBorder
-import com.sundram.weplay.ui.theme.VyboraGold
-import com.sundram.weplay.ui.theme.VyboraLavender
-import com.sundram.weplay.ui.theme.VyboraPurple
-import com.sundram.weplay.ui.theme.VyboraSurface
-import com.sundram.weplay.ui.theme.VyboraTextPrimary
-import com.sundram.weplay.ui.theme.VyboraTextSecondary
+import com.sundram.weplay.ui.theme.AuroraBorder
+import com.sundram.weplay.ui.theme.AuroraElevated
+import com.sundram.weplay.ui.theme.AuroraSuccess
+import com.sundram.weplay.ui.theme.AuroraSurface
+import com.sundram.weplay.ui.theme.CelestialNavy
+import com.sundram.weplay.ui.theme.CloudWhite
+import com.sundram.weplay.ui.theme.CrystalBlue
+import com.sundram.weplay.ui.theme.DreamLavender
+import com.sundram.weplay.ui.theme.MysticPurple
+import com.sundram.weplay.ui.theme.RoyalGold
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+private val VyboraBg = CelestialNavy
+private val VyboraBorder = AuroraBorder
+private val VyboraGold = RoyalGold
+private val VyboraLavender = AuroraElevated
+private val VyboraPurple = MysticPurple
+private val VyboraSurface = AuroraSurface
+private val VyboraTextPrimary = CloudWhite
+private val VyboraTextSecondary = DreamLavender
 
 private val stampFormat = SimpleDateFormat("d MMM · h:mm a", Locale.US)
 
@@ -190,7 +201,7 @@ fun TopUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFFEDE7F6))
+                    .background(AuroraElevated)
                     .border(1.dp, VyboraBorder, RoundedCornerShape(14.dp))
                     .padding(14.dp),
             ) {
@@ -198,20 +209,20 @@ fun TopUpScreen(
                     Icon(
                         painter = painterResource(R.drawable.ic_verified),
                         contentDescription = null,
-                        tint = VyboraPurple,
+                        tint = CrystalBlue,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "Test Mode Billing Notice",
-                            color = VyboraPurple,
+                            text = "Simulated Balance Notice",
+                            color = CrystalBlue,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            text = "Play Billing is not connected in this build. Packages simulate test coin credits locally with no real charges.",
+                            text = "Google Play Billing is not connected in this preview build. Packs credit local demo coins with no real charges.",
                             color = VyboraTextSecondary,
                             fontSize = 11.sp,
                             lineHeight = 16.sp,
@@ -304,7 +315,7 @@ fun TopUpScreen(
                         }
                     }
                 ) {
-                    Text("Confirm ₹${packToBuy.price} (Test)", color = VyboraPurple, fontWeight = FontWeight.Bold)
+                    Text("Confirm ₹${packToBuy.price} (Preview)", color = CrystalBlue, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -357,7 +368,7 @@ fun TopUpScreen(
                 Column {
                     Text(
                         text = "+%,d Coins Added".format(lastPurchasedRecord!!.coins),
-                        color = Color(0xFF2E7D32),
+                        color = AuroraSuccess,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -382,7 +393,7 @@ fun TopUpScreen(
                         selectedPack = null
                     }
                 ) {
-                    Text("Done", color = VyboraPurple, fontWeight = FontWeight.Bold)
+                    Text("Done", color = CrystalBlue, fontWeight = FontWeight.Bold)
                 }
             },
         )
@@ -476,7 +487,7 @@ fun TopUpScreen(
                                 }
                                 Text(
                                     text = "₹%,d".format(record.price),
-                                    color = VyboraPurple,
+                                    color = CrystalBlue,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -534,7 +545,7 @@ fun TopUpScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showHelpDialog = false }) {
-                    Text("Got It", color = VyboraPurple, fontWeight = FontWeight.Bold)
+                    Text("Got It", color = CrystalBlue, fontWeight = FontWeight.Bold)
                 }
             },
         )
@@ -770,7 +781,7 @@ private fun CoinPackCard(
         ) {
             Text(
                 text = "₹%,d".format(pack.price),
-                color = if (isSelected) Color.White else VyboraPurple,
+                color = if (isSelected) Color.White else CrystalBlue,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
             )

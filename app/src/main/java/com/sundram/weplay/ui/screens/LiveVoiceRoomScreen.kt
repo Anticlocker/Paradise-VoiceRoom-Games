@@ -323,6 +323,7 @@ fun LiveVoiceRoomScreen(
                 roomTitle = displayTitle,
                 roomId = id,
                 coverRes = coverRes,
+
                 crestLevel = crestProgress.level,
                 palette = palette,
                 state = state,

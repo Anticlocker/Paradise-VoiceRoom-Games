@@ -1,6 +1,7 @@
 package com.sundram.weplay.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,8 +49,12 @@ import com.sundram.weplay.R
 import com.sundram.weplay.data.Demo
 import com.sundram.weplay.ui.components.CoverThumb
 import com.sundram.weplay.ui.nav.Routes
+import com.sundram.weplay.ui.theme.CardWhite
+import com.sundram.weplay.ui.theme.CrystalBlue
 import com.sundram.weplay.ui.theme.CyanBrand
+import com.sundram.weplay.ui.theme.ChipBg
 import com.sundram.weplay.ui.theme.PageWhite
+import com.sundram.weplay.ui.theme.Stroke
 import com.sundram.weplay.ui.theme.TextMain
 import com.sundram.weplay.ui.theme.TextMuted
 
@@ -113,7 +118,8 @@ fun SearchScreen(nav: NavHostController) {
                     .weight(1f)
                     .height(42.dp)
                     .clip(RoundedCornerShape(21.dp))
-                    .background(Color(0xFFF1F3F7))
+                    .background(CardWhite)
+                    .border(1.dp, Stroke, RoundedCornerShape(21.dp))
                     .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -146,7 +152,7 @@ fun SearchScreen(nav: NavHostController) {
                         modifier = Modifier
                             .size(22.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFD6DBE5))
+                            .background(ChipBg)
                             .clickable { query = "" },
                         contentAlignment = Alignment.Center,
                     ) {
@@ -210,12 +216,13 @@ fun SearchScreen(nav: NavHostController) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFFF7F8FA))
+                                .background(CardWhite)
+                                .border(1.dp, Stroke, RoundedCornerShape(12.dp))
                                 .clickable {
                                     when (game.id) {
                                         "ludo" -> nav.navigate(Routes.LUDO)
                                         "spy" -> nav.navigate(Routes.SPY)
-                                        else -> nav.navigate(Routes.GAME_ROOMS)
+                                        else -> nav.navigate(Routes.ALL_GAMES)
                                     }
                                 }
                                 .padding(12.dp),
@@ -228,8 +235,8 @@ fun SearchScreen(nav: NavHostController) {
                                 Text(game.desc, color = TextMuted, fontSize = 12.sp)
                             }
                             Text(
-                                if (game.playable) "Play" else "Lobby",
-                                color = CyanBrand,
+                                if (game.playable) "Play" else "Catalog",
+                                color = CrystalBlue,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -246,7 +253,8 @@ fun SearchScreen(nav: NavHostController) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFFF7F8FA))
+                                .background(CardWhite)
+                                .border(1.dp, Stroke, RoundedCornerShape(12.dp))
                                 .clickable { nav.navigate(Routes.roomRoute(room.id)) }
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -257,7 +265,7 @@ fun SearchScreen(nav: NavHostController) {
                                 Text(room.title, color = TextMain, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                                 Text("Host: ${room.host} · ${room.members} listeners", color = TextMuted, fontSize = 12.sp)
                             }
-                            Text("Join", color = CyanBrand, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Join", color = CrystalBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

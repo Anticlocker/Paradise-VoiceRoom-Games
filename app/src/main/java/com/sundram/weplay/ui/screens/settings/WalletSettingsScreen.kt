@@ -3,6 +3,8 @@ package com.sundram.weplay.ui.screens.settings
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +29,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -44,6 +45,7 @@ import com.sundram.weplay.ui.theme.CyanDeep
 import com.sundram.weplay.ui.theme.MintGreen
 import com.sundram.weplay.ui.theme.PinkGift
 import com.sundram.weplay.ui.theme.CardWhite
+import com.sundram.weplay.ui.theme.Stroke
 import com.sundram.weplay.ui.theme.TextMuted
 import com.sundram.weplay.ui.theme.WarnOrange
 import com.sundram.weplay.ui.theme.Gold
@@ -84,7 +86,7 @@ fun WalletSettingsScreen(nav: NavHostController, profile: UserProfile) {
                 icon = R.drawable.ic_bag,
                 tint = MintGreen,
                 title = "Payment methods",
-                subtitle = "Cards saved on this device",
+                subtitle = "Preview billing labels saved locally",
                 value = if (cards.isEmpty()) "None" else cards.size.toString(),
                 onClick = { nav.navigate(Routes.PAYMENT_METHODS) },
             )
@@ -94,7 +96,7 @@ fun WalletSettingsScreen(nav: NavHostController, profile: UserProfile) {
                 tint = PinkGift,
                 title = "Host earnings",
                 subtitle = "Withdrawals and payout history",
-                value = "Phase 5",
+                value = "Preview",
                 onClick = { nav.navigate(Routes.HOST_EARNINGS) },
             )
         }
@@ -305,17 +307,17 @@ fun PaymentMethodsScreen(nav: NavHostController, profile: UserProfile) {
     var cards by remember { mutableStateOf(store.cards(profile.id)) }
     var showAdd by remember { mutableStateOf(false) }
 
-    SubScreen(nav, "Payment methods", "Cards saved on this device") {
-        PrimaryButton("Add payment method") { showAdd = true }
+    SubScreen(nav, "Payment methods", "Play Billing preview methods") {
+        PrimaryButton("Add billing preview method") { showAdd = true }
         Spacer(Modifier.height(16.dp))
 
         if (cards.isEmpty()) {
             SettingsEmptyState(
-                title = "No saved cards",
-                body = "Add a card to keep a local demo payment method ready for top-ups.",
+                title = "No saved billing labels",
+                body = "Choose a Google Play Billing preview label for coin top-ups. Raw card numbers and CVV are never collected.",
             )
         } else {
-            SettingsGroup("Saved cards") {
+            SettingsGroup("Saved billing previews") {
                 cards.forEachIndexed { index, card ->
                     Row(
                         Modifier
@@ -340,18 +342,18 @@ fun PaymentMethodsScreen(nav: NavHostController, profile: UserProfile) {
                         Spacer(Modifier.width(11.dp))
                         Column(Modifier.weight(1f)) {
                             Text(
-                                "${card.brand} •••• ${card.last4}",
+                                "${card.brand} · ${card.last4}",
                                 color = TextMain,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                             )
-                            Text("Expires ${card.expiry}", color = TextMuted, fontSize = 11.sp)
+                            Text(card.expiry, color = TextMuted, fontSize = 11.sp)
                         }
                         TextButton(
                             onClick = {
                                 store.removeCard(profile.id, card)
                                 cards = store.cards(profile.id)
-                                Toast.makeText(context, "Card removed", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Method removed", Toast.LENGTH_SHORT).show()
                             },
                         ) {
                             Text("Remove", color = PinkGift, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -363,8 +365,7 @@ fun PaymentMethodsScreen(nav: NavHostController, profile: UserProfile) {
         }
 
         Text(
-            "Only the card brand, last four digits and expiry are stored. No payment is processed " +
-                "and card details are never uploaded.",
+            "In-app purchases use Google Play Billing in signed release builds. This app never asks for or stores raw card numbers or CVV codes.",
             color = TextMuted,
             fontSize = 11.sp,
             lineHeight = 16.sp,
@@ -373,92 +374,85 @@ fun PaymentMethodsScreen(nav: NavHostController, profile: UserProfile) {
     }
 
     if (showAdd) {
-        AddCardDialog(
+        AddBillingPreviewDialog(
             onDismiss = { showAdd = false },
             onSave = { card ->
                 store.addCard(profile.id, card)
                 cards = store.cards(profile.id)
-                Toast.makeText(context, "Card saved", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Preview billing method saved", Toast.LENGTH_SHORT).show()
             },
         )
     }
 }
 
+private val PlayBillingMethodOptions = listOf(
+    "Google Play balance" to "Play Store Wallet",
+    "Play UPI preview" to "Play Billing Managed",
+    "Play gift card" to "Redeemable Credit",
+    "Sandbox test pass" to "Local Demo Only",
+)
+
 @Composable
-private fun AddCardDialog(
+private fun AddBillingPreviewDialog(
     onDismiss: () -> Unit,
     onSave: (SavedCard) -> Unit,
 ) {
-    var number by remember { mutableStateOf("") }
-    var expiry by remember { mutableStateOf("") }
-    var cvv by remember { mutableStateOf("") }
-    val digits = number.filter { it.isDigit() }
-    val expiryValid = expiry.matches(Regex("(0[1-9]|1[0-2])/\\d{2}"))
-    val valid = digits.length in 13..19 && expiryValid && cvv.length in 3..4
-    val brand = when {
-        digits.startsWith("4") -> "Visa"
-        digits.startsWith("5") -> "Mastercard"
-        digits.startsWith("3") -> "Amex"
-        else -> "Card"
-    }
+    var selectedIdx by remember { mutableStateOf(0) }
+    var alias by remember { mutableStateOf("Primary") }
+    val cleanAlias = alias.filter { it.isLetterOrDigit() || it == ' ' }.trim().ifBlank { "Play" }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = CardWhite,
-        title = { Text("Add payment method", color = TextMain, fontWeight = FontWeight.Bold) },
+        title = { Text("Add billing preview method", color = TextMain, fontWeight = FontWeight.Bold) },
         text = {
             Column {
-                Text("Card number", color = TextMuted, fontSize = 11.sp)
-                Spacer(Modifier.height(6.dp))
-                SettingsTextField(
-                    value = number,
-                    onChange = { number = it.filter { char -> char.isDigit() }.take(19) },
-                    placeholder = "4242424242424242",
-                    keyboardType = KeyboardType.Number,
+                Text(
+                    "Select a simulated Play Billing label (never enter card numbers or CVV):",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                    lineHeight = 17.sp,
                 )
                 Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Expiry", color = TextMuted, fontSize = 11.sp)
-                        Spacer(Modifier.height(6.dp))
-                        SettingsTextField(
-                            value = expiry,
-                            onChange = { raw ->
-                                val clean = raw.filter { char -> char.isDigit() }.take(4)
-                                expiry = if (clean.length >= 3) {
-                                    clean.take(2) + "/" + clean.drop(2)
-                                } else {
-                                    clean
-                                }
-                            },
-                            placeholder = "MM/YY",
-                            keyboardType = KeyboardType.Number,
-                        )
+                PlayBillingMethodOptions.forEachIndexed { idx, (label, subtitle) ->
+                    val chosen = idx == selectedIdx
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 3.dp)
+                            .background(
+                                if (chosen) CyanBrand.copy(alpha = 0.14f) else CardWhite,
+                                RoundedCornerShape(10.dp),
+                            )
+                            .border(
+                                1.dp,
+                                if (chosen) CyanBrand else Stroke,
+                                RoundedCornerShape(10.dp),
+                            )
+                            .clickable { selectedIdx = idx }
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(label, color = TextMain, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                            Text(subtitle, color = TextMuted, fontSize = 11.sp)
+                        }
+                        if (chosen) {
+                            Text("Selected", color = CyanBrand, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
-                    Column(Modifier.weight(1f)) {
-                        Text("CVV", color = TextMuted, fontSize = 11.sp)
-                        Spacer(Modifier.height(6.dp))
-                        SettingsTextField(
-                            value = cvv,
-                            onChange = { cvv = it.filter { char -> char.isDigit() }.take(4) },
-                            placeholder = "123",
-                            password = true,
-                            keyboardType = KeyboardType.Number,
-                        )
-                    }
-                }
-                if (number.isNotBlank() && !valid) {
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        "Enter a valid card number, expiry and CVV.",
-                        color = WarnOrange,
-                        fontSize = 11.sp,
-                    )
                 }
                 Spacer(Modifier.height(10.dp))
+                Text("Short label", color = TextMuted, fontSize = 11.sp)
+                Spacer(Modifier.height(6.dp))
+                SettingsTextField(
+                    value = alias,
+                    onChange = { alias = it.filter { ch -> ch.isLetterOrDigit() || ch == ' ' }.take(16) },
+                    placeholder = "Primary",
+                )
+                Spacer(Modifier.height(10.dp))
                 Text(
-                    "Demo only. The full number and CVV are discarded; only the brand, last four " +
-                        "digits and expiry are saved.",
+                    "Preview only. No real charge occurs until Google Play Billing is linked.",
                     color = TextMuted,
                     fontSize = 11.sp,
                     lineHeight = 16.sp,
@@ -467,15 +461,15 @@ private fun AddCardDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = valid,
                 onClick = {
-                    onSave(SavedCard(brand = brand, last4 = digits.takeLast(4), expiry = expiry))
+                    val (method, providerType) = PlayBillingMethodOptions[selectedIdx]
+                    onSave(SavedCard(brand = method, last4 = cleanAlias, expiry = providerType))
                     onDismiss()
                 },
             ) {
                 Text(
-                    "Save card",
-                    color = if (valid) CyanBrand else TextMuted,
+                    "Save method",
+                    color = CyanBrand,
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -502,7 +496,7 @@ fun HostEarningsScreen(nav: NavHostController) {
                     fontSize = 12.sp,
                     modifier = Modifier.weight(1f),
                 )
-                SettingsValueBadge("Phase 5", Gold)
+                SettingsValueBadge("Preview", Gold)
             }
             Spacer(Modifier.height(6.dp))
             Text("₹0.00", color = TextMain, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
@@ -547,8 +541,8 @@ fun HostEarningsScreen(nav: NavHostController) {
         Spacer(Modifier.height(12.dp))
         SettingsEmptyState(
             title = "No payout history",
-            body = "Host earnings, withdrawal requests and payout history are planned for Phase 5. " +
-                "No host account is connected in this build.",
+            body = "Host earnings, withdrawal requests and payout history will activate once " +
+                "creator payouts connect to the live backend.",
         )
     }
 }

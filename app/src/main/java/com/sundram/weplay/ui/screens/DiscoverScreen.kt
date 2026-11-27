@@ -128,14 +128,21 @@ fun DiscoverScreen(
     var refresh by remember { mutableIntStateOf(0) }
     var state by remember { mutableStateOf<UiState<DiscoverFeed>>(UiState.Loading) }
 
+    val context = LocalContext.current
     var selectedPost by remember { mutableStateOf<FeedPost?>(null) }
-    var showNearbyDialog by remember { mutableStateOf(false) }
-    var showClubsDialog by remember { mutableStateOf(false) }
     var showActivityDialog by remember { mutableStateOf(false) }
     var showCreatePostDialog by remember { mutableStateOf(false) }
 
     var localLikedPostIds by remember { mutableStateOf(setOf<String>()) }
     var localAddedPosts by remember { mutableStateOf(listOf<FeedPost>()) }
+    var localHiddenPostIds by remember { mutableStateOf(setOf<String>()) }
+    var localPostComments by remember {
+        mutableStateOf(
+            mapOf<String, List<Pair<String, String>>>(
+                "m1" to listOf("Ankit" to "Great melody on stream!", "Priya" to "Saving this lounge for tonight."),
+            )
+        )
+    }
 
     LaunchedEffect(refresh) {
         state = UiState.Loading
@@ -193,8 +200,13 @@ fun DiscoverScreen(
                     modifier = Modifier.fillMaxSize(),
                 )
                 is UiState.Success -> {
-                    val combinedPosts = remember(current.data.posts, localAddedPosts) {
-                        localAddedPosts + current.data.posts
+                    val combinedPosts = remember(current.data.posts, localAddedPosts, localHiddenPostIds, localPostComments) {
+                        (localAddedPosts + current.data.posts)
+                            .filterNot { it.id in localHiddenPostIds }
+                            .map { post ->
+                                val extraComments = localPostComments[post.id]?.size ?: 0
+                                if (extraComments > 0) post.copy(comments = post.comments + extraComments) else post
+                            }
                     }
 
                     DiscoverContent(
@@ -203,8 +215,8 @@ fun DiscoverScreen(
                         likedPostIds = localLikedPostIds,
                         nav = nav,
                         onPostClick = { selectedPost = it },
-                        onNearbyClick = { showNearbyDialog = true },
-                        onClubsClick = { showClubsDialog = true },
+                        onNearbyClick = { nav.navigateSafe(Routes.NEARBY) },
+                        onClubsClick = { nav.navigateSafe(Routes.CLUBS) },
                         onActivityTodayClick = { showActivityDialog = true },
                         onShareMomentClick = { showCreatePostDialog = true },
                     )
@@ -212,35 +224,47 @@ fun DiscoverScreen(
             }
         }
 
-        selectedPost?.let { post ->
-            val isLiked = localLikedPostIds.contains(post.id)
-            val currentLikes = post.likes + if (isLiked) 1 else 0
+        selectedPost?.let { selected ->
+            val currentPost = remember(selected, localPostComments) {
+                val extra = localPostComments[selected.id]?.size ?: 0
+                if (selected.id.startsWith("custom_") || extra == 0) selected
+                else selected.copy(comments = selected.comments + extra)
+            }
+            val isLiked = localLikedPostIds.contains(selected.id)
+            val currentLikes = selected.likes + if (isLiked) 1 else 0
+            val commentsForPost = localPostComments[selected.id].orEmpty()
+            val canDelete = selected.id.startsWith("custom_") || selected.who == "You"
 
             MomentDetailDialog(
-                post = post,
+                post = currentPost,
                 isLiked = isLiked,
                 likesCount = currentLikes,
+                comments = commentsForPost,
+                canDelete = canDelete,
                 onDismiss = { selectedPost = null },
                 onToggleLike = {
                     localLikedPostIds = if (isLiked) {
-                        localLikedPostIds - post.id
+                        localLikedPostIds - selected.id
                     } else {
-                        localLikedPostIds + post.id
+                        localLikedPostIds + selected.id
                     }
                 },
-            )
-        }
-
-        if (showNearbyDialog) {
-            NearbyDiscoveryDialog(onDismiss = { showNearbyDialog = false })
-        }
-
-        if (showClubsDialog) {
-            ClubsSpacesDialog(
-                onDismiss = { showClubsDialog = false },
-                onExploreFamilies = {
-                    showClubsDialog = false
-                    nav.navigateSafe(Routes.FAMILY)
+                onAddComment = { commentText ->
+                    val existing = localPostComments[selected.id].orEmpty()
+                    localPostComments = localPostComments + (selected.id to (existing + ("You" to commentText)))
+                },
+                onDeletePost = {
+                    localAddedPosts = localAddedPosts.filterNot { it.id == selected.id }
+                    localHiddenPostIds = localHiddenPostIds + selected.id
+                    selectedPost = null
+                },
+                onReportPost = {
+                    val profStore = com.sundram.weplay.data.ProfileStore(context)
+                    com.sundram.weplay.data.MessagingStore(context) { profStore.load() }
+                        .report("moment_${selected.who}", "Reported community moment: ${selected.text.take(60)}")
+                    localHiddenPostIds = localHiddenPostIds + selected.id
+                    selectedPost = null
+                    android.widget.Toast.makeText(context, "Moment hidden and reported locally.", android.widget.Toast.LENGTH_SHORT).show()
                 },
             )
         }
@@ -730,8 +754,9 @@ private fun MomentMediaImage(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val decodedBitmap by produceState<ImageBitmap?>(initialValue = null, key1 = post.mediaUri) {
-        value = post.mediaUri?.let { uriStr ->
+    val decodedBitmapState = remember(post.mediaUri) { mutableStateOf<ImageBitmap?>(null) }
+    androidx.compose.runtime.LaunchedEffect(post.mediaUri) {
+        decodedBitmapState.value = post.mediaUri?.let { uriStr ->
             withContext(Dispatchers.IO) {
                 runCatching {
                     val uri = Uri.parse(uriStr)
@@ -749,6 +774,7 @@ private fun MomentMediaImage(
             }
         }
     }
+    val decodedBitmap = decodedBitmapState.value
 
     if (decodedBitmap != null) {
         Image(
@@ -772,10 +798,16 @@ private fun MomentDetailDialog(
     post: FeedPost,
     isLiked: Boolean,
     likesCount: Int,
+    comments: List<Pair<String, String>>,
+    canDelete: Boolean,
     onDismiss: () -> Unit,
     onToggleLike: () -> Unit,
+    onAddComment: (String) -> Unit,
+    onDeletePost: () -> Unit,
+    onReportPost: () -> Unit,
 ) {
     val context = LocalContext.current
+    var draftComment by remember(post.id) { mutableStateOf("") }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -964,6 +996,97 @@ private fun MomentDetailDialog(
                             tint = CloudWhite,
                             modifier = Modifier.size(16.dp),
                         )
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // Comments list
+                if (comments.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(DeepInk)
+                            .border(1.dp, AuroraBorder, RoundedCornerShape(12.dp))
+                            .padding(10.dp),
+                    ) {
+                        comments.takeLast(3).forEach { (author, body) ->
+                            Text(
+                                text = "$author: $body",
+                                color = CloudWhite,
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                // Inline comment composer
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    OutlinedTextField(
+                        value = draftComment,
+                        onValueChange = { draftComment = it },
+                        placeholder = { Text("Add a comment…", color = DiscoverMutedText, fontSize = 12.sp) },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = CloudWhite,
+                            unfocusedTextColor = CloudWhite,
+                            focusedBorderColor = CrystalBlue,
+                            unfocusedBorderColor = AuroraBorder,
+                            focusedContainerColor = DeepInk,
+                            unfocusedContainerColor = DeepInk,
+                        ),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            val trimmed = draftComment.trim()
+                            if (trimmed.isNotEmpty()) {
+                                onAddComment(trimmed)
+                                draftComment = ""
+                            }
+                        },
+                        enabled = draftComment.isNotBlank(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AuroraOrchid,
+                            contentColor = Color.White,
+                        ),
+                    ) {
+                        Text("Send", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    if (canDelete) {
+                        OutlinedButton(
+                            onClick = onDeletePost,
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, Color(0xFFFF5277).copy(alpha = 0.6f)),
+                        ) {
+                            Text("Delete Moment", color = Color(0xFFFF5277), fontSize = 12.sp)
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = onReportPost,
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, AuroraBorder),
+                        ) {
+                            Text("Report / Hide", color = DiscoverMutedText, fontSize = 12.sp)
+                        }
                     }
                 }
             }
@@ -1269,8 +1392,9 @@ private fun CreateMomentDialog(
         selectedImageUri = uri
     }
 
-    val previewBitmap by produceState<ImageBitmap?>(initialValue = null, key1 = selectedImageUri) {
-        value = selectedImageUri?.let { uri ->
+    val previewBitmapState = remember(selectedImageUri) { mutableStateOf<ImageBitmap?>(null) }
+    androidx.compose.runtime.LaunchedEffect(selectedImageUri) {
+        previewBitmapState.value = selectedImageUri?.let { uri ->
             withContext(Dispatchers.IO) {
                 runCatching {
                     val opts = BitmapFactory.Options().apply { inSampleSize = 2 }
@@ -1281,6 +1405,7 @@ private fun CreateMomentDialog(
             }
         }
     }
+    val previewBitmap = previewBitmapState.value
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(

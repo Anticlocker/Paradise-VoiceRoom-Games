@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.WePlay" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_brand_window</item>
+        <item name="android:statusBarColor">#10052D</item>
+        <item name="android:navigationBarColor">#10052D</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

@@ -1324,6 +1324,7 @@ private fun UnsloppedGiftPickerSheet(
 
             Spacer(Modifier.height(16.dp))
 
+            var needCoinsNotice by remember { mutableStateOf<String?>(null) }
             androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
                 columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1337,7 +1338,14 @@ private fun UnsloppedGiftPickerSheet(
                         modifier = Modifier
                             .background(UnsloppedChatTokens.Surface, RoundedCornerShape(10.dp))
                             .border(1.dp, UnsloppedChatTokens.Hairline, RoundedCornerShape(10.dp))
-                            .clickable(enabled = afford) { onSelect(gift) }
+                            .clickable {
+                                if (afford) {
+                                    needCoinsNotice = null
+                                    onSelect(gift)
+                                } else {
+                                    needCoinsNotice = "You need ${gift.cost - balance} more coins for ${gift.name}."
+                                }
+                            }
                             .padding(12.dp),
                     ) {
                         Image(
@@ -1361,6 +1369,15 @@ private fun UnsloppedGiftPickerSheet(
                         )
                     }
                 }
+            }
+            needCoinsNotice?.let { notice ->
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = notice,
+                    color = UnsloppedChatTokens.AlertDanger,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                )
             }
 
             Spacer(Modifier.height(20.dp))

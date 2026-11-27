@@ -24,5 +24,13 @@ fun clearLocalAccount(context: Context) {
         .edit()
         .clear()
         .apply()
+    app.getSharedPreferences("paradise_safety", Context.MODE_PRIVATE)
+        .edit()
+        .clear()
+        .apply()
+    app.getSharedPreferences("paradise_clubs", Context.MODE_PRIVATE)
+        .edit()
+        .clear()
+        .apply()
     File(app.filesDir, "chat_media").deleteRecursively()
 }

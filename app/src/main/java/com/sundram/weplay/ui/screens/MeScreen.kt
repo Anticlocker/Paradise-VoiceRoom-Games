@@ -177,10 +177,10 @@ fun MeScreen(
             // ── 2. Four Illustrated Quick Shortcuts (VIP, Shop, Avatar Studio, My Space) ──
             item(key = "royal_shortcuts") {
                 RoyalShortcutsRow(
-                    onVipClick = { showVipSheet = true },
-                    onShopClick = { showShopSheet = true },
+                    onVipClick = { nav.navigate(Routes.VIP) },
+                    onShopClick = { nav.navigate(Routes.SHOP) },
                     onAvatarStudioClick = { showAvatarStudioSheet = true },
-                    onMySpaceClick = { showMySpaceSheet = true },
+                    onMySpaceClick = { nav.navigate(Routes.MY_SPACE) },
                 )
             }
 
@@ -303,13 +303,13 @@ fun MeScreen(
                         RoyalMenuItemData(
                             iconRes = R.drawable.ap_me_language,
                             title = "Language",
-                            subtitle = "English",
+                            subtitle = if (com.sundram.weplay.data.UserPrefs(context).language == "hi") "Hindi" else "English",
                             onClick = { showLanguageSheet = true },
                         ),
                         RoyalMenuItemData(
                             iconRes = R.drawable.ap_me_parental,
                             title = "Parental Control Mode",
-                            subtitle = "Safe Mode",
+                            subtitle = if (context.getSharedPreferences("paradise_safety", android.content.Context.MODE_PRIVATE).getBoolean("safe_mode", false)) "Safe Mode ON" else "Safe Mode",
                             onClick = { showParentalControlsSheet = true },
                         ),
                         RoyalMenuItemData(
@@ -520,7 +520,7 @@ fun MeScreen(
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
             RoyalSocialListBottomSheet(
-                title = "Following (142)",
+                title = "Following (4)",
                 items = listOf("Aria Vance", "Kiran Patel", "Elena Rostova", "Marcus Brody"),
                 onDismiss = { showFollowingSheet = false },
             )
@@ -535,7 +535,7 @@ fun MeScreen(
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         ) {
             RoyalSocialListBottomSheet(
-                title = "Followers (380)",
+                title = "Followers (4)",
                 items = listOf("Rohan Sharma", "Sofia Chen", "Zayd Malik", "Liam O'Connor"),
                 onDismiss = { showFollowersSheet = false },
             )
@@ -912,6 +912,11 @@ private fun RoyalSocialMicroStrip(
     onFollowersClick: () -> Unit,
     onTopUpClick: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val friendCount = remember {
+        val prof = com.sundram.weplay.data.ProfileStore(context).load()
+        com.sundram.weplay.data.MessagingStore(context) { prof }.friends().size
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -933,7 +938,7 @@ private fun RoyalSocialMicroStrip(
                     .clickable(onClick = onFriendsClick),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = "24", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
+                Text(text = "$friendCount", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
                 Text(text = "Friends", fontSize = 11.sp, color = RoyalTextSecondary)
             }
 
@@ -946,7 +951,7 @@ private fun RoyalSocialMicroStrip(
                     .clickable(onClick = onFollowingClick),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = "142", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
+                Text(text = "4", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
                 Text(text = "Following", fontSize = 11.sp, color = RoyalTextSecondary)
             }
 
@@ -959,7 +964,7 @@ private fun RoyalSocialMicroStrip(
                     .clickable(onClick = onFollowersClick),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = "380", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
+                Text(text = "4", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = RoyalTextPrimary)
                 Text(text = "Followers", fontSize = 11.sp, color = RoyalTextSecondary)
             }
 
@@ -1796,8 +1801,12 @@ private fun RoyalBadgesBottomSheet(onDismiss: () -> Unit) {
 
 @Composable
 private fun RoyalLanguageBottomSheet(onDismiss: () -> Unit) {
-    var selectedLanguage by remember { mutableStateOf("English") }
-    val languages = listOf("English", "Hindi", "Español", "Français", "Deutsch", "日本語")
+    val context = LocalContext.current
+    val userPrefs = remember { com.sundram.weplay.data.UserPrefs(context) }
+    val codeToLabel = mapOf("en" to "English", "hi" to "Hindi")
+    val labelToCode = mapOf("English" to "en", "Hindi" to "hi")
+    var selectedLanguage by remember { mutableStateOf(codeToLabel[userPrefs.language] ?: "English") }
+    val languages = listOf("English", "Hindi")
 
     Column(
         modifier = Modifier
@@ -1820,7 +1829,10 @@ private fun RoyalLanguageBottomSheet(onDismiss: () -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { selectedLanguage = lang }
+                    .clickable {
+                        selectedLanguage = lang
+                        userPrefs.language = labelToCode[lang] ?: "en"
+                    }
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -1848,7 +1860,9 @@ private fun RoyalLanguageBottomSheet(onDismiss: () -> Unit) {
 
 @Composable
 private fun RoyalParentalControlsBottomSheet(onDismiss: () -> Unit) {
-    var safeModeEnabled by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val safetyPrefs = remember { context.getSharedPreferences("paradise_safety", android.content.Context.MODE_PRIVATE) }
+    var safeModeEnabled by remember { mutableStateOf(safetyPrefs.getBoolean("safe_mode", false)) }
 
     Column(
         modifier = Modifier
@@ -1867,7 +1881,7 @@ private fun RoyalParentalControlsBottomSheet(onDismiss: () -> Unit) {
 
         Spacer(Modifier.height(6.dp))
         Text(
-            text = "Restrict voice chat with strangers, filter mature content, and set screen time alerts.",
+            text = "Restrict voice chat with strangers and filter mature room tags locally on this device.",
             color = RoyalTextSecondary,
             fontSize = 12.sp,
         )
@@ -1886,11 +1900,14 @@ private fun RoyalParentalControlsBottomSheet(onDismiss: () -> Unit) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text("Restricted Safe Mode", color = RoyalTextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Text("Requires guardian PIN to change", color = RoyalTextSecondary, fontSize = 11.sp)
+                Text("Saved locally on this device (no guardian PIN backend yet)", color = RoyalTextSecondary, fontSize = 11.sp)
             }
             Switch(
                 checked = safeModeEnabled,
-                onCheckedChange = { safeModeEnabled = it },
+                onCheckedChange = {
+                    safeModeEnabled = it
+                    safetyPrefs.edit().putBoolean("safe_mode", it).apply()
+                },
                 colors = SwitchDefaults.colors(checkedThumbColor = RoyalGold, checkedTrackColor = RoyalViolet),
             )
         }

@@ -60,13 +60,13 @@ import com.sundram.weplay.ui.components.bounceClick
 import com.sundram.weplay.ui.nav.Routes
 import com.sundram.weplay.ui.theme.CyanBrand
 
-private val BgPearl = Color(0xFFF8F7FF)
-private val TextDark = Color(0xFF211B38)
-private val TextSecondary = Color(0xFF6C628A)
-private val BorderLavender = Color(0xFFECE9FE)
-private val CardWhite = Color(0xFFFFFFFF)
-private val PurpleBrand = Color(0xFF8058E9)
-private val ChipInactiveBg = Color(0xFFF0EDFF)
+private val BgPearl = Color(0xFF11134A)
+private val TextDark = Color(0xFFF8F1FF)
+private val TextSecondary = Color(0xD9B89BFF)
+private val BorderLavender = Color(0x47B89BFF)
+private val CardWhite = Color(0xFF211448)
+private val PurpleBrand = Color(0xFF5423B7)
+private val ChipInactiveBg = Color(0xFF2C195E)
 
 private val FilterCategories = listOf("All", "Games", "Deduction", "Casual", "KTV", "PK")
 
@@ -155,7 +155,7 @@ fun GameRoomsScreen(nav: NavHostController) {
                 ) {
                     Text(
                         text = "${filteredRooms.size}",
-                        color = PurpleBrand,
+                        color = Color(0xFF54CFFF),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -478,7 +478,7 @@ private fun GameRoomsHeroBanner(onCreateRoom: () -> Unit) {
 }
 
 /**
- * High-contrast, clean room card adhering to the White/Lavender/Cyan VYBORA identity.
+ * High-contrast, dark Aurora Paradise 3.0 game room card.
  */
 @Composable
 private fun GameRoomItem(
@@ -543,7 +543,7 @@ private fun GameRoomItem(
                 ) {
                     Text(
                         text = room.tag,
-                        color = PurpleBrand,
+                        color = Color(0xFF54CFFF),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                     )

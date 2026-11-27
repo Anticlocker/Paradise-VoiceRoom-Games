@@ -3,6 +3,7 @@ package com.sundram.weplay.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -38,9 +39,10 @@ fun TopBackBar(
                 painter = painterResource(R.drawable.ic_back),
                 onClick = onBack,
                 contentDescription = "Back",
-                size = 34.dp,
+                size = 44.dp,
                 iconSize = 20.dp,
                 tint = TextMain,
+                modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
             )
             Spacer(Modifier.width(8.dp))
         }

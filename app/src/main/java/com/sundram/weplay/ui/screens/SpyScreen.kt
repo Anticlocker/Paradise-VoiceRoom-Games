@@ -377,11 +377,11 @@ private fun VoteScreen(game: SpyGame, st: SpyState) {
                 if (ti == vi) {
                     Text(
                         "YOU",
-                        color = CyanDeep,
+                        color = Color(0xFF54CFFF),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .background(TagBlueBg, RoundedCornerShape(6.dp))
+                            .background(Color(0xFF1F3868), RoundedCornerShape(6.dp))
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     )
                 }

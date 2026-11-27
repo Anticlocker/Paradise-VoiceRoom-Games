@@ -29,7 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sundram.weplay.data.DefaultAvatar
-import com.sundram.weplay.ui.theme.VyboraSurface
+import com.sundram.weplay.ui.theme.AuroraSurface
 
 @Composable
 fun AnimatedAvatar(
@@ -106,7 +106,7 @@ fun AnimatedAvatar(
                 .size(size - 4.dp)
                 .shadow(2.dp, CircleShape)
                 .clip(CircleShape)
-                .background(VyboraSurface)
+                .background(AuroraSurface)
                 .border(2.dp, avatar.accentColor.copy(alpha = 0.85f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
